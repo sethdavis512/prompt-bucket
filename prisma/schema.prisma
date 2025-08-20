@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auth related fields
+  emailVerified Boolean @default(false)
+  image         String?
+
+  // Subscription fields
+  subscriptionStatus String? @default("free") // free, active, canceled, etc.
+  subscriptionId     String?
+  customerId         String?
+
+  // Relations
+  prompts  Prompt[]
+  sessions Session[]
+  accounts Account[]
+
+  @@map("users")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?  @default("#6B7280") // Default gray color
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  prompts PromptCategory[]
+
+  @@map("categories")
+}
+
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  public      Boolean  @default(false) // Public/private sharing
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Prompt structure sections
+  taskContext             String?
+  toneContext             String?
+  backgroundData          String?
+  detailedTaskDescription String?
+  examples                String?
+  conversationHistory     String?
+  immediateTask           String?
+  thinkingSteps           String?
+  outputFormatting        String?
+  prefilledResponse       String?
+
+  // Relations
+  categories PromptCategory[]
+
+  @@map("prompts")
+}
+
+model PromptCategory {
+  id         String   @id @default(cuid())
+  promptId   String
+  categoryId String
+  createdAt  DateTime @default(now())
+
+  prompt   Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, categoryId])
+  @@map("prompt_categories")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
