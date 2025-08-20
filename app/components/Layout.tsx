@@ -40,18 +40,18 @@ export default function Layout({ children, user }: LayoutProps) {
                     <span>My Prompts</span>
                   </Link>
                   <Link
-                    to="/prompts/new"
-                    className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>New Prompt</span>
-                  </Link>
-                  <Link
                     to="/categories"
                     className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
                   >
                     <FolderOpen className="h-4 w-4" />
                     <span>Categories</span>
+                  </Link>
+                  <Link
+                    to="/prompts/new"
+                    className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>New Prompt</span>
                   </Link>
                   <div className="relative group">
                     <button className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1">
