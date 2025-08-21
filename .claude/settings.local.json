@@ -3,7 +3,9 @@
     "allow": [
       "Bash(gh repo create:*)",
       "Bash(npm install:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "ask": []
