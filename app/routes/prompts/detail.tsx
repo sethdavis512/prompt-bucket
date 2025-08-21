@@ -9,6 +9,8 @@ import { Edit, Copy, Download, ArrowLeft, Check, Share2 } from 'lucide-react';
 import { prisma } from '~/lib/prisma';
 import { auth } from '~/lib/auth';
 import Layout from '~/components/Layout';
+import TextField from '~/components/TextField';
+import TextArea from '~/components/TextArea';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -167,10 +169,6 @@ export async function action({ request, params }: Route.ActionArgs) {
             });
         });
 
-        console.log('Prompt updated successfully:', {
-            id: updatedPrompt.id,
-            title: updatedPrompt.title
-        });
         return { success: true, prompt: updatedPrompt };
     } catch (error) {
         console.error('Error updating prompt:', error);
@@ -441,51 +439,43 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                 {/* Header */}
                 <div className="mb-8">
                     <Link
-                        to="/prompts"
+                        to="/dashboard"
                         className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
                     >
                         <ArrowLeft className="h-4 w-4 mr-1" />
-                        Back to Prompts
+                        Back to Dashboard
                     </Link>
 
                     <div className="flex items-start justify-between">
                         <div>
                             {isEditing ? (
                                 <div className="space-y-4 mb-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Title *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editedPrompt.title}
-                                            onChange={(e) =>
-                                                updateEditedValue(
-                                                    'title',
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-2xl font-bold"
-                                            placeholder="Enter prompt title..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Description
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={editedPrompt.description}
-                                            onChange={(e) =>
-                                                updateEditedValue(
-                                                    'description',
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-600"
-                                            placeholder="Brief description of what this prompt does..."
-                                        />
-                                    </div>
+                                    <TextField
+                                        label="Title"
+                                        required
+                                        value={editedPrompt.title}
+                                        onChange={(e) =>
+                                            updateEditedValue(
+                                                'title',
+                                                e.target.value
+                                            )
+                                        }
+                                        inputClassName="text-2xl font-bold"
+                                        placeholder="Enter prompt title..."
+                                        size="lg"
+                                    />
+                                    <TextField
+                                        label="Description"
+                                        value={editedPrompt.description}
+                                        onChange={(e) =>
+                                            updateEditedValue(
+                                                'description',
+                                                e.target.value
+                                            )
+                                        }
+                                        inputClassName="text-gray-600"
+                                        placeholder="Brief description of what this prompt does..."
+                                    />
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Visibility
@@ -757,7 +747,7 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                             </div>
 
                                             {isEditing ? (
-                                                <textarea
+                                                <TextArea
                                                     value={content}
                                                     onChange={(e) =>
                                                         updateEditedValue(
@@ -766,7 +756,6 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                                         )
                                                     }
                                                     rows={4}
-                                                    className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                                     placeholder={`Enter ${section.title.toLowerCase()}...`}
                                                 />
                                             ) : (
