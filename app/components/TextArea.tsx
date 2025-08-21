@@ -12,6 +12,7 @@ interface TextAreaProps {
     value?: string;
     defaultValue?: string;
     onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
     name?: string;
     id?: string;
     disabled?: boolean;
@@ -37,6 +38,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
             value,
             defaultValue,
             onChange,
+            onBlur,
             name,
             id,
             disabled,
@@ -81,6 +83,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                         value={value}
                         defaultValue={defaultValue}
                         onChange={onChange}
+                        onBlur={onBlur}
                         disabled={disabled}
                         readOnly={readOnly}
                         required={required}

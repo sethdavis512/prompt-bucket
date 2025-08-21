@@ -110,6 +110,21 @@ model Prompt {
   outputFormatting        String?
   prefilledResponse       String?
 
+  // Individual field scores (1-10 each)
+  taskContextScore        Int? @default(0)
+  toneContextScore        Int? @default(0)
+  backgroundDataScore     Int? @default(0)
+  detailedTaskScore       Int? @default(0)
+  examplesScore          Int? @default(0)
+  conversationScore      Int? @default(0)
+  immediateTaskScore     Int? @default(0)
+  thinkingStepsScore     Int? @default(0)
+  outputFormattingScore  Int? @default(0)
+  prefilledResponseScore Int? @default(0)
+
+  // Overall calculated score (sum of above, max 100)
+  totalScore             Int? @default(0)
+
   // Relations
   categories PromptCategory[]
 
