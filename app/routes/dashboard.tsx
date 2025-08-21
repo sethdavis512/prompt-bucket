@@ -11,7 +11,8 @@ import {
     Filter,
     EyeIcon,
     EyeOffIcon,
-    TelescopeIcon
+    TelescopeIcon,
+    StarIcon
 } from 'lucide-react';
 import type { Route } from './+types/dashboard';
 
@@ -138,9 +139,9 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         {!loaderData.isProUser && (
                             <Link
                                 to="/pricing"
-                                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 px-4 py-2 rounded-md text-sm font-medium"
+                                className="flex gap-2 items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 px-4 py-2 rounded-md text-sm font-medium"
                             >
-                                Upgrade to Pro
+                                Upgrade to Pro <StarIcon className='h-4 w-4' />
                             </Link>
                         )}
                         {loaderData.canCreateMore ? (
