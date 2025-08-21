@@ -6,6 +6,7 @@ import { auth } from '~/lib/auth';
 import Layout from '~/components/Layout';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
+import PromptPreview from '~/components/PromptPreview';
 import type { Route } from './+types/new';
 
 const createPromptSchema = z.object({
@@ -27,6 +28,24 @@ const createPromptSchema = z.object({
 
 export async function loader({ request }: Route.LoaderArgs) {
     const session = await auth.api.getSession({ headers: request.headers });
+
+    // Check user subscription and prompt count
+    const user = await prisma.user.findUnique({
+        where: { id: session!.user.id },
+        select: { subscriptionStatus: true }
+    });
+
+    const promptCount = await prisma.prompt.count({
+        where: { userId: session!.user.id }
+    });
+
+    const isProUser = user?.subscriptionStatus === 'active';
+    const canCreateMore = isProUser || promptCount < 5;
+
+    // Redirect to pricing if free user has reached limit
+    if (!canCreateMore) {
+        return redirect('/pricing?reason=limit_reached');
+    }
 
     const categories = await prisma.category.findMany({
         include: {
@@ -515,18 +534,7 @@ export default function NewPrompt({
                     </div>
 
                     {/* Live Preview Column */}
-                    <div className="bg-white shadow rounded-lg sticky top-6 self-start">
-                        <div className="p-6">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                Live Prompt Preview
-                            </h3>
-                            <div className="block w-full h-screen max-h-[calc(100vh-12rem)] p-6 bg-gradient-to-br from-slate-50 to-gray-100 rounded-lg border border-gray-200 overflow-y-auto text-sm leading-relaxed">
-                                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap font-sans">
-                                    {generatePromptPreview()}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <PromptPreview content={generatePromptPreview()} />
                 </div>
             </div>
         </Layout>

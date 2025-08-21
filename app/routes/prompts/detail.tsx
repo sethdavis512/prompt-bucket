@@ -11,6 +11,7 @@ import { auth } from '~/lib/auth';
 import Layout from '~/components/Layout';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
+import PromptPreview from '~/components/PromptPreview';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -772,17 +773,11 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                         </div>
                     </div>
 
-                    {/* Live Preview Column - Same as New Prompt Page */}
-                    <div className="bg-gray-50 shadow rounded-lg sticky top-6 self-start">
-                        <div className="p-6">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                Complete Prompt Preview
-                            </h3>
-                            <code className="block w-full h-screen max-h-[calc(100vh-12rem)] p-4 bg-gray-900 text-green-400 rounded-md overflow-y-auto text-sm whitespace-pre-wrap font-mono">
-                                {generatePromptPreview()}
-                            </code>
-                        </div>
-                    </div>
+                    {/* Live Preview Column */}
+                    <PromptPreview 
+                        title="Complete Prompt Preview"
+                        content={generatePromptPreview()} 
+                    />
                 </div>
             </div>
         </Layout>

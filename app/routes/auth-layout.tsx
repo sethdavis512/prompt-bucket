@@ -1,5 +1,6 @@
 import { Outlet, redirect } from 'react-router';
 import { auth } from '~/lib/auth';
+import { prisma } from '~/lib/prisma';
 import type { Route } from './+types/auth-layout';
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -9,8 +10,24 @@ export async function loader({ request }: Route.LoaderArgs) {
         throw redirect('/auth/signin');
     }
 
-    // Only return user session data - let individual routes handle their own data
-    return { user: session.user };
+    // Fetch full user data including subscription status
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            subscriptionStatus: true,
+            customerId: true,
+            createdAt: true
+        }
+    });
+
+    if (!user) {
+        throw redirect('/auth/signin');
+    }
+
+    return { user };
 }
 
 export default function AuthLayout({ loaderData }: Route.ComponentProps) {

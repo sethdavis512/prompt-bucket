@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link, useOutletContext } from 'react-router';
+import type { User } from '@prisma/client';
 import {
     FileText,
     FolderOpen,
@@ -11,12 +13,12 @@ import {
     EyeOffIcon,
     TelescopeIcon
 } from 'lucide-react';
+import type { Route } from './+types/dashboard';
+
 import TextField from '~/components/TextField';
 import { prisma } from '~/lib/prisma';
 import { auth } from '~/lib/auth';
 import Layout from '~/components/Layout';
-import type { Route } from './+types/dashboard';
-import { useState } from 'react';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -25,16 +27,22 @@ export async function loader({ request }: Route.LoaderArgs) {
     const search = url.searchParams.get('search') || '';
     const categoryId = url.searchParams.get('category') || '';
 
+    // Get user subscription status
+    const user = await prisma.user.findUnique({
+        where: { id: session!.user.id },
+        select: { subscriptionStatus: true }
+    });
+
     // Build where clause for prompts based on filters
     const promptWhere: any = { userId: session!.user.id };
-    
+
     if (search) {
         promptWhere.OR = [
             { title: { contains: search, mode: 'insensitive' } },
             { description: { contains: search, mode: 'insensitive' } }
         ];
     }
-    
+
     if (categoryId) {
         promptWhere.categories = {
             some: {
@@ -75,11 +83,25 @@ export async function loader({ request }: Route.LoaderArgs) {
         })
     ]);
 
-    return { prompts, categories, promptCount, search, categoryId };
+    // Check if user is on pro plan
+    const isProUser = user?.subscriptionStatus === 'active';
+    const promptLimit = isProUser ? null : 5; // null means unlimited for pro users
+    const canCreateMore = isProUser || promptCount < 5;
+
+    return {
+        prompts,
+        categories,
+        promptCount,
+        search,
+        categoryId,
+        isProUser,
+        promptLimit,
+        canCreateMore
+    };
 }
 
 export default function Dashboard({ loaderData }: Route.ComponentProps) {
-    const { user } = useOutletContext<{ user: any }>();
+    const { user } = useOutletContext<{ user: User }>();
 
     const [searchTerm, setSearchTerm] = useState(loaderData.search);
 
@@ -87,25 +109,67 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
         <Layout user={user}>
             <div className="px-4 py-6 sm:px-0">
                 <div className="flex justify-between mb-8">
-                    
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Welcome back, {user.name || 'there'}!
-                    </h1>
-                    <p className="text-gray-600">
-                        Manage your prompt library and create new templates
-                    </p>
-                </div>
-                <div>
-                    <Link
-                        to="/prompts/new"
-                        className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
-                        >
-                        <Plus className="h-4 w-4" />
-                        <span>New Prompt</span>
-                    </Link>
-                </div>
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-3xl font-bold text-gray-900">
+                                Welcome back, {user.name || 'there'}!
+                            </h1>
+                            {loaderData.isProUser ? (
+                                <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                    Pro
+                                </span>
+                            ) : (
+                                <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                    Free
+                                </span>
+                            )}
                         </div>
+                        <p className="text-gray-600">
+                            Manage your prompt library and create new templates
+                        </p>
+                        {!loaderData.isProUser && (
+                            <p className="text-sm text-gray-500 mt-1">
+                                {loaderData.promptCount}/
+                                {loaderData.promptLimit} prompts used
+                            </p>
+                        )}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                        {!loaderData.isProUser && (
+                            <Link
+                                to="/pricing"
+                                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 px-4 py-2 rounded-md text-sm font-medium"
+                            >
+                                Upgrade to Pro
+                            </Link>
+                        )}
+                        {loaderData.canCreateMore ? (
+                            <Link
+                                to="/prompts/new"
+                                className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                            >
+                                <Plus className="h-4 w-4" />
+                                <span>New Prompt</span>
+                            </Link>
+                        ) : (
+                            <div className="relative">
+                                <button
+                                    disabled
+                                    className="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    <span>New Prompt</span>
+                                </button>
+                                <div className="absolute -bottom-8 left-0 text-xs text-red-600">
+                                    Limit reached.{' '}
+                                    <Link to="/pricing" className="underline">
+                                        Upgrade to Pro
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <div className="lg:col-span-3">
