@@ -1,6 +1,5 @@
 import { useOutletContext, Link } from 'react-router';
-import { User, Mail, Calendar, Crown, Star, CreditCard } from 'lucide-react';
-import Layout from '~/components/Layout';
+import { User, Mail, Calendar, Star, CreditCard } from 'lucide-react';
 
 export default function Profile() {
     const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
@@ -11,7 +10,6 @@ export default function Profile() {
     // Pro status now comes from auth layout context
 
     return (
-        <Layout user={user}>
             <div className="px-4 py-6 sm:px-0">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -93,7 +91,6 @@ export default function Profile() {
                                         </>
                                     ) : (
                                         <>
-                                            <Crown className="h-3 w-3 mr-1" />
                                             Free Plan
                                         </>
                                     )}
@@ -202,6 +199,5 @@ export default function Profile() {
                     </div>
                 </div>
             </div>
-        </Layout>
     );
 }

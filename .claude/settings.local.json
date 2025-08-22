@@ -8,7 +8,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(npx prisma db push:*)",
       "Bash(npm run build:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

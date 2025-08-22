@@ -52,7 +52,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         ref
     ) => {
         const baseTextAreaClasses = `
-            block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500
+            block p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
             ${error ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' : ''}
             ${!resize ? 'resize-none' : 'resize-y'}
             ${textAreaClassName}

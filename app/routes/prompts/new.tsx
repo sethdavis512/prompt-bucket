@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { useOutletContext, Form, redirect } from 'react-router';
 import { prisma } from '~/lib/prisma';
 import { auth } from '~/lib/auth';
-import Layout from '~/components/Layout';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
@@ -333,7 +332,10 @@ export default function NewPrompt({
         values?: any;
     };
 }) {
-    const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
+    const { user, isProUser } = useOutletContext<{
+        user: any;
+        isProUser: boolean;
+    }>();
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(false);
 
@@ -377,51 +379,60 @@ export default function NewPrompt({
     const getContextualHint = (fieldType: string): string => {
         const taskContext = promptValues.taskContext?.toLowerCase() || '';
         const title = promptValues.title?.toLowerCase() || '';
-        
+
         // Extract key themes from task context and title
-        const isMarketing = taskContext.includes('marketing') || title.includes('marketing');
-        const isSoftware = taskContext.includes('software') || taskContext.includes('saas') || taskContext.includes('tech');
-        const isWriting = taskContext.includes('writer') || taskContext.includes('content') || title.includes('writer');
-        const isStrategy = taskContext.includes('strategy') || taskContext.includes('strategist');
-        
+        const isMarketing =
+            taskContext.includes('marketing') || title.includes('marketing');
+        const isSoftware =
+            taskContext.includes('software') ||
+            taskContext.includes('saas') ||
+            taskContext.includes('tech');
+        const isWriting =
+            taskContext.includes('writer') ||
+            taskContext.includes('content') ||
+            title.includes('writer');
+        const isStrategy =
+            taskContext.includes('strategy') ||
+            taskContext.includes('strategist');
+
         // Generate hints based on field type and context
         switch (fieldType) {
             case 'toneContext':
-                if (isMarketing && isSoftware) return "Define marketing tone";
-                if (isWriting) return "Set writing style";
-                if (isStrategy) return "Choose strategic voice";
-                return "Specify desired tone";
-                
+                if (isMarketing && isSoftware) return 'Define marketing tone';
+                if (isWriting) return 'Set writing style';
+                if (isStrategy) return 'Choose strategic voice';
+                return 'Specify desired tone';
+
             case 'backgroundData':
-                if (isMarketing && isSoftware) return "Add market context";
-                if (isSoftware) return "Include tech background";
-                if (isMarketing) return "Provide market data";
-                return "Share relevant context";
-                
+                if (isMarketing && isSoftware) return 'Add market context';
+                if (isSoftware) return 'Include tech background';
+                if (isMarketing) return 'Provide market data';
+                return 'Share relevant context';
+
             case 'detailedTaskDescription':
-                if (isMarketing) return "Detail marketing goals";
-                if (isSoftware) return "Outline tech requirements";
-                if (isWriting) return "Specify content needs";
-                return "Provide context or details";
-                
+                if (isMarketing) return 'Detail marketing goals';
+                if (isSoftware) return 'Outline tech requirements';
+                if (isWriting) return 'Specify content needs';
+                return 'Provide context or details';
+
             case 'examples':
-                if (isMarketing) return "Show campaign examples";
-                if (isSoftware) return "Include product examples";
-                if (isWriting) return "Add writing samples";
-                return "Provide examples";
-                
+                if (isMarketing) return 'Show campaign examples';
+                if (isSoftware) return 'Include product examples';
+                if (isWriting) return 'Add writing samples';
+                return 'Provide examples';
+
             case 'immediateTask':
-                if (isMarketing) return "State marketing request";
-                if (isSoftware) return "Define current need";
-                return "Describe specific task";
-                
+                if (isMarketing) return 'State marketing request';
+                if (isSoftware) return 'Define current need';
+                return 'Describe specific task';
+
             case 'outputFormatting':
-                if (isMarketing) return "Set content format";
-                if (isWriting) return "Choose output style";
-                return "Specify format needs";
-                
+                if (isMarketing) return 'Set content format';
+                if (isWriting) return 'Choose output style';
+                return 'Specify format needs';
+
             default:
-                return "AI will rate this";
+                return 'AI will rate this';
         }
     };
 
@@ -463,469 +474,444 @@ export default function NewPrompt({
     };
 
     return (
-        <Layout user={user}>
-            <div className="px-4 py-6 sm:px-0">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Create New Prompt
-                    </h1>
-                    <p className="text-gray-600">
-                        Build a structured prompt using the 10-section
-                        methodology
-                    </p>
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">Create New Prompt</h1>
+                            <p className="text-gray-600 mt-1">
+                                Build a structured prompt using the 10-section methodology
+                            </p>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
                 {actionData?.error && (
                     <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                         {actionData.error}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Form Column */}
-                    <div className="bg-white shadow rounded-lg">
-                        <Form method="post" className="space-y-6 p-6">
-                            {/* Hidden field for user ID */}
-                            <input
-                                type="hidden"
-                                name="userId"
-                                value={user.id}
-                            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Form Column */}
+                <div className="bg-white shadow rounded-lg">
+                    <Form method="post" className="space-y-6 p-6">
+                        {/* Hidden field for user ID */}
+                        <input type="hidden" name="userId" value={user.id} />
 
-                            {/* Hidden field for effective public value (enforces Pro-only) */}
-                            <input
-                                type="hidden"
-                                name="public"
-                                value={effectiveIsPublic.toString()}
-                            />
+                        {/* Hidden field for effective public value (enforces Pro-only) */}
+                        <input
+                            type="hidden"
+                            name="public"
+                            value={effectiveIsPublic.toString()}
+                        />
 
-                            {/* Hidden fields for scoring data */}
-                            {Object.entries(scores).map(
-                                ([fieldType, score]) => (
+                        {/* Hidden fields for scoring data */}
+                        {Object.entries(scores).map(([fieldType, score]) => (
+                            <input
+                                key={fieldType}
+                                type="hidden"
+                                name={`${fieldType}Score`}
+                                value={score || 0}
+                            />
+                        ))}
+                        <input
+                            type="hidden"
+                            name="totalScore"
+                            value={totalScore || 0}
+                        />
+                        {/* Basic Info */}
+                        <div className="border-b border-gray-200 pb-6">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                Basic Information
+                            </h3>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <TextField
+                                    label="Title"
+                                    name="title"
+                                    id="title"
+                                    required
+                                    value={promptValues.title}
+                                    onChange={(e) =>
+                                        updatePromptValue(
+                                            'title',
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="e.g., Blog Article Writer"
+                                    error={actionData?.errors?.title?.[0]}
+                                />
+
+                                <TextField
+                                    label="Description"
+                                    name="description"
+                                    id="description"
+                                    value={promptValues.description}
+                                    onChange={(e) =>
+                                        updatePromptValue(
+                                            'description',
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Brief description of what this prompt does"
+                                />
+
+                                <CategoryManager
+                                    categories={loaderData.categories}
+                                    selectedCategories={selectedCategories}
+                                    onCategoryToggle={toggleCategory}
+                                    isProUser={isProUser}
+                                />
+                                {selectedCategories.map((categoryId) => (
                                     <input
-                                        key={fieldType}
+                                        key={categoryId}
                                         type="hidden"
-                                        name={`${fieldType}Score`}
-                                        value={score || 0}
+                                        name="categoryIds"
+                                        value={categoryId}
                                     />
-                                )
-                            )}
-                            <input
-                                type="hidden"
-                                name="totalScore"
-                                value={totalScore || 0}
-                            />
-                            {/* Basic Info */}
-                            <div className="border-b border-gray-200 pb-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                                    Basic Information
-                                </h3>
+                                ))}
 
-                                <div className="grid grid-cols-1 gap-4">
-                                    <TextField
-                                        label="Title"
-                                        name="title"
-                                        id="title"
-                                        required
-                                        value={promptValues.title}
-                                        onChange={(e) =>
-                                            updatePromptValue(
-                                                'title',
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="e.g., Blog Article Writer"
-                                        error={actionData?.errors?.title?.[0]}
-                                    />
-
-                                    <TextField
-                                        label="Description"
-                                        name="description"
-                                        id="description"
-                                        value={promptValues.description}
-                                        onChange={(e) =>
-                                            updatePromptValue(
-                                                'description',
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="Brief description of what this prompt does"
-                                    />
-
-                                    <CategoryManager
-                                        categories={loaderData.categories}
-                                        selectedCategories={selectedCategories}
-                                        onCategoryToggle={toggleCategory}
-                                        isProUser={isProUser}
-                                    />
-                                    {selectedCategories.map((categoryId) => (
-                                        <input
-                                            key={categoryId}
-                                            type="hidden"
-                                            name="categoryIds"
-                                            value={categoryId}
-                                        />
-                                    ))}
-
-                                    {isProUser ? (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Visibility
+                                {isProUser ? (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Visibility
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    value="false"
+                                                    checked={!isPublic}
+                                                    onChange={() =>
+                                                        setIsPublic(false)
+                                                    }
+                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">
+                                                    Private
+                                                </span>
                                             </label>
-                                            <div className="flex items-center space-x-4">
-                                                <label className="flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="false"
-                                                        checked={!isPublic}
-                                                        onChange={() =>
-                                                            setIsPublic(false)
-                                                        }
-                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                    />
-                                                    <span className="ml-2 text-sm text-gray-700">
-                                                        Private
-                                                    </span>
-                                                </label>
-                                                <label className="flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        value="true"
-                                                        checked={isPublic}
-                                                        onChange={() =>
-                                                            setIsPublic(true)
-                                                        }
-                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                    />
-                                                    <span className="ml-2 text-sm text-gray-700">
-                                                        Public
-                                                    </span>
-                                                </label>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Public prompts can be shared
-                                                with others via a link. Private
-                                                prompts are only visible to you.
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                Visibility
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    value="true"
+                                                    checked={isPublic}
+                                                    onChange={() =>
+                                                        setIsPublic(true)
+                                                    }
+                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">
+                                                    Public
+                                                </span>
                                             </label>
-                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                                <div className="flex items-center">
-                                                    <input
-                                                        type="radio"
-                                                        name="public"
-                                                        value="false"
-                                                        checked={true}
-                                                        disabled
-                                                        className="h-4 w-4 text-gray-400 border-gray-300"
-                                                    />
-                                                    <span className="ml-2 text-sm text-gray-700">
-                                                        Private
-                                                    </span>
-                                                    <span className="ml-2 text-xs text-gray-500">
-                                                        (Free users)
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                    Public sharing is available
-                                                    with Pro.
-                                                    <a
-                                                        href="/pricing"
-                                                        className="text-blue-600 hover:text-blue-500 ml-1"
-                                                    >
-                                                        Upgrade to share prompts
-                                                        →
-                                                    </a>
-                                                </p>
-                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Prompt Sections */}
-                            <div className="space-y-6">
-                                <div>
-                                    <h3 className="text-lg font-medium text-gray-900">
-                                        Prompt Structure
-                                    </h3>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        Start by defining the AI's role in
-                                        section 1 - this forms the foundation
-                                        for your prompt. Complete additional
-                                        sections as needed, with each building
-                                        upon the previous context.
-                                    </p>
-                                </div>
-
-                                {!isProUser && (
-                                    <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
-                                        <div className="flex items-start space-x-3">
-                                            <div className="flex-shrink-0">
-                                                <svg
-                                                    className="w-5 h-5 text-blue-600 mt-0.5"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Public prompts can be shared with
+                                            others via a link. Private prompts
+                                            are only visible to you.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Visibility
+                                        </label>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="public"
+                                                    value="false"
+                                                    checked={true}
+                                                    disabled
+                                                    className="h-4 w-4 text-gray-400 border-gray-300"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-700">
+                                                    Private
+                                                </span>
+                                                <span className="ml-2 text-xs text-gray-500">
+                                                    (Free users)
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-2">
+                                                Public sharing is available with
+                                                Pro.
+                                                <a
+                                                    href="/pricing"
+                                                    className="text-blue-600 hover:text-blue-500 ml-1"
                                                 >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="text-sm font-medium text-gray-900 mb-1">
-                                                    Pro Features Available
-                                                </h4>
-                                                <div className="text-sm text-gray-600 space-y-1">
-                                                    <p>
-                                                        <strong>
-                                                            Auto-fill:
-                                                        </strong>{' '}
-                                                        AI generates content for
-                                                        each section based on
-                                                        your existing prompt
-                                                        context
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            AI Scoring:
-                                                        </strong>{' '}
-                                                        Get real-time quality
-                                                        scores (1-10) and
-                                                        improvement suggestions
-                                                        for each section
-                                                    </p>
-                                                    <p>
-                                                        <strong>
-                                                            Public Sharing:
-                                                        </strong>{' '}
-                                                        Share your prompts
-                                                        publicly with a
-                                                        shareable link
-                                                    </p>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <a
-                                                        href="/pricing"
-                                                        className="text-sm font-medium text-blue-600 hover:text-blue-500"
-                                                    >
-                                                        Upgrade to Pro →
-                                                    </a>
-                                                </div>
-                                            </div>
+                                                    Upgrade to share prompts →
+                                                </a>
+                                            </p>
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        </div>
 
-                                {promptSections.map((section) => (
-                                    <div
-                                        key={section.id}
-                                        className="border border-gray-200 rounded-lg p-4"
-                                    >
-                                        <div className="mb-3">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <div className="flex-1">
-                                                    <FieldScoring
-                                                        fieldType={section.id}
-                                                        label={section.title}
-                                                        score={
-                                                            isProUser
-                                                                ? scores[
-                                                                      section.id
-                                                                  ]
-                                                                : 0
-                                                        }
-                                                        suggestion={
-                                                            isProUser
-                                                                ? suggestions[
-                                                                      section.id
-                                                                  ]
-                                                                : undefined
-                                                        }
-                                                        isProUser={isProUser}
-                                                        isLoading={
-                                                            isProUser &&
-                                                            scoringField ===
-                                                                section.id
-                                                        }
-                                                        onScoreUpdate={(
+                        {/* Prompt Sections */}
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    Prompt Structure
+                                </h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Start by defining the AI's role in section 1
+                                    - this forms the foundation for your prompt.
+                                    Complete additional sections as needed, with
+                                    each building upon the previous context.
+                                </p>
+                            </div>
+
+                            {!isProUser && (
+                                <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
+                                    <div className="flex items-start space-x-3">
+                                        <div className="flex-shrink-0">
+                                            <svg
+                                                className="w-5 h-5 text-blue-600 mt-0.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                                Pro Features Available
+                                            </h4>
+                                            <div className="text-sm text-gray-600 space-y-1">
+                                                <p>
+                                                    <strong>Auto-fill:</strong>{' '}
+                                                    AI generates content for
+                                                    each section based on your
+                                                    existing prompt context
+                                                </p>
+                                                <p>
+                                                    <strong>AI Scoring:</strong>{' '}
+                                                    Get real-time quality scores
+                                                    (1-10) and improvement
+                                                    suggestions for each section
+                                                </p>
+                                                <p>
+                                                    <strong>
+                                                        Public Sharing:
+                                                    </strong>{' '}
+                                                    Share your prompts publicly
+                                                    with a shareable link
+                                                </p>
+                                            </div>
+                                            <div className="mt-3">
+                                                <a
+                                                    href="/pricing"
+                                                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                                >
+                                                    Upgrade to Pro →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {promptSections.map((section) => (
+                                <div
+                                    key={section.id}
+                                    className="border border-gray-200 rounded-lg p-4"
+                                >
+                                    <div className="mb-3">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex-1">
+                                                <FieldScoring
+                                                    fieldType={section.id}
+                                                    label={section.title}
+                                                    score={
+                                                        isProUser
+                                                            ? scores[section.id]
+                                                            : 0
+                                                    }
+                                                    suggestion={
+                                                        isProUser
+                                                            ? suggestions[
+                                                                  section.id
+                                                              ]
+                                                            : undefined
+                                                    }
+                                                    isProUser={isProUser}
+                                                    isLoading={
+                                                        isProUser &&
+                                                        scoringField ===
+                                                            section.id
+                                                    }
+                                                    onScoreUpdate={(
+                                                        score,
+                                                        suggestion
+                                                    ) =>
+                                                        updateFieldScore(
+                                                            section.id,
                                                             score,
                                                             suggestion
-                                                        ) =>
-                                                            updateFieldScore(
-                                                                section.id,
-                                                                score,
-                                                                suggestion
-                                                            )
-                                                        }
-                                                        contextualHint={getContextualHint(section.id)}
-                                                    />
-                                                </div>
-
-                                                {/* Generate Button - Top Right */}
-                                                {isProUser && (
-                                                    <div className="ml-4">
-                                                        {canGenerate(
-                                                            section.id
-                                                        ) ? (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    generateField(
-                                                                        section.id
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    generatingField ===
-                                                                    section.id
-                                                                }
-                                                                className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                                                                    generatingField ===
-                                                                    section.id
-                                                                        ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                                                                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                                }`}
-                                                            >
-                                                                {generatingField ===
-                                                                section.id ? (
-                                                                    <>
-                                                                        <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
-                                                                        Generating...
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        ✨
-                                                                        Generate
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        ) : null}
-                                                    </div>
-                                                )}
+                                                        )
+                                                    }
+                                                    contextualHint={getContextualHint(
+                                                        section.id
+                                                    )}
+                                                />
                                             </div>
 
-                                            <p className="text-xs text-gray-500 mb-2">
-                                                {section.description}
-                                            </p>
-
-                                            {suggestions[section.id] &&
-                                                isProUser && (
-                                                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                                                        💡{' '}
-                                                        {
-                                                            suggestions[
+                                            {/* Generate Button - Top Right */}
+                                            {isProUser && (
+                                                <div className="ml-4">
+                                                    {canGenerate(section.id) ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                generateField(
+                                                                    section.id
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                generatingField ===
                                                                 section.id
-                                                            ]
-                                                        }
-                                                    </div>
-                                                )}
+                                                            }
+                                                            className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                                                                generatingField ===
+                                                                section.id
+                                                                    ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
+                                                                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                            }`}
+                                                        >
+                                                            {generatingField ===
+                                                            section.id ? (
+                                                                <>
+                                                                    <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                                                                    Generating...
+                                                                </>
+                                                            ) : (
+                                                                <>✨ Generate</>
+                                                            )}
+                                                        </button>
+                                                    ) : null}
+                                                </div>
+                                            )}
                                         </div>
-                                        <TextArea
-                                            name={section.id}
-                                            id={section.id}
-                                            rows={4}
-                                            value={
-                                                promptValues[
-                                                    section.id as keyof typeof promptValues
-                                                ]
-                                            }
-                                            onChange={(e) =>
-                                                updatePromptValue(
-                                                    section.id,
-                                                    e.target.value
-                                                )
-                                            }
-                                            onBlur={(
-                                                e: React.FocusEvent<HTMLTextAreaElement>
-                                            ) =>
-                                                scoreField(
-                                                    section.id,
-                                                    e.target.value
-                                                )
-                                            }
-                                            placeholder={section.placeholder}
-                                            disabled={
-                                                scoringField === section.id
-                                            }
-                                            maxLength={section.maxChars}
-                                        />
 
-                                        {/* Character count indicator */}
-                                        <div className="mt-1 flex justify-between text-xs">
-                                            <span className="text-gray-500">
-                                                Max {section.maxChars}{' '}
-                                                characters for optimal token
-                                                efficiency
-                                            </span>
-                                            <span
-                                                className={`font-medium ${
-                                                    (promptValues[
-                                                        section.id as keyof typeof promptValues
-                                                    ]?.length || 0) >
-                                                    section.maxChars * 0.9
-                                                        ? 'text-orange-600'
-                                                        : (promptValues[
-                                                                section.id as keyof typeof promptValues
-                                                            ]?.length || 0) >
-                                                            section.maxChars *
-                                                                0.75
-                                                          ? 'text-yellow-600'
-                                                          : 'text-gray-600'
-                                                }`}
-                                            >
-                                                {promptValues[
-                                                    section.id as keyof typeof promptValues
-                                                ]?.length || 0}
-                                                /{section.maxChars}
-                                            </span>
-                                        </div>
-                                        {isProUser &&
-                                            scoringField === section.id && (
-                                                <div className="mt-2 flex items-center text-xs text-blue-600">
-                                                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                    AI is analyzing this
-                                                    field...
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            {section.description}
+                                        </p>
+
+                                        {suggestions[section.id] &&
+                                            isProUser && (
+                                                <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                                                    💡 {suggestions[section.id]}
                                                 </div>
                                             )}
                                     </div>
-                                ))}
-                            </div>
+                                    <TextArea
+                                        name={section.id}
+                                        id={section.id}
+                                        rows={4}
+                                        value={
+                                            promptValues[
+                                                section.id as keyof typeof promptValues
+                                            ]
+                                        }
+                                        onChange={(e) =>
+                                            updatePromptValue(
+                                                section.id,
+                                                e.target.value
+                                            )
+                                        }
+                                        onBlur={(
+                                            e: React.FocusEvent<HTMLTextAreaElement>
+                                        ) =>
+                                            scoreField(
+                                                section.id,
+                                                e.target.value
+                                            )
+                                        }
+                                        placeholder={section.placeholder}
+                                        disabled={scoringField === section.id}
+                                        maxLength={section.maxChars}
+                                    />
 
-                            {/* Submit */}
-                            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                                <button
-                                    type="button"
-                                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                    onClick={() => window.history.back()}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700"
-                                >
-                                    Create Prompt
-                                </button>
-                            </div>
-                        </Form>
-                    </div>
+                                    {/* Character count indicator */}
+                                    <div className="mt-1 flex justify-between text-xs">
+                                        <span className="text-gray-500">
+                                            Max {section.maxChars} characters
+                                            for optimal token efficiency
+                                        </span>
+                                        <span
+                                            className={`font-medium ${
+                                                (promptValues[
+                                                    section.id as keyof typeof promptValues
+                                                ]?.length || 0) >
+                                                section.maxChars * 0.9
+                                                    ? 'text-orange-600'
+                                                    : (promptValues[
+                                                            section.id as keyof typeof promptValues
+                                                        ]?.length || 0) >
+                                                        section.maxChars * 0.75
+                                                      ? 'text-yellow-600'
+                                                      : 'text-gray-600'
+                                            }`}
+                                        >
+                                            {promptValues[
+                                                section.id as keyof typeof promptValues
+                                            ]?.length || 0}
+                                            /{section.maxChars}
+                                        </span>
+                                    </div>
+                                    {isProUser &&
+                                        scoringField === section.id && (
+                                            <div className="mt-2 flex items-center text-xs text-blue-600">
+                                                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                AI is analyzing this field...
+                                            </div>
+                                        )}
+                                </div>
+                            ))}
+                        </div>
 
-                    {/* Live Preview Column */}
-                    <div className="sticky top-6 self-start">
-                        <PromptPreview
-                            content={generatePromptPreview()}
-                            totalScore={totalScore}
-                            isProUser={isProUser}
-                        />
-                    </div>
+                        {/* Submit */}
+                        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                            <button
+                                type="button"
+                                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                onClick={() => window.history.back()}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700"
+                            >
+                                Create Prompt
+                            </button>
+                        </div>
+                    </Form>
+                </div>
+
+                {/* Live Preview Column */}
+                <div className="sticky top-0 self-start">
+                    <PromptPreview
+                        content={generatePromptPreview()}
+                        totalScore={totalScore}
+                        isProUser={isProUser}
+                    />
                 </div>
             </div>
-        </Layout>
+            </div>
+        </div>
     );
 }

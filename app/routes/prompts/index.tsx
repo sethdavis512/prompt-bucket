@@ -2,10 +2,7 @@ import { useState } from 'react';
 import { Link, useOutletContext, useNavigate } from 'react-router';
 import type { User } from '@prisma/client';
 import {
-    Home,
     FileText,
-    FolderOpen,
-    TrendingUp,
     Plus,
     Search,
     Edit,
@@ -15,7 +12,7 @@ import {
     TelescopeIcon,
     StarIcon
 } from 'lucide-react';
-import type { Route } from './+types/dashboard';
+import type { Route } from './+types/index';
 
 import TextField from '~/components/TextField';
 import { prisma } from '~/lib/prisma';
@@ -104,7 +101,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     };
 }
 
-export default function Dashboard({ loaderData }: Route.ComponentProps) {
+export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
     const { user } = useOutletContext<{ user: User; isProUser: boolean }>();
     const navigate = useNavigate();
 
@@ -117,9 +114,9 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <Home className="h-6 w-6 text-gray-400" />
+                            <FileText className="h-6 w-6 text-gray-400" />
                             <h1 className="text-2xl font-bold text-gray-900">
-                                Dashboard
+                                My Prompts
                             </h1>
                         </div>
                         <div className="flex items-center space-x-3">
@@ -154,8 +151,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         </div>
                     </div>
                     <p className="text-gray-600 mt-2">
-                        Welcome back, {user.name || 'there'}! Manage your prompt
-                        library and create new templates.
+                        Manage and organize your prompt templates
                     </p>
                     {!loaderData.isProUser && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -209,8 +205,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                                             searchParams.toString();
                                                         navigate(
                                                             queryString
-                                                                ? `/dashboard?${queryString}`
-                                                                : '/dashboard'
+                                                                ? `/prompts?${queryString}`
+                                                                : '/prompts'
                                                         );
                                                     }
                                                 }}
@@ -242,8 +238,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                                         searchParams.toString();
                                                     navigate(
                                                         queryString
-                                                            ? `/dashboard?${queryString}`
-                                                            : '/dashboard'
+                                                            ? `/prompts?${queryString}`
+                                                            : '/prompts'
                                                     );
                                                 }}
                                                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
@@ -407,8 +403,9 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                             </div>
                         )}
                     </div>
+
+                    {/* Stats Sidebar */}
                     <div className="lg:col-span-1">
-                        {/* Stats Cards */}
                         <div className="space-y-4">
                             <div className="bg-white shadow rounded-lg">
                                 <div className="p-5">
@@ -419,7 +416,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                         <div className="ml-5 w-0 flex-1">
                                             <dl>
                                                 <dt className="text-sm font-medium text-gray-500 truncate">
-                                                    My Prompts
+                                                    Total Prompts
                                                 </dt>
                                                 <dd className="text-2xl font-bold text-gray-900">
                                                     {loaderData.promptCount}
@@ -434,38 +431,12 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                 <div className="p-5">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0">
-                                            <FolderOpen className="h-6 w-6 text-gray-400" />
+                                            <StarIcon className="h-6 w-6 text-gray-400" />
                                         </div>
                                         <div className="ml-5 w-0 flex-1">
                                             <dl>
                                                 <dt className="text-sm font-medium text-gray-500 truncate">
-                                                    Categories
-                                                </dt>
-                                                <dd className="text-2xl font-bold text-gray-900">
-                                                    {
-                                                        loaderData.categories.filter(
-                                                            (c) =>
-                                                                c._count
-                                                                    .prompts > 0
-                                                        ).length
-                                                    }
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="p-5">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0">
-                                            <TrendingUp className="h-6 w-6 text-gray-400" />
-                                        </div>
-                                        <div className="ml-5 w-0 flex-1">
-                                            <dl>
-                                                <dt className="text-sm font-medium text-gray-500 truncate">
-                                                    Account
+                                                    Account Status
                                                 </dt>
                                                 <dd className="text-2xl font-bold text-gray-900 capitalize">
                                                     {loaderData.isProUser

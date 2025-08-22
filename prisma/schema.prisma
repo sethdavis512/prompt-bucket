@@ -13,10 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -32,6 +38,7 @@ model User {
   // Relations
   prompts    Prompt[]
   categories Category[]
+  chains     Chain[]
   sessions   Session[]
   accounts   Account[]
 
@@ -132,6 +139,7 @@ model Prompt {
 
   // Relations
   categories PromptCategory[]
+  chainPrompts ChainPrompt[]
 
   @@map("prompts")
 }
@@ -147,6 +155,46 @@ model PromptCategory {
 
   @@unique([promptId, categoryId])
   @@map("prompt_categories")
+}
+
+model Chain {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Overall chain score from AI evaluation
+  chainScore Int? @default(0)
+  
+  // AI evaluation feedback
+  evaluationFeedback String?
+  lastEvaluatedAt    DateTime?
+
+  // Relations
+  prompts ChainPrompt[]
+
+  @@map("chains")
+}
+
+model ChainPrompt {
+  id       String @id @default(cuid())
+  chainId  String
+  promptId String
+  order    Int    // Position in the chain (0-based)
+  createdAt DateTime @default(now())
+
+  chain  Chain  @relation(fields: [chainId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  // Ensure unique ordering per chain and no duplicate prompts in same chain
+  @@unique([chainId, order])
+  @@unique([chainId, promptId])
+  @@map("chain_prompts")
 }
 
 model Verification {

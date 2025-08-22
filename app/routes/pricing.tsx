@@ -1,6 +1,5 @@
 import { Link } from 'react-router';
 import { Check, Star, Zap } from 'lucide-react';
-import Layout from '~/components/Layout';
 import { auth } from '~/lib/auth';
 import { prisma } from '~/lib/prisma';
 import type { Route } from './+types/pricing';
@@ -86,7 +85,6 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
     ];
 
     return (
-        <Layout user={user}>
             <div className="px-4 py-12 sm:px-0">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -231,6 +229,5 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                     </div>
                 </div>
             </div>
-        </Layout>
     );
 }
