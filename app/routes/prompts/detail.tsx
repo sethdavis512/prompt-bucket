@@ -12,6 +12,7 @@ import Layout from '~/components/Layout';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
+import CategoryManager from '~/components/CategoryManager';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -42,6 +43,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
     // Get all available categories for the user
     const allCategories = await prisma.category.findMany({
+        where: {
+            userId: session!.user.id // Only user's own categories
+        },
         include: {
             _count: {
                 select: {
@@ -55,7 +59,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
                 }
             }
         },
-        orderBy: { name: 'asc' }
+        orderBy: [
+            { userId: 'asc' }, // System categories first (null userId)
+            { name: 'asc' }
+        ]
     });
 
     return { prompt, allCategories };
@@ -239,7 +246,7 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
 
     // Use real prompt data from the loader
     const [prompt, setPrompt] = useState(loaderData.prompt);
-    const allCategories = loaderData.allCategories;
+    const { allCategories } = loaderData;
     const [copiedSection, setCopiedSection] = useState<string | null>(null);
     const [copiedFull, setCopiedFull] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -528,40 +535,12 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                     </div>
 
                                     {/* Categories Section */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Categories
-                                        </label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {allCategories.map(
-                                                (category: any) => (
-                                                    <button
-                                                        key={category.id}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            toggleCategory(
-                                                                category.id
-                                                            )
-                                                        }
-                                                        className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                                                            selectedCategories.includes(
-                                                                category.id
-                                                            )
-                                                                ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
-                                                                : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200'
-                                                        }`}
-                                                    >
-                                                        {category.name}
-                                                    </button>
-                                                )
-                                            )}
-                                        </div>
-                                        {selectedCategories.length === 0 && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                No categories selected
-                                            </p>
-                                        )}
-                                    </div>
+                                    <CategoryManager
+                                        categories={allCategories}
+                                        selectedCategories={selectedCategories}
+                                        onCategoryToggle={toggleCategory}
+                                        isProUser={user?.subscriptionStatus === 'active'}
+                                    />
                                 </div>
                             ) : (
                                 <>
@@ -774,10 +753,12 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                     </div>
 
                     {/* Live Preview Column */}
-                    <PromptPreview 
-                        title="Complete Prompt Preview"
-                        content={generatePromptPreview()} 
-                    />
+                    <div className="sticky top-6 self-start">
+                        <PromptPreview 
+                            title="Complete Prompt Preview"
+                            content={generatePromptPreview()} 
+                        />
+                    </div>
                 </div>
             </div>
         </Layout>

@@ -22,7 +22,8 @@ export default [
     ...prefix(`api`, [
         route('auth/*', 'routes/api/auth.tsx'),
         route('webhooks/polar', 'routes/api.webhooks.polar.tsx'),
-        route('score-prompt', 'routes/api/score-prompt.ts')
+        route('score-prompt', 'routes/api/score-prompt.ts'),
+        route('categories', 'routes/api/categories.ts')
     ]),
 
     // Polar payment routes

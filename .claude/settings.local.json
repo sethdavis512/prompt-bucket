@@ -5,7 +5,9 @@
       "Bash(npm install:*)",
       "Bash(psql:*)",
       "Bash(npx prisma migrate dev:*)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

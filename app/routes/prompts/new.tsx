@@ -8,6 +8,7 @@ import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
 import FieldScoring from '~/components/FieldScoring';
+import CategoryManager from '~/components/CategoryManager';
 import { usePromptScoring } from '~/hooks/usePromptScoring';
 import { usePromptAPI } from '~/hooks/usePromptAPI';
 import type { Route } from './+types/new';
@@ -63,6 +64,9 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     const categories = await prisma.category.findMany({
+        where: {
+            userId: session!.user.id // Only user's own categories
+        },
         include: {
             prompts: {
                 where: {
@@ -92,7 +96,10 @@ export async function loader({ request }: Route.LoaderArgs) {
                 }
             }
         },
-        orderBy: { name: 'asc' }
+        orderBy: [
+            { userId: 'asc' }, // System categories first (null userId)
+            { name: 'asc' }
+        ]
     });
 
     return { categories };
@@ -324,31 +331,34 @@ export default function NewPrompt({
     
     const isProUser = user?.subscriptionStatus === 'active';
     
+    // Ensure free users can't make public prompts
+    const effectiveIsPublic = isProUser ? isPublic : false;
+    
     // State for live prompt preview
     const [promptValues, setPromptValues] = useState({
-        title: 'Blog Article Writer',
+        title: 'Software Marketing Content Strategist',
         description:
-            'Creates engaging blog articles with proper structure and SEO optimization',
+            'Creates compelling marketing content for software products with focus on conversion and user engagement',
         taskContext:
-            'You are an expert content writer with years of experience in creating engaging blog articles. You understand SEO best practices, audience engagement techniques, and how to structure content for maximum readability and impact.',
+            'You are an expert software marketing strategist with deep experience in SaaS, B2B software, and developer tools. You understand product positioning, customer pain points, technical feature communication, and conversion-focused content creation for software audiences.',
         toneContext:
-            "Use a professional yet conversational tone that's accessible to a general audience. The writing should be engaging, informative, and maintain reader interest throughout. Avoid jargon unless absolutely necessary, and when used, provide clear explanations.",
+            'Use a professional, authoritative tone that demonstrates technical understanding while remaining accessible to decision-makers. Balance technical credibility with business value. Be confident and solution-focused, avoiding overly salesy language.',
         backgroundData:
-            'Consider current digital marketing trends, SEO best practices for 2024, and user engagement metrics. Focus on creating content that performs well in search engines while providing genuine value to readers.',
+            'Consider current software market trends, competitive landscape analysis, customer journey stages, and proven SaaS marketing strategies. Focus on addressing specific software buyer personas including developers, engineering managers, and IT decision-makers.',
         detailedTaskDescription:
-            'Create a comprehensive blog article that: 1. Is between 1500-2500 words 2. Includes proper headings (H1, H2, H3) 3. Has a compelling introduction and conclusion 4. Uses bullet points and numbered lists where appropriate 5. Includes actionable insights and practical tips',
+            'Create marketing content that: 1. Clearly articulates software value propositions 2. Addresses specific technical and business pain points 3. Includes competitive differentiation 4. Provides social proof and credibility indicators 5. Drives action with clear next steps 6. Optimizes for software buyer intent keywords',
         examples:
-            "Structure example: Title: '10 Proven Strategies to...' Introduction (hook + preview) Main sections with H2 headings, each containing 2-3 paragraphs with actionable insights, bullet points for key takeaways, and a strong conclusion with next steps.",
+            "Content examples: 'How [Software] Reduced Deployment Time by 80% for Enterprise Teams' with customer case studies, technical benefits breakdown, ROI calculations, and implementation timeline. Include before/after scenarios and quantifiable results.",
         conversationHistory:
-            'This is a new request with no prior conversation history. Approach this as a fresh start with no assumptions about previous discussions.',
+            'This is a new software marketing content request. Approach with fresh perspective on the specific software product, target audience, and competitive positioning without assumptions about previous campaigns.',
         immediateTask:
-            'Now, please write a comprehensive blog post about [TOPIC TO BE SPECIFIED]. The article should be informative, well-researched, and provide practical value to readers interested in this subject.',
+            'Create high-converting marketing content for [SOFTWARE PRODUCT/FEATURE]. Focus on the specific value proposition, target audience pain points, and desired conversion action.',
         thinkingSteps:
-            'Think step by step: 1. Analyze the topic and target audience 2. Create a detailed outline with main points 3. Research current trends and best practices 4. Write compelling introduction 5. Develop each main section with examples 6. Create actionable conclusion with next steps',
+            'Think step by step: 1. Identify target software buyer persona and pain points 2. Analyze competitive landscape and differentiation 3. Define key value propositions and benefits 4. Structure content for conversion funnel stage 5. Include credibility indicators and social proof 6. Craft compelling call-to-action',
         outputFormatting:
-            'Format your response as: Title (H1), Introduction paragraph, Main sections with H2 headings, subsections with H3 if needed, bullet points for lists, bold text for key terms, and a conclusion with clear next steps or call-to-action.',
+            'Format as: Compelling headline, Problem/solution hook, Key benefits with technical details, Customer success indicators, Competitive advantages, Implementation ease, Clear call-to-action with next steps.',
         prefilledResponse:
-            "I'll help you create a comprehensive and engaging blog article. Let me start by outlining the key points and then developing each section with practical insights and actionable advice."
+            "I'll create targeted marketing content that resonates with software buyers. Let me structure this around the specific technical and business value propositions that drive software purchasing decisions."
     });
 
     const updatePromptValue = useCallback((field: string, value: string) => {
@@ -425,6 +435,13 @@ export default function NewPrompt({
                                 value={user.id}
                             />
                             
+                            {/* Hidden field for effective public value (enforces Pro-only) */}
+                            <input
+                                type="hidden"
+                                name="public"
+                                value={effectiveIsPublic.toString()}
+                            />
+                            
                             {/* Hidden fields for scoring data */}
                             {Object.entries(scores).map(([fieldType, score]) => (
                                 <input
@@ -476,94 +493,133 @@ export default function NewPrompt({
                                         placeholder="Brief description of what this prompt does"
                                     />
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Categories
-                                        </label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {categories.map((category: any) => (
-                                                <button
-                                                    key={category.id}
-                                                    type="button"
-                                                    onClick={() =>
-                                                        toggleCategory(
-                                                            category.id
-                                                        )
-                                                    }
-                                                    className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                                                        selectedCategories.includes(
-                                                            category.id
-                                                        )
-                                                            ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
-                                                            : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200'
-                                                    }`}
-                                                >
-                                                    {category.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {selectedCategories.map(
-                                            (categoryId) => (
-                                                <input
-                                                    key={categoryId}
-                                                    type="hidden"
-                                                    name="categoryIds"
-                                                    value={categoryId}
-                                                />
-                                            )
-                                        )}
-                                    </div>
+                                    <CategoryManager
+                                        categories={categories}
+                                        selectedCategories={selectedCategories}
+                                        onCategoryToggle={toggleCategory}
+                                        isProUser={isProUser}
+                                    />
+                                    {selectedCategories.map(
+                                        (categoryId) => (
+                                            <input
+                                                key={categoryId}
+                                                type="hidden"
+                                                name="categoryIds"
+                                                value={categoryId}
+                                            />
+                                        )
+                                    )}
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Visibility
-                                        </label>
-                                        <div className="flex items-center space-x-4">
-                                            <label className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="public"
-                                                    value="false"
-                                                    checked={!isPublic}
-                                                    onChange={() =>
-                                                        setIsPublic(false)
-                                                    }
-                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                />
-                                                <span className="ml-2 text-sm text-gray-700">
-                                                    Private
-                                                </span>
+                                    {isProUser ? (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Visibility
                                             </label>
-                                            <label className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    name="public"
-                                                    value="true"
-                                                    checked={isPublic}
-                                                    onChange={() =>
-                                                        setIsPublic(true)
-                                                    }
-                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                />
-                                                <span className="ml-2 text-sm text-gray-700">
-                                                    Public
-                                                </span>
-                                            </label>
+                                            <div className="flex items-center space-x-4">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        value="false"
+                                                        checked={!isPublic}
+                                                        onChange={() =>
+                                                            setIsPublic(false)
+                                                        }
+                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Private
+                                                    </span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        value="true"
+                                                        checked={isPublic}
+                                                        onChange={() =>
+                                                            setIsPublic(true)
+                                                        }
+                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Public
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Public prompts can be shared with
+                                                others via a link. Private prompts
+                                                are only visible to you.
+                                            </p>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Public prompts can be shared with
-                                            others via a link. Private prompts
-                                            are only visible to you.
-                                        </p>
-                                    </div>
+                                    ) : (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Visibility
+                                            </label>
+                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="public"
+                                                        value="false"
+                                                        checked={true}
+                                                        disabled
+                                                        className="h-4 w-4 text-gray-400 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Private
+                                                    </span>
+                                                    <span className="ml-2 text-xs text-gray-500">
+                                                        (Free users)
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    Public sharing is available with Pro. 
+                                                    <a href="/pricing" className="text-blue-600 hover:text-blue-500 ml-1">
+                                                        Upgrade to share prompts →
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Prompt Sections */}
                             <div className="space-y-6">
-                                <h3 className="text-lg font-medium text-gray-900">
-                                    Prompt Structure
-                                </h3>
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        Prompt Structure
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Start by defining the AI's role in section 1 - this forms the foundation for your prompt. Complete additional sections as needed, with each building upon the previous context.
+                                    </p>
+                                </div>
+                                
+                                {!isProUser && (
+                                    <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="flex-shrink-0">
+                                                <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-sm font-medium text-gray-900 mb-1">Pro Features Available</h4>
+                                                <div className="text-sm text-gray-600 space-y-1">
+                                                    <p><strong>Auto-fill:</strong> AI generates content for each section based on your existing prompt context</p>
+                                                    <p><strong>AI Scoring:</strong> Get real-time quality scores (1-10) and improvement suggestions for each section</p>
+                                                    <p><strong>Public Sharing:</strong> Share your prompts publicly with a shareable link</p>
+                                                </div>
+                                                <div className="mt-3">
+                                                    <a href="/pricing" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                                        Upgrade to Pro →
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {promptSections.map((section) => (
                                     <div
@@ -576,10 +632,10 @@ export default function NewPrompt({
                                                     <FieldScoring
                                                         fieldType={section.id}
                                                         label={section.title}
-                                                        score={scores[section.id]}
-                                                        suggestion={suggestions[section.id]}
+                                                        score={isProUser ? scores[section.id] : 0}
+                                                        suggestion={isProUser ? suggestions[section.id] : undefined}
                                                         isProUser={isProUser}
-                                                        isLoading={scoringField === section.id}
+                                                        isLoading={isProUser && scoringField === section.id}
                                                         onScoreUpdate={(score, suggestion) => 
                                                             updateFieldScore(section.id, score, suggestion)
                                                         }
@@ -587,40 +643,33 @@ export default function NewPrompt({
                                                 </div>
                                                 
                                                 {/* Generate Button - Top Right */}
-                                                <div className="ml-4">
-                                                    {canGenerate(section.id) ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => generateField(section.id)}
-                                                            disabled={generatingField === section.id}
-                                                            className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                                                                generatingField === section.id
-                                                                    ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                                                                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                                            }`}
-                                                        >
-                                                            {generatingField === section.id ? (
-                                                                <>
-                                                                    <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
-                                                                    Generating...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    ✨ Generate
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    ) : (
-                                                        !isProUser && (
-                                                            <div className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-400 cursor-not-allowed">
-                                                                <svg className="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-                                                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                                                                </svg>
-                                                                Pro Feature
-                                                            </div>
-                                                        )
-                                                    )}
-                                                </div>
+                                                {isProUser && (
+                                                    <div className="ml-4">
+                                                        {canGenerate(section.id) ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => generateField(section.id)}
+                                                                disabled={generatingField === section.id}
+                                                                className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                                                                    generatingField === section.id
+                                                                        ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
+                                                                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                                }`}
+                                                            >
+                                                                {generatingField === section.id ? (
+                                                                    <>
+                                                                        <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                                                                        Generating...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        ✨ Generate
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        ) : null}
+                                                    </div>
+                                                )}
                                             </div>
                                             
                                             <p className="text-xs text-gray-500 mb-2">
@@ -671,7 +720,7 @@ export default function NewPrompt({
                                                 {promptValues[section.id as keyof typeof promptValues]?.length || 0}/{section.maxChars}
                                             </span>
                                         </div>
-                                        {scoringField === section.id && (
+                                        {isProUser && scoringField === section.id && (
                                             <div className="mt-2 flex items-center text-xs text-blue-600">
                                                 <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
                                                 AI is analyzing this field...
@@ -701,11 +750,13 @@ export default function NewPrompt({
                     </div>
 
                     {/* Live Preview Column */}
-                    <PromptPreview 
-                        content={generatePromptPreview()} 
-                        totalScore={totalScore}
-                        isProUser={isProUser}
-                    />
+                    <div className="sticky top-6 self-start">
+                        <PromptPreview 
+                            content={generatePromptPreview()} 
+                            totalScore={totalScore}
+                            isProUser={isProUser}
+                        />
+                    </div>
                 </div>
             </div>
         </Layout>

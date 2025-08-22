@@ -65,6 +65,9 @@ export async function loader({ request }: Route.LoaderArgs) {
             orderBy: { updatedAt: 'desc' }
         }),
         prisma.category.findMany({
+            where: {
+                userId: session!.user.id // Only user's own categories
+            },
             include: {
                 _count: {
                     select: {
@@ -210,50 +213,59 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
 
                                     <div className="flex items-center space-x-2">
                                         <Filter className="h-4 w-4 text-gray-400" />
-                                        <select
-                                            value={loaderData.categoryId}
-                                            onChange={(e) => {
-                                                const url = new URL(
-                                                    window.location.href
-                                                );
-                                                if (e.target.value) {
-                                                    url.searchParams.set(
-                                                        'category',
-                                                        e.target.value
+                                        {loaderData.isProUser ? (
+                                            <select
+                                                value={loaderData.categoryId}
+                                                onChange={(e) => {
+                                                    const url = new URL(
+                                                        window.location.href
                                                     );
-                                                } else {
-                                                    url.searchParams.delete(
-                                                        'category'
-                                                    );
-                                                }
-                                                window.location.href =
-                                                    url.toString();
-                                            }}
-                                            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
-                                        >
-                                            <option value="">
-                                                All Categories
-                                            </option>
-                                            {loaderData.categories
-                                                .filter(
-                                                    (category) =>
-                                                        category._count
-                                                            .prompts > 0
-                                                )
-                                                .map((category) => (
-                                                    <option
-                                                        key={category.id}
-                                                        value={category.id}
-                                                    >
-                                                        {category.name} (
-                                                        {
+                                                    if (e.target.value) {
+                                                        url.searchParams.set(
+                                                            'category',
+                                                            e.target.value
+                                                        );
+                                                    } else {
+                                                        url.searchParams.delete(
+                                                            'category'
+                                                        );
+                                                    }
+                                                    window.location.href =
+                                                        url.toString();
+                                                }}
+                                                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
+                                            >
+                                                <option value="">
+                                                    All Categories
+                                                </option>
+                                                {loaderData.categories
+                                                    .filter(
+                                                        (category) =>
                                                             category._count
-                                                                .prompts
-                                                        }
-                                                        )
-                                                    </option>
-                                                ))}
-                                        </select>
+                                                                .prompts > 0
+                                                    )
+                                                    .map((category) => (
+                                                        <option
+                                                            key={category.id}
+                                                            value={category.id}
+                                                        >
+                                                            {category.name} (
+                                                            {
+                                                                category._count
+                                                                    .prompts
+                                                            }
+                                                            )
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                        ) : (
+                                            <select
+                                                disabled
+                                                className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
+                                            >
+                                                <option>Categories (Pro feature)</option>
+                                            </select>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -443,7 +455,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                                     Account
                                                 </dt>
                                                 <dd className="text-2xl font-bold text-gray-900 capitalize">
-                                                    Free
+                                                    {loaderData.isProUser ? 'Pro' : 'Free'}
                                                 </dd>
                                             </dl>
                                         </div>

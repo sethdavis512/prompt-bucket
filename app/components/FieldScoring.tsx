@@ -1,4 +1,4 @@
-import { Crown, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 interface FieldScoringProps {
   fieldType: string;
@@ -26,13 +26,14 @@ export default function FieldScoring({
 
   const getScoreDisplay = () => {
     if (!isProUser) {
+      // Show grayed-out score for free users
       return (
-        <div className="flex items-center space-x-2">
-          <div className="flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-400 text-xs font-medium">
-            <Crown className="w-3 h-3 mr-1" />
-            Pro
-          </div>
-          <div className="text-xs text-gray-500">AI Scoring</div>
+        <div 
+          className="flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400"
+          title="AI Scoring available with Pro"
+        >
+          <Star className="w-3 h-3 mr-1 opacity-50" />
+          0/10
         </div>
       );
     }

@@ -30,9 +30,10 @@ model User {
   customerId         String?
 
   // Relations
-  prompts  Prompt[]
-  sessions Session[]
-  accounts Account[]
+  prompts    Prompt[]
+  categories Category[]
+  sessions   Session[]
+  accounts   Account[]
 
   @@map("users")
 }
@@ -74,15 +75,19 @@ model Session {
 
 model Category {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String
   description String?
-  color       String?  @default("#6B7280") // Default gray color
+  color       String?  @default("#6366f1") // Default indigo color
+  userId      String   // Always required - categories are always user-owned
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   prompts PromptCategory[]
 
+  // Ensure unique category names per user
+  @@unique([name, userId])
   @@map("categories")
 }
 

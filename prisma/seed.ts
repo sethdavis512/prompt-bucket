@@ -3,43 +3,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create default categories
-  const categories = [
-    {
-      name: 'Writing & Content',
-      description: 'Prompts for writing articles, blogs, and creative content',
-      color: '#3B82F6'
-    },
-    {
-      name: 'Code & Development',
-      description: 'Programming and software development prompts',
-      color: '#10B981'
-    },
-    {
-      name: 'Business & Strategy',
-      description: 'Business analysis, strategy, and planning prompts',
-      color: '#F59E0B'
-    },
-    {
-      name: 'Education & Learning',
-      description: 'Educational content and learning prompts',
-      color: '#8B5CF6'
-    },
-    {
-      name: 'Creative & Design',
-      description: 'Creative projects and design thinking prompts',
-      color: '#EC4899'
-    }
-  ]
-
-  console.log('Creating categories...')
-  for (const category of categories) {
-    await prisma.category.upsert({
-      where: { name: category.name },
-      update: {},
-      create: category
-    })
-  }
+  // No default categories - categories are Pro-only and user-created
 
   // Create a demo user
   console.log('Creating demo user...')
@@ -53,9 +17,7 @@ async function main() {
     }
   })
 
-  // Get categories for relating to prompts
-  const writingCategory = await prisma.category.findUnique({ where: { name: 'Writing & Content' } })
-  const codeCategory = await prisma.category.findUnique({ where: { name: 'Code & Development' } })
+  // No categories to link since we don't create default categories
 
   // Create sample prompts
   console.log('Creating sample prompts...')
@@ -92,24 +54,7 @@ async function main() {
     }
   })
 
-  // Link prompts to categories
-  if (writingCategory) {
-    await prisma.promptCategory.create({
-      data: {
-        promptId: articlePrompt.id,
-        categoryId: writingCategory.id
-      }
-    })
-  }
-
-  if (codeCategory) {
-    await prisma.promptCategory.create({
-      data: {
-        promptId: codeReviewPrompt.id,
-        categoryId: codeCategory.id
-      }
-    })
-  }
+  // Sample prompts have no categories since categories are Pro-only
 
   console.log('Database seeded successfully!')
 }
