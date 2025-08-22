@@ -2,25 +2,52 @@ import {
     type RouteConfig,
     index,
     route,
-    layout
+    layout,
+    prefix
 } from '@react-router/dev/routes';
 
 export default [
-    // Public routes
-    index('routes/home.tsx'),
-    route('/access-denied', 'routes/access-denied.tsx'),
-    route('/auth/signin', 'routes/auth/signin.tsx'),
-    route('/auth/signup', 'routes/auth/signup.tsx'),
-    route('/share/:id', 'routes/share/prompt.tsx'),
+    // API routes (no layout needed)
+    ...prefix(`api`, [
+        route('admin/user-settings', 'routes/api/admin/user-settings.ts'),
+        route('auth/*', 'routes/api/auth.tsx'),
+        route('categories', 'routes/api/categories.ts'),
+        route('chains', 'routes/api/chains.ts'),
+        route('evaluate-chain', 'routes/api/evaluate-chain.ts'),
+        route('score-prompt', 'routes/api/score-prompt.ts'),
+        route('webhooks/polar', 'routes/api.webhooks.polar.tsx')
+    ]),
 
-    // API routes for auth
-    route('/api/auth/*', 'routes/api/auth.tsx'),
+    // All UI routes wrapped in main layout
+    layout('routes/layout.tsx', [
+        // Public routes
+        index('routes/home.tsx'),
+        route('pricing', 'routes/pricing.tsx'),
+        route('access-denied', 'routes/access-denied.tsx'),
+        ...prefix(`auth`, [
+            route('signin', 'routes/auth/signin.tsx'),
+            route('signup', 'routes/auth/signup.tsx')
+        ]),
+        route('share/:id', 'routes/share/prompt.tsx'),
+        route('checkout', 'routes/checkout.tsx'),
 
-    // Protected routes wrapped in auth layout
-    layout('routes/auth-layout.tsx', [
-        route('/dashboard', 'routes/dashboard.tsx'),
-        route('/profile', 'routes/profile.tsx'),
-        route('/prompts/:id', 'routes/prompts/detail.tsx'),
-        route('/prompts/new', 'routes/prompts/new.tsx')
+        // Protected routes with auth + sidebar layout
+        layout('routes/auth-layout.tsx', [
+            route('dashboard', 'routes/dashboard.tsx'),
+            route('categories', 'routes/categories.tsx'),
+            route('profile', 'routes/profile.tsx'),
+            route('billing', 'routes/billing.ts'),
+            ...prefix(`prompts`, [
+                index('routes/prompts/index.tsx'),
+                route(':id', 'routes/prompts/detail.tsx'),
+                route(':id/edit', 'routes/prompts/edit.tsx'),
+                route('new', 'routes/prompts/new.tsx')
+            ]),
+            ...prefix(`chains`, [
+                index('routes/chains/index.tsx'),
+                route(':id', 'routes/chains/detail.tsx'),
+                route('new', 'routes/chains/new.tsx')
+            ])
+        ])
     ])
 ] satisfies RouteConfig;

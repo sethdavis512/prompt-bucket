@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh repo create:*)"
+      "Bash(gh repo create:*)",
+      "Bash(npm install:*)",
+      "Bash(psql:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm run build:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

@@ -605,3 +605,220 @@ The final implementation uses a **separated auth and data pattern** where:
 - ✅ **More scalable**: Add routes without modifying auth layout
 
 This pattern eliminates code duplication, provides proper security, follows React Router 7 best practices, and creates a maintainable, scalable application structure.
+
+## Pro Feature Gating and Navigation Pattern Fixes
+
+### Problem Discovery
+**Issue**: Inconsistent Pro feature gating and improper navigation patterns
+- Free users could set prompts to "Public" in detail edit view (Pro-only feature)
+- Multiple routes calculating `isProUser` independently causing inconsistency
+- Improper use of `window.location` for navigation instead of React Router 7 patterns
+- Missing server-side validation for Pro features
+
+### Root Cause Analysis
+**Initial Implementation Issues**:
+1. **Inconsistent Feature Gating**: `detail.tsx` missing `isProUser` checks that existed in `new.tsx`
+2. **Duplicate Logic**: Each route calculating `isProUser = user?.subscriptionStatus === 'active'` separately
+3. **Navigation Anti-patterns**: Using `window.location.href` manipulation instead of React Router hooks
+4. **Security Gap**: No server-side validation to prevent free users from bypassing UI restrictions
+
+### Solution Implementation - Centralized Pro Status
+
+**Brooks Rules RR7 Compliant Approach**: Centralize `isProUser` in auth layout following outlet context pattern
+
+```typescript
+// BEFORE - Duplicate calculations in each route
+export default function MyRoute() {
+  const { user } = useOutletContext<{ user: any }>();
+  const isProUser = user?.subscriptionStatus === 'active'; // DUPLICATED
+}
+
+// AFTER - Centralized in auth layout
+// ~/routes/auth-layout.tsx
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { subscriptionStatus: true, /* other fields */ }
+  });
+  
+  const isProUser = user.subscriptionStatus === 'active';
+  return { user, isProUser }; // Single source of truth
+}
+
+// Child routes get isProUser from context
+export default function MyRoute() {
+  const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
+  // No duplicate calculation needed
+}
+```
+
+### Fixed Pro Feature Gating Patterns
+
+**detail.tsx Visibility Section**: Added proper Pro gating matching `new.tsx` pattern
+```typescript
+// BEFORE - No Pro gating (SECURITY ISSUE)
+<div>
+  <label>Visibility</label>
+  <input type="radio" checked={!editedPrompt.public} /> Private
+  <input type="radio" checked={editedPrompt.public} /> Public
+</div>
+
+// AFTER - Proper Pro gating with upgrade prompt
+{isProUser ? (
+  <div>
+    <label>Visibility</label>
+    <input type="radio" checked={!editedPrompt.public} /> Private
+    <input type="radio" checked={editedPrompt.public} /> Public
+  </div>
+) : (
+  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+    <input type="radio" checked={true} disabled /> Private (Free users)
+    <p>Public sharing is available with Pro. 
+      <a href="/pricing">Upgrade to share prompts →</a>
+    </p>
+  </div>
+)}
+```
+
+**Server-Side Pro Validation**: Added action validation to prevent bypassing UI restrictions
+```typescript
+// Enhanced detail.tsx action with Pro validation
+export async function action({ request, params }: Route.ActionArgs) {
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { subscriptionStatus: true }
+  });
+
+  const isProUser = user?.subscriptionStatus === 'active';
+  const requestedPublic = formData.get('public') === 'true';
+
+  // CRITICAL: Server-side Pro feature validation
+  if (requestedPublic && !isProUser) {
+    return {
+      error: 'Public sharing is a Pro feature. Upgrade your subscription to share prompts publicly.'
+    };
+  }
+
+  const data = {
+    public: isProUser ? requestedPublic : false, // Force false for free users
+    // ... other fields
+  };
+}
+```
+
+### Navigation Pattern Fixes - React Router 7 Compliance
+
+**Problem**: Multiple `window.location` usages violating React Router 7 patterns
+
+**Dashboard Search Functionality**:
+```typescript
+// BEFORE - window.location anti-pattern
+onKeyDown={(e) => {
+  if (e.key === 'Enter') {
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', searchTerm);
+    window.location.href = url.toString(); // BAD
+  }
+}}
+
+// AFTER - Proper React Router 7 navigation
+import { useNavigate } from 'react-router';
+
+const navigate = useNavigate();
+
+onKeyDown={(e) => {
+  if (e.key === 'Enter') {
+    const searchParams = new URLSearchParams();
+    if (searchTerm) searchParams.set('search', searchTerm);
+    if (loaderData.categoryId) searchParams.set('category', loaderData.categoryId);
+    const queryString = searchParams.toString();
+    navigate(queryString ? `/dashboard?${queryString}` : '/dashboard');
+  }
+}}
+```
+
+**Dashboard Category Filter**:
+```typescript
+// BEFORE - window.location manipulation
+onChange={(e) => {
+  const url = new URL(window.location.href);
+  if (e.target.value) {
+    url.searchParams.set('category', e.target.value);
+  } else {
+    url.searchParams.delete('category');
+  }
+  window.location.href = url.toString(); // BAD
+}}
+
+// AFTER - React Router navigation with state preservation
+onChange={(e) => {
+  const searchParams = new URLSearchParams();
+  if (loaderData.search) searchParams.set('search', loaderData.search);
+  if (e.target.value) searchParams.set('category', e.target.value);
+  const queryString = searchParams.toString();
+  navigate(queryString ? `/dashboard?${queryString}` : '/dashboard');
+}}
+```
+
+**Detail Page URL Cleanup**:
+```typescript
+// BEFORE - Manual history manipulation
+const url = new URL(window.location.href);
+if (url.searchParams.has('edit')) {
+  url.searchParams.delete('edit');
+  window.history.replaceState({}, '', url.toString()); // BAD
+}
+
+// AFTER - React Router navigation
+import { useNavigate } from 'react-router';
+const navigate = useNavigate();
+
+// Clean up URL by removing edit parameter
+navigate(`/prompts/${prompt.id}`, { replace: true });
+```
+
+### Enhanced Security Patterns
+
+**Share Button Gating**: Enhanced to require both public status AND Pro subscription
+```typescript
+// BEFORE - Only checked if prompt was public
+{prompt.public && (
+  <button onClick={() => sharePrompt()}>Share</button>
+)}
+
+// AFTER - Requires both public AND Pro status
+{prompt.public && isProUser && (
+  <button onClick={() => sharePrompt()}>Share</button>
+)}
+```
+
+### Files Updated
+- **Enhanced**: `/app/routes/auth-layout.tsx` - Centralized `isProUser` calculation
+- **Fixed**: `/app/routes/prompts/detail.tsx` - Pro feature gating, server validation, navigation
+- **Fixed**: `/app/routes/dashboard.tsx` - React Router navigation patterns
+- **Updated**: `/app/routes/prompts/new.tsx` - Uses centralized `isProUser`
+- **Updated**: `/app/routes/profile.tsx` - Uses centralized `isProUser`
+
+### Impact
+- ✅ **Consistent Pro Feature Gating**: All routes use centralized `isProUser` logic
+- ✅ **Enhanced Security**: Server-side validation prevents Pro feature bypass
+- ✅ **React Router 7 Compliance**: All navigation uses proper `useNavigate()` patterns
+- ✅ **Single Source of Truth**: Pro status calculated once in auth layout
+- ✅ **Better UX**: Smooth navigation without page reloads
+- ✅ **Type Safety**: All navigation properly typed through React Router
+
+### Key Technical Lessons
+
+**Brooks Rules RR7 Navigation Patterns**:
+1. **Never use `window.location`** for navigation - use `useNavigate()` hook
+2. **URL parameter handling** with `URLSearchParams` for clean query building
+3. **State preservation** during navigation with proper parameter management
+4. **Replace vs push** - use `{ replace: true }` for URL cleanup operations
+
+**Pro Feature Security Pattern**:
+1. **UI Layer**: Conditional rendering based on `isProUser` with upgrade prompts
+2. **Server Layer**: Validate subscription status before allowing Pro features
+3. **Double Protection**: Force safe defaults for free users regardless of form input
+4. **Consistent Gating**: All Pro features follow same pattern across routes
+
+This implementation ensures both proper security and excellent user experience while following React Router 7 best practices throughout the application.

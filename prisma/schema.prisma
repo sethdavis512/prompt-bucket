@@ -13,10 +13,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -30,9 +36,11 @@ model User {
   customerId         String?
 
   // Relations
-  prompts  Prompt[]
-  sessions Session[]
-  accounts Account[]
+  prompts    Prompt[]
+  categories Category[]
+  chains     Chain[]
+  sessions   Session[]
+  accounts   Account[]
 
   @@map("users")
 }
@@ -74,15 +82,19 @@ model Session {
 
 model Category {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String
   description String?
-  color       String?  @default("#6B7280") // Default gray color
+  color       String?  @default("#6366f1") // Default indigo color
+  userId      String   // Always required - categories are always user-owned
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   prompts PromptCategory[]
 
+  // Ensure unique category names per user
+  @@unique([name, userId])
   @@map("categories")
 }
 
@@ -110,8 +122,24 @@ model Prompt {
   outputFormatting        String?
   prefilledResponse       String?
 
+  // Individual field scores (1-10 each)
+  taskContextScore        Int? @default(0)
+  toneContextScore        Int? @default(0)
+  backgroundDataScore     Int? @default(0)
+  detailedTaskScore       Int? @default(0)
+  examplesScore          Int? @default(0)
+  conversationScore      Int? @default(0)
+  immediateTaskScore     Int? @default(0)
+  thinkingStepsScore     Int? @default(0)
+  outputFormattingScore  Int? @default(0)
+  prefilledResponseScore Int? @default(0)
+
+  // Overall calculated score (sum of above, max 100)
+  totalScore             Int? @default(0)
+
   // Relations
   categories PromptCategory[]
+  chainPrompts ChainPrompt[]
 
   @@map("prompts")
 }
@@ -127,6 +155,46 @@ model PromptCategory {
 
   @@unique([promptId, categoryId])
   @@map("prompt_categories")
+}
+
+model Chain {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Overall chain score from AI evaluation
+  chainScore Int? @default(0)
+  
+  // AI evaluation feedback
+  evaluationFeedback String?
+  lastEvaluatedAt    DateTime?
+
+  // Relations
+  prompts ChainPrompt[]
+
+  @@map("chains")
+}
+
+model ChainPrompt {
+  id       String @id @default(cuid())
+  chainId  String
+  promptId String
+  order    Int    // Position in the chain (0-based)
+  createdAt DateTime @default(now())
+
+  chain  Chain  @relation(fields: [chainId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  // Ensure unique ordering per chain and no duplicate prompts in same chain
+  @@unique([chainId, order])
+  @@unique([chainId, promptId])
+  @@map("chain_prompts")
 }
 
 model Verification {

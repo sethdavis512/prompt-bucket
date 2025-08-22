@@ -1,0 +1,29 @@
+{
+  "basic": {
+    "title": "Basic Test Prompt",
+    "description": "A simple prompt for testing",
+    "taskContext": "You are a helpful AI assistant.",
+    "immediateTask": "Help the user with their request."
+  },
+  "marketing": {
+    "title": "Marketing Email Template",
+    "description": "Template for creating marketing emails",
+    "taskContext": "You are an expert marketing copywriter specializing in email campaigns.",
+    "toneContext": "Professional yet friendly, engaging and persuasive",
+    "backgroundData": "The company is a B2B SaaS platform for project management.",
+    "detailedTaskDescription": "Create compelling email copy that drives conversions while maintaining brand voice.",
+    "examples": "Subject: Boost your team's productivity by 40%\nHi [Name], Are you tired of missed deadlines?",
+    "immediateTask": "Write a promotional email for our new feature launch.",
+    "outputFormatting": "Format as HTML email with clear CTA buttons"
+  },
+  "codeReview": {
+    "title": "Code Review Assistant",
+    "description": "Helps review code for best practices",
+    "taskContext": "You are a senior software engineer with expertise in clean code principles.",
+    "toneContext": "Constructive and educational, focusing on improvement",
+    "detailedTaskDescription": "Review code for security, performance, maintainability, and best practices.",
+    "examples": "// Good: Clear variable names\nconst userAge = 25;\n// Bad: Unclear abbreviations\nconst usrAg = 25;",
+    "immediateTask": "Review the provided code and suggest improvements.",
+    "outputFormatting": "Provide feedback in markdown with code examples"
+  }
+}
