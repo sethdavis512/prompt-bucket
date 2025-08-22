@@ -509,8 +509,11 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
             formData.append('categoryIds', categoryId);
         });
 
-        // Submit the form
-        fetcher.submit(formData, { method: 'POST' });
+        // Submit the form to the correct action URL without query parameters
+        fetcher.submit(formData, { 
+            method: 'POST',
+            action: `/prompts/${prompt.id}`
+        });
     };
 
     const handleCancel = () => {
