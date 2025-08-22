@@ -12,12 +12,17 @@ import Layout from '~/components/Layout';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
+import FieldScoring from '~/components/FieldScoring';
 import CategoryManager from '~/components/CategoryManager';
+import { usePromptScoring } from '~/hooks/usePromptScoring';
+import { usePromptAPI } from '~/hooks/usePromptAPI';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
     const session = await auth.api.getSession({ headers: request.headers });
     const promptId = params.id;
+    const url = new URL(request.url);
+    const shouldEdit = url.searchParams.get('edit') === 'true';
 
     if (!promptId) {
         throw new Response('Prompt not found', { status: 404 });
@@ -65,7 +70,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         ]
     });
 
-    return { prompt, allCategories };
+    return { prompt, allCategories, shouldEdit };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -249,10 +254,13 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
     const { allCategories } = loaderData;
     const [copiedSection, setCopiedSection] = useState<string | null>(null);
     const [copiedFull, setCopiedFull] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(loaderData.shouldEdit || false);
     const [selectedCategories, setSelectedCategories] = useState<string[]>(
         prompt?.categories?.map((pc: any) => pc.category.id) || []
     );
+    
+    // Check if user is Pro
+    const isProUser = user?.subscriptionStatus === 'active';
 
     // If no prompt data, show loading or error
     if (!prompt) {
@@ -358,6 +366,95 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
         }));
     };
 
+    // Generate contextual hints based on existing content
+    const getContextualHint = (fieldType: string): string => {
+        const taskContext = promptValues.taskContext?.toLowerCase() || '';
+        const title = promptValues.title?.toLowerCase() || '';
+        
+        // Extract key themes from task context and title
+        const isMarketing = taskContext.includes('marketing') || title.includes('marketing');
+        const isSoftware = taskContext.includes('software') || taskContext.includes('saas') || taskContext.includes('tech');
+        const isWriting = taskContext.includes('writer') || taskContext.includes('content') || title.includes('writer');
+        const isStrategy = taskContext.includes('strategy') || taskContext.includes('strategist');
+        
+        // Generate hints based on field type and context
+        switch (fieldType) {
+            case 'toneContext':
+                if (isMarketing && isSoftware) return "Define marketing tone";
+                if (isWriting) return "Set writing style";
+                if (isStrategy) return "Choose strategic voice";
+                return "Specify desired tone";
+                
+            case 'backgroundData':
+                if (isMarketing && isSoftware) return "Add market context";
+                if (isSoftware) return "Include tech background";
+                if (isMarketing) return "Provide market data";
+                return "Share relevant context";
+                
+            case 'detailedTaskDescription':
+                if (isMarketing) return "Detail marketing goals";
+                if (isSoftware) return "Outline tech requirements";
+                if (isWriting) return "Specify content needs";
+                return "Provide context or details";
+                
+            case 'examples':
+                if (isMarketing) return "Show campaign examples";
+                if (isSoftware) return "Include product examples";
+                if (isWriting) return "Add writing samples";
+                return "Provide examples";
+                
+            case 'immediateTask':
+                if (isMarketing) return "State marketing request";
+                if (isSoftware) return "Define current need";
+                return "Describe specific task";
+                
+            case 'outputFormatting':
+                if (isMarketing) return "Set content format";
+                if (isWriting) return "Choose output style";
+                return "Specify format needs";
+                
+            default:
+                return "AI will rate this";
+        }
+    };
+    
+    // Create a filtered version of editedPrompt for the API hook (only string fields)
+    const promptValues = {
+        title: editedPrompt.title,
+        description: editedPrompt.description,
+        taskContext: editedPrompt.taskContext,
+        toneContext: editedPrompt.toneContext,
+        backgroundData: editedPrompt.backgroundData,
+        detailedTaskDescription: editedPrompt.detailedTaskDescription,
+        examples: editedPrompt.examples,
+        conversationHistory: editedPrompt.conversationHistory,
+        immediateTask: editedPrompt.immediateTask,
+        thinkingSteps: editedPrompt.thinkingSteps,
+        outputFormatting: editedPrompt.outputFormatting,
+        prefilledResponse: editedPrompt.prefilledResponse
+    };
+    
+    // Use custom hooks for scoring and API management
+    const {
+        scores,
+        suggestions,
+        totalScore,
+        updateFieldScore
+    } = usePromptScoring();
+    
+    const {
+        scoringField,
+        generatingField,
+        scoreField,
+        generateField,
+        canGenerate
+    } = usePromptAPI({
+        isProUser,
+        promptValues,
+        onScoreUpdate: updateFieldScore,
+        onContentGenerated: updateEditedValue
+    });
+
     const toggleCategory = (categoryId: string) => {
         setSelectedCategories((prev) =>
             prev.includes(categoryId)
@@ -422,6 +519,13 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
             );
         }
         setIsEditing(false);
+        
+        // Clean up URL by removing edit parameter
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('edit')) {
+            url.searchParams.delete('edit');
+            window.history.replaceState({}, '', url.toString());
+        }
     };
 
     const buildFullPrompt = () => {
@@ -695,16 +799,63 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                         >
                                             <div className="mb-3">
                                                 <div className="flex items-center justify-between">
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-900">
-                                                            {section.title}
-                                                        </label>
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            {
-                                                                section.description
-                                                            }
-                                                        </p>
+                                                    <div className="flex-1">
+                                                        {isEditing ? (
+                                                            <FieldScoring
+                                                                fieldType={section.id}
+                                                                label={section.title}
+                                                                score={isProUser ? scores[section.id] : 0}
+                                                                suggestion={isProUser ? suggestions[section.id] : undefined}
+                                                                isProUser={isProUser}
+                                                                isLoading={isProUser && scoringField === section.id}
+                                                                onScoreUpdate={(score, suggestion) => 
+                                                                    updateFieldScore(section.id, score, suggestion)
+                                                                }
+                                                                contextualHint={getContextualHint(section.id)}
+                                                            />
+                                                        ) : (
+                                                            <div>
+                                                                <label className="block text-sm font-medium text-gray-900">
+                                                                    {section.title}
+                                                                </label>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {
+                                                                        section.description
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                    
+                                                    {/* Generate Button - Top Right (Edit mode only) */}
+                                                    {isEditing && isProUser && (
+                                                        <div className="ml-4">
+                                                            {canGenerate(section.id) ? (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => generateField(section.id)}
+                                                                    disabled={generatingField === section.id}
+                                                                    className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                                                                        generatingField === section.id
+                                                                            ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
+                                                                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                                    }`}
+                                                                >
+                                                                    {generatingField === section.id ? (
+                                                                        <>
+                                                                            <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                                                                            Generating...
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            ✨ Generate
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                            ) : null}
+                                                        </div>
+                                                    )}
+                                                    
                                                     {!isEditing && (
                                                         <button
                                                             onClick={() =>
@@ -724,20 +875,48 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                                         </button>
                                                     )}
                                                 </div>
+                                                
+                                                {/* Description and suggestions for edit mode */}
+                                                {isEditing && (
+                                                    <>
+                                                        <p className="text-xs text-gray-500 mb-2">
+                                                            {section.description}
+                                                        </p>
+                                                        
+                                                        {suggestions[section.id] && isProUser && (
+                                                            <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                                                                💡 {suggestions[section.id]}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
                                             </div>
 
                                             {isEditing ? (
-                                                <TextArea
-                                                    value={content}
-                                                    onChange={(e) =>
-                                                        updateEditedValue(
-                                                            section.id,
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    rows={4}
-                                                    placeholder={`Enter ${section.title.toLowerCase()}...`}
-                                                />
+                                                <>
+                                                    <TextArea
+                                                        value={content}
+                                                        onChange={(e) =>
+                                                            updateEditedValue(
+                                                                section.id,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => 
+                                                            scoreField(section.id, e.target.value)
+                                                        }
+                                                        rows={4}
+                                                        placeholder={`Enter ${section.title.toLowerCase()}...`}
+                                                        disabled={scoringField === section.id}
+                                                    />
+                                                    
+                                                    {isProUser && scoringField === section.id && (
+                                                        <div className="mt-2 flex items-center text-xs text-blue-600">
+                                                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                            AI is analyzing this field...
+                                                        </div>
+                                                    )}
+                                                </>
                                             ) : (
                                                 <div className="bg-gray-50 p-3 rounded-md border">
                                                     <pre className="whitespace-pre-wrap text-sm text-gray-700">
@@ -756,7 +935,9 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                     <div className="sticky top-6 self-start">
                         <PromptPreview 
                             title="Complete Prompt Preview"
-                            content={generatePromptPreview()} 
+                            content={generatePromptPreview()}
+                            totalScore={totalScore}
+                            isProUser={isProUser}
                         />
                     </div>
                 </div>

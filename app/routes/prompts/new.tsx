@@ -137,16 +137,25 @@ export async function action({ request }: Route.ActionArgs) {
         prefilledResponse: (formData.get('prefilledResponse') as string) || '',
         categoryIds: formData.getAll('categoryIds') as string[],
         // Parse scoring data
-        taskContextScore: parseInt(formData.get('taskContextScore') as string) || 0,
-        toneContextScore: parseInt(formData.get('toneContextScore') as string) || 0,
-        backgroundDataScore: parseInt(formData.get('backgroundDataScore') as string) || 0,
-        detailedTaskScore: parseInt(formData.get('detailedTaskScore') as string) || 0,
+        taskContextScore:
+            parseInt(formData.get('taskContextScore') as string) || 0,
+        toneContextScore:
+            parseInt(formData.get('toneContextScore') as string) || 0,
+        backgroundDataScore:
+            parseInt(formData.get('backgroundDataScore') as string) || 0,
+        detailedTaskScore:
+            parseInt(formData.get('detailedTaskScore') as string) || 0,
         examplesScore: parseInt(formData.get('examplesScore') as string) || 0,
-        conversationScore: parseInt(formData.get('conversationScore') as string) || 0,
-        immediateTaskScore: parseInt(formData.get('immediateTaskScore') as string) || 0,
-        thinkingStepsScore: parseInt(formData.get('thinkingStepsScore') as string) || 0,
-        outputFormattingScore: parseInt(formData.get('outputFormattingScore') as string) || 0,
-        prefilledResponseScore: parseInt(formData.get('prefilledResponseScore') as string) || 0,
+        conversationScore:
+            parseInt(formData.get('conversationScore') as string) || 0,
+        immediateTaskScore:
+            parseInt(formData.get('immediateTaskScore') as string) || 0,
+        thinkingStepsScore:
+            parseInt(formData.get('thinkingStepsScore') as string) || 0,
+        outputFormattingScore:
+            parseInt(formData.get('outputFormattingScore') as string) || 0,
+        prefilledResponseScore:
+            parseInt(formData.get('prefilledResponseScore') as string) || 0,
         totalScore: parseInt(formData.get('totalScore') as string) || 0
     };
 
@@ -325,15 +334,14 @@ export default function NewPrompt({
     };
 }) {
     const { user } = useOutletContext<{ user: any }>();
-    const { categories } = loaderData;
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(false);
-    
+
     const isProUser = user?.subscriptionStatus === 'active';
-    
+
     // Ensure free users can't make public prompts
     const effectiveIsPublic = isProUser ? isPublic : false;
-    
+
     // State for live prompt preview
     const [promptValues, setPromptValues] = useState({
         title: 'Software Marketing Content Strategist',
@@ -364,15 +372,63 @@ export default function NewPrompt({
     const updatePromptValue = useCallback((field: string, value: string) => {
         setPromptValues((prev) => ({ ...prev, [field]: value }));
     }, []);
-    
+
+    // Generate contextual hints based on existing content
+    const getContextualHint = (fieldType: string): string => {
+        const taskContext = promptValues.taskContext?.toLowerCase() || '';
+        const title = promptValues.title?.toLowerCase() || '';
+        
+        // Extract key themes from task context and title
+        const isMarketing = taskContext.includes('marketing') || title.includes('marketing');
+        const isSoftware = taskContext.includes('software') || taskContext.includes('saas') || taskContext.includes('tech');
+        const isWriting = taskContext.includes('writer') || taskContext.includes('content') || title.includes('writer');
+        const isStrategy = taskContext.includes('strategy') || taskContext.includes('strategist');
+        
+        // Generate hints based on field type and context
+        switch (fieldType) {
+            case 'toneContext':
+                if (isMarketing && isSoftware) return "Define marketing tone";
+                if (isWriting) return "Set writing style";
+                if (isStrategy) return "Choose strategic voice";
+                return "Specify desired tone";
+                
+            case 'backgroundData':
+                if (isMarketing && isSoftware) return "Add market context";
+                if (isSoftware) return "Include tech background";
+                if (isMarketing) return "Provide market data";
+                return "Share relevant context";
+                
+            case 'detailedTaskDescription':
+                if (isMarketing) return "Detail marketing goals";
+                if (isSoftware) return "Outline tech requirements";
+                if (isWriting) return "Specify content needs";
+                return "Provide context or details";
+                
+            case 'examples':
+                if (isMarketing) return "Show campaign examples";
+                if (isSoftware) return "Include product examples";
+                if (isWriting) return "Add writing samples";
+                return "Provide examples";
+                
+            case 'immediateTask':
+                if (isMarketing) return "State marketing request";
+                if (isSoftware) return "Define current need";
+                return "Describe specific task";
+                
+            case 'outputFormatting':
+                if (isMarketing) return "Set content format";
+                if (isWriting) return "Choose output style";
+                return "Specify format needs";
+                
+            default:
+                return "AI will rate this";
+        }
+    };
+
     // Use custom hooks for scoring and API management
-    const {
-        scores,
-        suggestions,
-        totalScore,
-        updateFieldScore
-    } = usePromptScoring();
-    
+    const { scores, suggestions, totalScore, updateFieldScore } =
+        usePromptScoring();
+
     const {
         scoringField,
         generatingField,
@@ -386,12 +442,13 @@ export default function NewPrompt({
         onContentGenerated: updatePromptValue
     });
 
-
     const generatePromptPreview = () => {
         return Object.entries(promptValues)
             .filter(
                 ([fieldKey, value]) =>
-                    fieldKey !== 'title' && fieldKey !== 'description' && value.trim()
+                    fieldKey !== 'title' &&
+                    fieldKey !== 'description' &&
+                    value.trim()
             )
             .map(([, value]) => value)
             .join('\n\n');
@@ -434,23 +491,25 @@ export default function NewPrompt({
                                 name="userId"
                                 value={user.id}
                             />
-                            
+
                             {/* Hidden field for effective public value (enforces Pro-only) */}
                             <input
                                 type="hidden"
                                 name="public"
                                 value={effectiveIsPublic.toString()}
                             />
-                            
+
                             {/* Hidden fields for scoring data */}
-                            {Object.entries(scores).map(([fieldType, score]) => (
-                                <input
-                                    key={fieldType}
-                                    type="hidden"
-                                    name={`${fieldType}Score`}
-                                    value={score || 0}
-                                />
-                            ))}
+                            {Object.entries(scores).map(
+                                ([fieldType, score]) => (
+                                    <input
+                                        key={fieldType}
+                                        type="hidden"
+                                        name={`${fieldType}Score`}
+                                        value={score || 0}
+                                    />
+                                )
+                            )}
                             <input
                                 type="hidden"
                                 name="totalScore"
@@ -494,21 +553,19 @@ export default function NewPrompt({
                                     />
 
                                     <CategoryManager
-                                        categories={categories}
+                                        categories={loaderData.categories}
                                         selectedCategories={selectedCategories}
                                         onCategoryToggle={toggleCategory}
                                         isProUser={isProUser}
                                     />
-                                    {selectedCategories.map(
-                                        (categoryId) => (
-                                            <input
-                                                key={categoryId}
-                                                type="hidden"
-                                                name="categoryIds"
-                                                value={categoryId}
-                                            />
-                                        )
-                                    )}
+                                    {selectedCategories.map((categoryId) => (
+                                        <input
+                                            key={categoryId}
+                                            type="hidden"
+                                            name="categoryIds"
+                                            value={categoryId}
+                                        />
+                                    ))}
 
                                     {isProUser ? (
                                         <div>
@@ -546,9 +603,9 @@ export default function NewPrompt({
                                                 </label>
                                             </div>
                                             <p className="text-xs text-gray-500 mt-1">
-                                                Public prompts can be shared with
-                                                others via a link. Private prompts
-                                                are only visible to you.
+                                                Public prompts can be shared
+                                                with others via a link. Private
+                                                prompts are only visible to you.
                                             </p>
                                         </div>
                                     ) : (
@@ -574,9 +631,14 @@ export default function NewPrompt({
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-gray-500 mt-2">
-                                                    Public sharing is available with Pro. 
-                                                    <a href="/pricing" className="text-blue-600 hover:text-blue-500 ml-1">
-                                                        Upgrade to share prompts →
+                                                    Public sharing is available
+                                                    with Pro.
+                                                    <a
+                                                        href="/pricing"
+                                                        className="text-blue-600 hover:text-blue-500 ml-1"
+                                                    >
+                                                        Upgrade to share prompts
+                                                        →
                                                     </a>
                                                 </p>
                                             </div>
@@ -592,27 +654,67 @@ export default function NewPrompt({
                                         Prompt Structure
                                     </h3>
                                     <p className="text-sm text-gray-600 mt-1">
-                                        Start by defining the AI's role in section 1 - this forms the foundation for your prompt. Complete additional sections as needed, with each building upon the previous context.
+                                        Start by defining the AI's role in
+                                        section 1 - this forms the foundation
+                                        for your prompt. Complete additional
+                                        sections as needed, with each building
+                                        upon the previous context.
                                     </p>
                                 </div>
-                                
+
                                 {!isProUser && (
                                     <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
                                         <div className="flex items-start space-x-3">
                                             <div className="flex-shrink-0">
-                                                <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                <svg
+                                                    className="w-5 h-5 text-blue-600 mt-0.5"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                        clipRule="evenodd"
+                                                    />
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="text-sm font-medium text-gray-900 mb-1">Pro Features Available</h4>
+                                                <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                                    Pro Features Available
+                                                </h4>
                                                 <div className="text-sm text-gray-600 space-y-1">
-                                                    <p><strong>Auto-fill:</strong> AI generates content for each section based on your existing prompt context</p>
-                                                    <p><strong>AI Scoring:</strong> Get real-time quality scores (1-10) and improvement suggestions for each section</p>
-                                                    <p><strong>Public Sharing:</strong> Share your prompts publicly with a shareable link</p>
+                                                    <p>
+                                                        <strong>
+                                                            Auto-fill:
+                                                        </strong>{' '}
+                                                        AI generates content for
+                                                        each section based on
+                                                        your existing prompt
+                                                        context
+                                                    </p>
+                                                    <p>
+                                                        <strong>
+                                                            AI Scoring:
+                                                        </strong>{' '}
+                                                        Get real-time quality
+                                                        scores (1-10) and
+                                                        improvement suggestions
+                                                        for each section
+                                                    </p>
+                                                    <p>
+                                                        <strong>
+                                                            Public Sharing:
+                                                        </strong>{' '}
+                                                        Share your prompts
+                                                        publicly with a
+                                                        shareable link
+                                                    </p>
                                                 </div>
                                                 <div className="mt-3">
-                                                    <a href="/pricing" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                                                    <a
+                                                        href="/pricing"
+                                                        className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                                    >
                                                         Upgrade to Pro →
                                                     </a>
                                                 </div>
@@ -632,38 +734,74 @@ export default function NewPrompt({
                                                     <FieldScoring
                                                         fieldType={section.id}
                                                         label={section.title}
-                                                        score={isProUser ? scores[section.id] : 0}
-                                                        suggestion={isProUser ? suggestions[section.id] : undefined}
-                                                        isProUser={isProUser}
-                                                        isLoading={isProUser && scoringField === section.id}
-                                                        onScoreUpdate={(score, suggestion) => 
-                                                            updateFieldScore(section.id, score, suggestion)
+                                                        score={
+                                                            isProUser
+                                                                ? scores[
+                                                                      section.id
+                                                                  ]
+                                                                : 0
                                                         }
+                                                        suggestion={
+                                                            isProUser
+                                                                ? suggestions[
+                                                                      section.id
+                                                                  ]
+                                                                : undefined
+                                                        }
+                                                        isProUser={isProUser}
+                                                        isLoading={
+                                                            isProUser &&
+                                                            scoringField ===
+                                                                section.id
+                                                        }
+                                                        onScoreUpdate={(
+                                                            score,
+                                                            suggestion
+                                                        ) =>
+                                                            updateFieldScore(
+                                                                section.id,
+                                                                score,
+                                                                suggestion
+                                                            )
+                                                        }
+                                                        contextualHint={getContextualHint(section.id)}
                                                     />
                                                 </div>
-                                                
+
                                                 {/* Generate Button - Top Right */}
                                                 {isProUser && (
                                                     <div className="ml-4">
-                                                        {canGenerate(section.id) ? (
+                                                        {canGenerate(
+                                                            section.id
+                                                        ) ? (
                                                             <button
                                                                 type="button"
-                                                                onClick={() => generateField(section.id)}
-                                                                disabled={generatingField === section.id}
+                                                                onClick={() =>
+                                                                    generateField(
+                                                                        section.id
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    generatingField ===
+                                                                    section.id
+                                                                }
                                                                 className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                                                                    generatingField === section.id
+                                                                    generatingField ===
+                                                                    section.id
                                                                         ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
                                                                         : 'bg-indigo-600 text-white hover:bg-indigo-700'
                                                                 }`}
                                                             >
-                                                                {generatingField === section.id ? (
+                                                                {generatingField ===
+                                                                section.id ? (
                                                                     <>
                                                                         <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
                                                                         Generating...
                                                                     </>
                                                                 ) : (
                                                                     <>
-                                                                        ✨ Generate
+                                                                        ✨
+                                                                        Generate
                                                                     </>
                                                                 )}
                                                             </button>
@@ -671,16 +809,22 @@ export default function NewPrompt({
                                                     </div>
                                                 )}
                                             </div>
-                                            
+
                                             <p className="text-xs text-gray-500 mb-2">
                                                 {section.description}
                                             </p>
-                                            
-                                            {suggestions[section.id] && isProUser && (
-                                                <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                                                    💡 {suggestions[section.id]}
-                                                </div>
-                                            )}
+
+                                            {suggestions[section.id] &&
+                                                isProUser && (
+                                                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                                                        💡{' '}
+                                                        {
+                                                            suggestions[
+                                                                section.id
+                                                            ]
+                                                        }
+                                                    </div>
+                                                )}
                                         </div>
                                         <TextArea
                                             name={section.id}
@@ -697,35 +841,58 @@ export default function NewPrompt({
                                                     e.target.value
                                                 )
                                             }
-                                            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => 
-                                                scoreField(section.id, e.target.value)
+                                            onBlur={(
+                                                e: React.FocusEvent<HTMLTextAreaElement>
+                                            ) =>
+                                                scoreField(
+                                                    section.id,
+                                                    e.target.value
+                                                )
                                             }
                                             placeholder={section.placeholder}
-                                            disabled={scoringField === section.id}
+                                            disabled={
+                                                scoringField === section.id
+                                            }
                                             maxLength={section.maxChars}
                                         />
-                                        
+
                                         {/* Character count indicator */}
                                         <div className="mt-1 flex justify-between text-xs">
                                             <span className="text-gray-500">
-                                                Max {section.maxChars} characters for optimal token efficiency
+                                                Max {section.maxChars}{' '}
+                                                characters for optimal token
+                                                efficiency
                                             </span>
-                                            <span className={`font-medium ${
-                                                (promptValues[section.id as keyof typeof promptValues]?.length || 0) > section.maxChars * 0.9
-                                                    ? 'text-orange-600'
-                                                    : (promptValues[section.id as keyof typeof promptValues]?.length || 0) > section.maxChars * 0.75
-                                                    ? 'text-yellow-600'
-                                                    : 'text-gray-600'
-                                            }`}>
-                                                {promptValues[section.id as keyof typeof promptValues]?.length || 0}/{section.maxChars}
+                                            <span
+                                                className={`font-medium ${
+                                                    (promptValues[
+                                                        section.id as keyof typeof promptValues
+                                                    ]?.length || 0) >
+                                                    section.maxChars * 0.9
+                                                        ? 'text-orange-600'
+                                                        : (promptValues[
+                                                                section.id as keyof typeof promptValues
+                                                            ]?.length || 0) >
+                                                            section.maxChars *
+                                                                0.75
+                                                          ? 'text-yellow-600'
+                                                          : 'text-gray-600'
+                                                }`}
+                                            >
+                                                {promptValues[
+                                                    section.id as keyof typeof promptValues
+                                                ]?.length || 0}
+                                                /{section.maxChars}
                                             </span>
                                         </div>
-                                        {isProUser && scoringField === section.id && (
-                                            <div className="mt-2 flex items-center text-xs text-blue-600">
-                                                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                AI is analyzing this field...
-                                            </div>
-                                        )}
+                                        {isProUser &&
+                                            scoringField === section.id && (
+                                                <div className="mt-2 flex items-center text-xs text-blue-600">
+                                                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    AI is analyzing this
+                                                    field...
+                                                </div>
+                                            )}
                                     </div>
                                 ))}
                             </div>
@@ -751,8 +918,8 @@ export default function NewPrompt({
 
                     {/* Live Preview Column */}
                     <div className="sticky top-6 self-start">
-                        <PromptPreview 
-                            content={generatePromptPreview()} 
+                        <PromptPreview
+                            content={generatePromptPreview()}
                             totalScore={totalScore}
                             isProUser={isProUser}
                         />

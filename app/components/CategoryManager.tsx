@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFetcher } from 'react-router';
 import { Plus, X, Check, AlertCircle } from 'lucide-react';
 
@@ -20,6 +20,20 @@ export default function CategoryManager({
   
   const createFetcher = useFetcher();
   const deleteFetcher = useFetcher();
+
+  // Handle successful deletion - clear modal
+  useEffect(() => {
+    if (deleteFetcher.data?.success && deleteFetcher.state === 'idle') {
+      setDeleteConfirm(null);
+    }
+  }, [deleteFetcher.data, deleteFetcher.state]);
+
+  // Handle successful creation - clear form
+  useEffect(() => {
+    if (createFetcher.data?.category && createFetcher.state === 'idle') {
+      setIsCreating(false);
+    }
+  }, [createFetcher.data, createFetcher.state]);
 
   return (
     <div>
@@ -96,21 +110,21 @@ export default function CategoryManager({
                   <button
                     type="button"
                     onClick={() => onCategoryToggle(category.id)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                    className={`px-3 py-1 rounded-full text-sm font-medium border transition-all ${
                       selectedCategories.includes(category.id)
-                        ? 'bg-indigo-100 text-indigo-800 border-indigo-300'
-                        : 'bg-indigo-50 text-indigo-800 border-indigo-300 hover:bg-indigo-100'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105'
+                        : 'bg-white text-indigo-600 border-indigo-300 hover:bg-indigo-50 hover:border-indigo-400'
                     }`}
                   >
                     {category.name}
                   </button>
                   
-                  {/* Delete button for categories with no prompts */}
-                  {category._count?.prompts === 0 && (
+                  {/* Delete button for user categories */}
+                  {(category._count?.prompts === 0 || category._count?.prompts === undefined) && (
                     <button
                       type="button"
                       onClick={() => setDeleteConfirm(category.id)}
-                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 text-xs z-10"
                       title="Delete category"
                     >
                       <X className="w-2.5 h-2.5" />
@@ -182,7 +196,6 @@ export default function CategoryManager({
                   type="submit"
                   disabled={deleteFetcher.state !== 'idle'}
                   className="px-3 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-md disabled:opacity-50"
-                  onClick={() => setDeleteConfirm(null)}
                 >
                   {deleteFetcher.state === 'submitting' ? 'Deleting...' : 'Delete'}
                 </button>

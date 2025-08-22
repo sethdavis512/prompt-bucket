@@ -8,6 +8,7 @@ interface FieldScoringProps {
   isProUser: boolean;
   isLoading?: boolean;
   onScoreUpdate?: (score: number, suggestion?: string) => void;
+  contextualHint?: string;
 }
 
 export default function FieldScoring({ 
@@ -15,7 +16,8 @@ export default function FieldScoring({
   score = 0, 
   suggestion, 
   isProUser,
-  isLoading = false
+  isLoading = false,
+  contextualHint
 }: FieldScoringProps) {
 
   const getScoreColor = (score: number) => {
@@ -59,7 +61,17 @@ export default function FieldScoring({
       );
     }
 
-    return null;
+    // Pro users without a score yet - show hint
+    const displayHint = contextualHint || "AI will rate this";
+    return (
+      <div 
+        className="flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600 border border-indigo-200"
+        title="Fill in this section and click elsewhere to get AI quality feedback"
+      >
+        <Star className="w-3 h-3 mr-1 opacity-70" />
+        {displayHint}
+      </div>
+    );
   };
 
   return (

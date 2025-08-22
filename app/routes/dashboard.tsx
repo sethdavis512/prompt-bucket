@@ -351,7 +351,7 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                                     <span>View</span>
                                                 </Link>
                                                 <Link
-                                                    to={`/prompts/${prompt.id}`}
+                                                    to={`/prompts/${prompt.id}?edit=true`}
                                                     className="flex items-center space-x-1 text-gray-600 hover:text-gray-500 text-sm"
                                                 >
                                                     <Edit className="h-4 w-4" />
