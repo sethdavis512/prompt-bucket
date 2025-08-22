@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useOutletContext } from 'react-router';
+import { Link, useOutletContext, useNavigate } from 'react-router';
 import type { User } from '@prisma/client';
 import {
     FileText,
@@ -105,7 +105,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function Dashboard({ loaderData }: Route.ComponentProps) {
-    const { user } = useOutletContext<{ user: User }>();
+    const { user } = useOutletContext<{ user: User, isProUser: boolean }>();
+    const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState(loaderData.search);
 
@@ -196,15 +197,15 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                                 inputClassName="pl-10"
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
-                                                        const url = new URL(
-                                                            window.location.href
-                                                        );
-                                                        url.searchParams.set(
-                                                            'search',
-                                                            searchTerm
-                                                        );
-                                                        window.location.href =
-                                                            url.toString();
+                                                        const searchParams = new URLSearchParams();
+                                                        if (searchTerm) {
+                                                            searchParams.set('search', searchTerm);
+                                                        }
+                                                        if (loaderData.categoryId) {
+                                                            searchParams.set('category', loaderData.categoryId);
+                                                        }
+                                                        const queryString = searchParams.toString();
+                                                        navigate(queryString ? `/dashboard?${queryString}` : '/dashboard');
                                                     }
                                                 }}
                                             />
@@ -217,21 +218,15 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                                             <select
                                                 value={loaderData.categoryId}
                                                 onChange={(e) => {
-                                                    const url = new URL(
-                                                        window.location.href
-                                                    );
-                                                    if (e.target.value) {
-                                                        url.searchParams.set(
-                                                            'category',
-                                                            e.target.value
-                                                        );
-                                                    } else {
-                                                        url.searchParams.delete(
-                                                            'category'
-                                                        );
+                                                    const searchParams = new URLSearchParams();
+                                                    if (loaderData.search) {
+                                                        searchParams.set('search', loaderData.search);
                                                     }
-                                                    window.location.href =
-                                                        url.toString();
+                                                    if (e.target.value) {
+                                                        searchParams.set('category', e.target.value);
+                                                    }
+                                                    const queryString = searchParams.toString();
+                                                    navigate(queryString ? `/dashboard?${queryString}` : '/dashboard');
                                                 }}
                                                 className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-900"
                                             >

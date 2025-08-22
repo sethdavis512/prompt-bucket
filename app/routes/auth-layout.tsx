@@ -27,7 +27,10 @@ export async function loader({ request }: Route.LoaderArgs) {
         throw redirect('/auth/signin');
     }
 
-    return { user };
+    // Calculate Pro status once for all child routes
+    const isProUser = user.subscriptionStatus === 'active';
+
+    return { user, isProUser };
 }
 
 export default function AuthLayout({ loaderData }: Route.ComponentProps) {

@@ -3,12 +3,12 @@ import { User, Mail, Calendar, Crown, Star, CreditCard } from 'lucide-react';
 import Layout from '~/components/Layout';
 
 export default function Profile() {
-    const { user } = useOutletContext<{ user: any }>();
+    const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
 
     // Debug: Log user data to console
     console.log('Profile user data:', user);
 
-    const isProUser = user?.subscriptionStatus === 'active';
+    // Pro status now comes from auth layout context
 
     return (
         <Layout user={user}>

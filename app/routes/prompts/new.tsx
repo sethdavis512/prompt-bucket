@@ -333,11 +333,11 @@ export default function NewPrompt({
         values?: any;
     };
 }) {
-    const { user } = useOutletContext<{ user: any }>();
+    const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(false);
 
-    const isProUser = user?.subscriptionStatus === 'active';
+    // Pro status now comes from auth layout context
 
     // Ensure free users can't make public prompts
     const effectiveIsPublic = isProUser ? isPublic : false;

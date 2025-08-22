@@ -3,7 +3,9 @@ import {
     Link,
     useOutletContext,
     useFetcher,
-    useRevalidator
+    useRevalidator,
+    useNavigate,
+    useLocation
 } from 'react-router';
 import { Edit, Copy, Download, ArrowLeft, Check, Share2 } from 'lucide-react';
 import { prisma } from '~/lib/prisma';
@@ -102,10 +104,26 @@ export async function action({ request, params }: Route.ActionArgs) {
         };
     }
 
+    // Get user subscription status for Pro feature validation
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { subscriptionStatus: true }
+    });
+
+    const isProUser = user?.subscriptionStatus === 'active';
+    const requestedPublic = formData.get('public') === 'true';
+
+    // Validate Pro features: prevent free users from making prompts public
+    if (requestedPublic && !isProUser) {
+        return {
+            error: 'Public sharing is a Pro feature. Upgrade your subscription to share prompts publicly.'
+        };
+    }
+
     const data = {
         title: formData.get('title') as string,
         description: (formData.get('description') as string) || '',
-        public: formData.get('public') === 'true',
+        public: isProUser ? requestedPublic : false, // Force false for free users
         taskContext: (formData.get('taskContext') as string) || '',
         toneContext: (formData.get('toneContext') as string) || '',
         backgroundData: (formData.get('backgroundData') as string) || '',
@@ -245,9 +263,10 @@ const promptSections = [
 ];
 
 export default function PromptDetail({ loaderData }: Route.ComponentProps) {
-    const { user } = useOutletContext<{ user: any }>();
+    const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
     const fetcher = useFetcher();
     const revalidator = useRevalidator();
+    const navigate = useNavigate();
 
     // Use real prompt data from the loader
     const [prompt, setPrompt] = useState(loaderData.prompt);
@@ -259,8 +278,7 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
         prompt?.categories?.map((pc: any) => pc.category.id) || []
     );
     
-    // Check if user is Pro
-    const isProUser = user?.subscriptionStatus === 'active';
+    // Pro status now comes from auth layout context
 
     // If no prompt data, show loading or error
     if (!prompt) {
@@ -520,12 +538,8 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
         }
         setIsEditing(false);
         
-        // Clean up URL by removing edit parameter
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('edit')) {
-            url.searchParams.delete('edit');
-            window.history.replaceState({}, '', url.toString());
-        }
+        // Clean up URL by removing edit parameter using React Router navigation
+        navigate(`/prompts/${prompt.id}`, { replace: true });
     };
 
     const buildFullPrompt = () => {
@@ -588,62 +602,94 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                         inputClassName="text-gray-600"
                                         placeholder="Brief description of what this prompt does..."
                                     />
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Visibility
-                                        </label>
-                                        <div className="flex items-center space-x-4">
-                                            <label className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    checked={
-                                                        !editedPrompt.public
-                                                    }
-                                                    onChange={() =>
-                                                        updateEditedValue(
-                                                            'public',
-                                                            'false'
-                                                        )
-                                                    }
-                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                />
-                                                <span className="ml-2 text-sm text-gray-700">
-                                                    Private
-                                                </span>
+                                    {isProUser ? (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Visibility
                                             </label>
-                                            <label className="flex items-center">
-                                                <input
-                                                    type="radio"
-                                                    checked={
-                                                        editedPrompt.public
-                                                    }
-                                                    onChange={() =>
-                                                        updateEditedValue(
-                                                            'public',
-                                                            'true'
-                                                        )
-                                                    }
-                                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                                />
-                                                <span className="ml-2 text-sm text-gray-700">
-                                                    Public
-                                                </span>
-                                            </label>
+                                            <div className="flex items-center space-x-4">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        checked={
+                                                            !editedPrompt.public
+                                                        }
+                                                        onChange={() =>
+                                                            updateEditedValue(
+                                                                'public',
+                                                                'false'
+                                                            )
+                                                        }
+                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Private
+                                                    </span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        checked={
+                                                            editedPrompt.public
+                                                        }
+                                                        onChange={() =>
+                                                            updateEditedValue(
+                                                                'public',
+                                                                'true'
+                                                            )
+                                                        }
+                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Public
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {editedPrompt.public
+                                                    ? 'This prompt can be shared publicly via: /share/' +
+                                                      prompt.id
+                                                    : 'This prompt is only visible to you'}
+                                            </p>
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {editedPrompt.public
-                                                ? 'This prompt can be shared publicly via: /share/' +
-                                                  prompt.id
-                                                : 'This prompt is only visible to you'}
-                                        </p>
-                                    </div>
+                                    ) : (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Visibility
+                                            </label>
+                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="public"
+                                                        value="false"
+                                                        checked={true}
+                                                        disabled
+                                                        className="h-4 w-4 text-gray-400 border-gray-300"
+                                                    />
+                                                    <span className="ml-2 text-sm text-gray-700">
+                                                        Private
+                                                    </span>
+                                                    <span className="ml-2 text-xs text-gray-500">
+                                                        (Free users)
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    Public sharing is available with Pro. 
+                                                    <a href="/pricing" className="text-blue-600 hover:text-blue-500 ml-1">
+                                                        Upgrade to share prompts →
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Categories Section */}
                                     <CategoryManager
                                         categories={allCategories}
                                         selectedCategories={selectedCategories}
                                         onCategoryToggle={toggleCategory}
-                                        isProUser={user?.subscriptionStatus === 'active'}
+                                        isProUser={isProUser}
                                     />
                                 </div>
                             ) : (
@@ -745,10 +791,11 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                         Export
                                     </button>
 
-                                    {prompt.public && (
+                                    {prompt.public && isProUser && (
                                         <button
                                             onClick={() => {
-                                                const shareUrl = `${window.location.origin}/share/${prompt.id}`;
+                                                // Use current location to build share URL
+                                                const shareUrl = `${document.location.origin}/share/${prompt.id}`;
                                                 navigator.clipboard.writeText(
                                                     shareUrl
                                                 );
