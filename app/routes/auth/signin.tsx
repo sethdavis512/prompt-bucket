@@ -82,6 +82,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
                         placeholder="Email address"
                         labelClassName="sr-only"
                         label="Email address"
+                        data-cy="email-input"
                     />
                     <TextField
                         id="password"
@@ -92,11 +93,13 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
                         placeholder="Password"
                         labelClassName="sr-only"
                         label="Password"
+                        data-cy="password-input"
                     />
 
                     <div>
                         <button
                             type="submit"
+                            data-cy="signin-button"
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Sign in

@@ -4,8 +4,7 @@ import {
     useOutletContext,
     useFetcher,
     useRevalidator,
-    useNavigate,
-    useLocation
+    useNavigate
 } from 'react-router';
 import { Edit, Copy, Download, ArrowLeft, Check, Share2 } from 'lucide-react';
 import { prisma } from '~/lib/prisma';
@@ -149,7 +148,7 @@ export async function action({ request, params }: Route.ActionArgs) {
         // Use a transaction to update prompt and categories atomically
         const updatedPrompt = await prisma.$transaction(async (tx) => {
             // Update the prompt
-            const prompt = await tx.prompt.update({
+            await tx.prompt.update({
                 where: {
                     id: promptId,
                     userId: session.user.id // Double-check user ownership

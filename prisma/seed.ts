@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 async function main() {
   // No default categories - categories are Pro-only and user-created
 
-  // Create a demo user
+  // Create demo and test users
   console.log('Creating demo user...')
   const user = await prisma.user.upsert({
     where: { email: 'demo@example.com' },
@@ -14,6 +14,30 @@ async function main() {
       email: 'demo@example.com',
       name: 'Demo User',
       emailVerified: true
+    }
+  })
+
+  // Create test users for Cypress e2e tests
+  console.log('Creating test users for e2e testing...')
+  const testUser = await prisma.user.upsert({
+    where: { email: 'test@example.com' },
+    update: {},
+    create: {
+      email: 'test@example.com',
+      name: 'Test User',
+      emailVerified: true,
+      subscriptionStatus: 'inactive' // Free user
+    }
+  })
+
+  const proTestUser = await prisma.user.upsert({
+    where: { email: 'pro@example.com' },
+    update: {},
+    create: {
+      email: 'pro@example.com',
+      name: 'Pro Test User',
+      emailVerified: true,
+      subscriptionStatus: 'active' // Pro user
     }
   })
 

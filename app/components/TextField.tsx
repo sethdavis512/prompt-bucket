@@ -23,6 +23,7 @@ interface TextFieldProps {
     maxLength?: number;
     pattern?: string;
     size?: 'sm' | 'md' | 'lg';
+    'data-cy'?: string;
 }
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
@@ -49,7 +50,8 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             minLength,
             maxLength,
             pattern,
-            size = 'md'
+            size = 'md',
+            'data-cy': dataCy
         },
         ref
     ) => {
@@ -100,6 +102,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
                         pattern={pattern}
                         className={baseInputClasses}
                         placeholder={placeholder}
+                        data-cy={dataCy}
                     />
                 </div>
                 {error && (
