@@ -133,6 +133,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                     onClick={() =>
                                         setIsDropdownOpen(!isDropdownOpen)
                                     }
+                                    data-testid="user-dropdown"
                                     className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
                                 >
                                     <User className="h-4 w-4" />
@@ -186,7 +187,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
             </nav>
 
             {/* Left Sidebar */}
-            <div className="hidden md:flex md:w-64 md:flex-col pt-16">
+            <div className="hidden md:flex md:w-64 md:flex-col pt-16" data-testid="sidebar">
                 <div className="flex flex-col flex-grow bg-white border-r border-gray-200 pt-5 pb-4 overflow-y-auto">
                     {/* Navigation */}
                     <nav className="mt-2 flex-1 px-2 space-y-1">
@@ -197,6 +198,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 return (
                                     <div
                                         key={item.name}
+                                        data-testid={`nav-${item.name.toLowerCase()}`}
                                         className="group flex items-center px-2 py-2 text-sm font-medium text-gray-400 rounded-md cursor-not-allowed"
                                     >
                                         <Icon className="mr-3 h-5 w-5" />
@@ -212,6 +214,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 <NavLink
                                     key={item.name}
                                     to={item.href}
+                                    data-testid={`nav-${item.name.toLowerCase()}`}
                                     className={({ isActive }) =>
                                         `group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                                             isActive
@@ -230,7 +233,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                     {/* Pro Upgrade Banner for Free Users */}
                     {!isProUser && (
                         <div className="flex-shrink-0 px-4 pb-4">
-                            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-3">
+                            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-3" data-testid="upgrade-banner">
                                 <div className="flex items-center">
                                     <div className="flex-shrink-0">
                                         <Star className="h-5 w-5 text-white" />

@@ -7,19 +7,25 @@ export default function Profile() {
     // Debug: Log user data to console
     console.log('Profile user data:', user);
 
-    // Pro status now comes from auth layout context
-
     return (
-            <div className="px-4 py-6 sm:px-0">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Profile Settings
-                    </h1>
-                    <p className="text-gray-600">
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                        <User className="h-6 w-6 text-gray-400" />
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Profile Settings
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 mt-2">
                         Manage your account information and preferences
                     </p>
                 </div>
+            </div>
 
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
                 <div className="max-w-2xl space-y-6">
                     {/* User Info Card */}
                     <div className="bg-white shadow rounded-lg">
@@ -199,5 +205,6 @@ export default function Profile() {
                     </div>
                 </div>
             </div>
+        </div>
     );
 }

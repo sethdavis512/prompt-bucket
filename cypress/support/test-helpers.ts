@@ -10,6 +10,11 @@ export const TEST_USERS = {
     email: 'pro@example.com', 
     password: 'testpassword123',
     name: 'Pro Test User'
+  },
+  admin: {
+    email: 'admin@example.com',
+    password: 'testpassword123', 
+    name: 'Admin User'
   }
 } as const
 
@@ -33,7 +38,7 @@ export function createTestUser(userData: typeof TEST_USERS.free) {
 /**
  * Signs in a user via the API and sets cookies
  */
-export function signInTestUser(userData: typeof TEST_USERS.free) {
+export function signInTestUser(userData: typeof TEST_USERS.free | typeof TEST_USERS.pro | typeof TEST_USERS.admin) {
   return cy.request({
     method: 'POST',
     url: '/api/auth/sign-in/email',
@@ -55,4 +60,31 @@ export function signInTestUser(userData: typeof TEST_USERS.free) {
       })
     }
   })
+}
+
+/**
+ * Creates a Pro user with active subscription
+ */
+export function createProTestUser(userData: typeof TEST_USERS.pro) {
+  return createTestUser(userData).then(() => {
+    // Upgrade user to Pro via API call
+    return cy.request({
+      method: 'POST',
+      url: '/api/admin/user-settings',
+      form: true,
+      body: {
+        intent: 'toggle_subscription',
+        userId: 'pro@example.com' // This would need to be the actual user ID
+      },
+      failOnStatusCode: false
+    })
+  })
+}
+
+/**
+ * Takes a screenshot with a descriptive name including timestamp
+ */
+export function takeTimestampedScreenshot(name: string) {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+  cy.screenshot(`${name}-${timestamp}`)
 }

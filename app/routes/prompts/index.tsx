@@ -123,6 +123,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                             {loaderData.canCreateMore ? (
                                 <Link
                                     to="/prompts/new"
+                                    data-cy="new-prompt-button"
                                     className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                                 >
                                     <Plus className="h-4 w-4" />
@@ -132,6 +133,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                 <div className="relative">
                                     <button
                                         disabled
+                                        data-cy="new-prompt-button"
                                         className="bg-gray-300 text-gray-500 cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                                     >
                                         <Plus className="h-4 w-4" />
@@ -164,8 +166,6 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
 
             {/* Content */}
             <div className="flex-1 overflow-auto p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div className="lg:col-span-3">
                         {/* Filters */}
                         <div className="bg-white shadow rounded-lg mb-6">
                             <div className="p-6">
@@ -183,6 +183,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                                     )
                                                 }
                                                 inputClassName="pl-10"
+                                                data-cy="search-prompts"
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
                                                         const searchParams =
@@ -219,6 +220,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                         {loaderData.isProUser ? (
                                             <select
                                                 value={loaderData.categoryId}
+                                                data-cy="category-filter"
                                                 onChange={(e) => {
                                                     const searchParams =
                                                         new URLSearchParams();
@@ -270,6 +272,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                         ) : (
                                             <select
                                                 disabled
+                                                data-cy="category-filter"
                                                 className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-100 text-gray-500 cursor-not-allowed"
                                             >
                                                 <option>Categories</option>
@@ -286,6 +289,7 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                 {loaderData.prompts.map((prompt) => (
                                     <div
                                         key={prompt.id}
+                                        data-cy="prompt-card"
                                         className="bg-white shadow rounded-lg hover:shadow-md transition-shadow"
                                     >
                                         <div className="p-6">
@@ -402,55 +406,6 @@ export default function PromptsIndex({ loaderData }: Route.ComponentProps) {
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* Stats Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="space-y-4">
-                            <div className="bg-white shadow rounded-lg">
-                                <div className="p-5">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0">
-                                            <FileText className="h-6 w-6 text-gray-400" />
-                                        </div>
-                                        <div className="ml-5 w-0 flex-1">
-                                            <dl>
-                                                <dt className="text-sm font-medium text-gray-500 truncate">
-                                                    Total Prompts
-                                                </dt>
-                                                <dd className="text-2xl font-bold text-gray-900">
-                                                    {loaderData.promptCount}
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="p-5">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0">
-                                            <StarIcon className="h-6 w-6 text-gray-400" />
-                                        </div>
-                                        <div className="ml-5 w-0 flex-1">
-                                            <dl>
-                                                <dt className="text-sm font-medium text-gray-500 truncate">
-                                                    Account Status
-                                                </dt>
-                                                <dd className="text-2xl font-bold text-gray-900 capitalize">
-                                                    {loaderData.isProUser
-                                                        ? 'Pro'
-                                                        : 'Free'}
-                                                </dd>
-                                            </dl>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

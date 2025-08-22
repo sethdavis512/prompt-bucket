@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Check, Star, Zap } from 'lucide-react';
+import { Check, Star, Zap, CreditCard } from 'lucide-react';
 import { auth } from '~/lib/auth';
 import { prisma } from '~/lib/prisma';
 import type { Route } from './+types/pricing';
@@ -85,7 +85,24 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
     ];
 
     return (
-            <div className="px-4 py-12 sm:px-0">
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                        <CreditCard className="h-6 w-6 text-gray-400" />
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Pricing
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 mt-2">
+                        Choose the plan that's right for you
+                    </p>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Simple, Transparent Pricing
@@ -229,5 +246,6 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                     </div>
                 </div>
             </div>
+        </div>
     );
 }

@@ -546,6 +546,7 @@ export default function NewPrompt({
                                     }
                                     placeholder="e.g., Blog Article Writer"
                                     error={actionData?.errors?.title?.[0]}
+                                    data-cy="prompt-title"
                                 />
 
                                 <TextField
@@ -560,6 +561,7 @@ export default function NewPrompt({
                                         )
                                     }
                                     placeholder="Brief description of what this prompt does"
+                                    data-cy="prompt-description"
                                 />
 
                                 <CategoryManager
@@ -605,6 +607,7 @@ export default function NewPrompt({
                                                     onChange={() =>
                                                         setIsPublic(true)
                                                     }
+                                                    data-cy="public-checkbox"
                                                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                                                 />
                                                 <span className="ml-2 text-sm text-gray-700">
@@ -843,6 +846,7 @@ export default function NewPrompt({
                                         placeholder={section.placeholder}
                                         disabled={scoringField === section.id}
                                         maxLength={section.maxChars}
+                                        data-cy={section.id}
                                     />
 
                                     {/* Character count indicator */}
@@ -894,6 +898,7 @@ export default function NewPrompt({
                             </button>
                             <button
                                 type="submit"
+                                data-cy="save-prompt"
                                 className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700"
                             >
                                 Create Prompt
