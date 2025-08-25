@@ -9,7 +9,9 @@
       "Bash(npx prisma db push:*)",
       "Bash(npm run build:*)",
       "Bash(mkdir:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": [],
     "ask": []

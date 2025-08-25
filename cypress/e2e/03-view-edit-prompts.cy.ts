@@ -1,33 +1,41 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createTestPrompt, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('3. View & Edit Existing Prompts', () => {
+  let testUser: any
+
   beforeEach(() => {
     cy.clearCookies()
     cy.clearLocalStorage()
     
-    // Set up authenticated free user
-    createTestUser(TEST_USERS.free)
-    signInTestUser(TEST_USERS.free)
+    // Set up authenticated free user with unique email
+    createAndSignInUser('free', 'view-edit').then((user) => {
+      testUser = user
+    })
   })
 
   context('Viewing Prompt Library', () => {
     it('should display prompts library with existing prompts', () => {
       cy.visit('/prompts')
       
-      cy.screenshot('03-prompts-library-overview')
+      takeContextualScreenshot('03-library', 'overview')
       
       // Should show prompts page header
-      cy.contains('My Prompts').should('be.visible')
+      waitForPageLoad('My Prompts')
       cy.contains('Manage and organize your prompt templates').should('be.visible')
       
       // Check if prompts exist or show empty state
       cy.get('body').then(($body) => {
         if ($body.text().includes('No prompts yet')) {
-          cy.screenshot('03-prompts-library-empty-state')
+          takeContextualScreenshot('03-library', 'empty-state')
           cy.contains('No prompts yet').should('be.visible')
           cy.contains('Create Your First Prompt').should('be.visible')
         } else {
-          cy.screenshot('03-prompts-library-with-prompts')
+          takeContextualScreenshot('03-library', 'with-prompts')
           // If prompts exist, verify grid layout
           cy.get('[data-cy=prompt-card]').should('exist')
         }
@@ -35,32 +43,25 @@ describe('3. View & Edit Existing Prompts', () => {
     })
 
     it('should create a prompt and then view it', () => {
-      // First create a test prompt to view/edit
-      cy.visit('/prompts/new')
-      
-      const testPrompt = {
+      // Use the helper to create a test prompt
+      const testPromptData = {
         title: `View Test Prompt ${Date.now()}`,
         description: 'A prompt created for testing view/edit functionality',
         taskContext: 'Act as a professional content writer with expertise in blog writing.',
         detailedTaskDescription: 'Write an engaging blog post introduction that hooks the reader.'
       }
       
-      cy.get('[data-cy=prompt-title]').type(testPrompt.title)
-      cy.get('[data-cy=prompt-description]').type(testPrompt.description)
-      cy.get('[data-cy=taskContext]').type(testPrompt.taskContext)
-      cy.get('[data-cy=detailedTaskDescription]').type(testPrompt.detailedTaskDescription)
-      
-      cy.get('[data-cy=save-prompt]').click()
-      
-      // Should be on prompt detail page
-      cy.url().should('match', /\/prompts\/[a-z0-9-]+$/)
-      
-      cy.screenshot('03-created-prompt-detail-view')
-      
-      // Verify prompt content is displayed correctly
-      cy.contains(testPrompt.title).should('be.visible')
-      cy.contains(testPrompt.description).should('be.visible')
-      cy.contains('content writer').should('be.visible')
+      createTestPrompt(testPromptData).then((createdPrompt) => {
+        // Should be on prompt detail page
+        cy.url().should('match', /\/prompts\/[a-z0-9-]+$/)
+        
+        takeContextualScreenshot('03-view', 'created-prompt-detail')
+        
+        // Verify prompt content is displayed correctly
+        cy.contains(createdPrompt.title).should('be.visible')
+        cy.contains(createdPrompt.description).should('be.visible')
+        cy.contains('content writer').should('be.visible')
+      })
     })
   })
 

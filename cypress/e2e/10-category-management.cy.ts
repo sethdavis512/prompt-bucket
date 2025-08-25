@@ -1,4 +1,10 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createProUserWithSubscription,
+  createTestPrompt, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('10. Category Management (Pro Feature)', () => {
   beforeEach(() => {
@@ -7,9 +13,12 @@ describe('10. Category Management (Pro Feature)', () => {
   })
 
   context('Free User Category Limitations', () => {
+    let freeUser: any
+
     beforeEach(() => {
-      createTestUser(TEST_USERS.free)
-      signInTestUser(TEST_USERS.free)
+      createAndSignInUser('free', 'category-free').then((user) => {
+        freeUser = user
+      })
     })
 
     it('should show categories as disabled for free users', () => {

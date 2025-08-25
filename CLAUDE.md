@@ -16,6 +16,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run db:reset` - Reset database and run seeds (use after schema changes)
 - `npm run db:seed` - Seed database only
 
+### Testing
+- `npm run test:e2e` - Run end-to-end tests with Cypress
+- `npm run test:e2e:open` - Open Cypress test runner for development
+- `npm run cypress:open` - Open Cypress for test development
+- `npm run cypress:run` - Run Cypress tests in headless mode
+
 ### Docker
 - `docker build -t my-app .` - Build Docker image
 - `docker run -p 3000:3000 my-app` - Run containerized app
@@ -58,10 +64,12 @@ const session = await auth.api.getSession({ headers: request.headers });
 ### Database Schema & Patterns
 
 **Core Models**:
-- `User` - Authentication and subscription status
-- `Prompt` - Rich prompt structure with 10+ optional fields for prompt engineering
-- `Category` - User-owned categorization system  
+- `User` - Authentication and subscription status with role-based access (USER/ADMIN)
+- `Prompt` - Rich prompt structure with 10+ optional fields for prompt engineering, includes scoring fields for AI evaluation
+- `Category` - User-owned categorization system with color coding
 - `PromptCategory` - Many-to-many relationship for prompt tagging
+- `Chain` - Pro feature for linking prompts in sequences with AI evaluation
+- `ChainPrompt` - Ordered relationship between chains and prompts
 
 **Key Patterns**:
 - User-scoped queries: `where: { userId: session!.user.id }`
@@ -86,8 +94,8 @@ const session = await auth.api.getSession({ headers: request.headers });
 
 Uses React Router v7 programmatic routing in `app/routes.ts`:
 
-**Public Routes**: `/`, `/pricing`, `/auth/*`, `/share/:id`
-**Protected Routes**: `/dashboard`, `/prompts/*`, `/profile`, `/billing`
+**Public Routes**: `/`, `/pricing`, `/auth/*`, `/share/:id`, `/access-denied`, `/checkout`
+**Protected Routes**: `/dashboard`, `/prompts/*`, `/chains/*`, `/categories`, `/profile`, `/billing`
 
 **Layout Pattern**:
 ```typescript
@@ -99,8 +107,9 @@ layout('routes/auth-layout.tsx', [
 
 ### Subscription & Feature Gating
 
-- **Free Users**: 5 prompt limit, private prompts only, visual scoring hints
-- **Pro Users**: Unlimited prompts, public sharing, AI scoring, content generation
+- **Free Users**: 5 prompt limit, private prompts only, visual scoring hints, no chains/categories
+- **Pro Users**: Unlimited prompts, public sharing, AI scoring, content generation, chains, categories  
+- **Admin Users**: Additional admin tools drawer with user management capabilities
 - **Subscription Status**: Stored in User model, validated in loaders/actions
 - **Payment Integration**: Polar webhooks for subscription management
 
@@ -147,3 +156,10 @@ export default function Component({ loaderData }: Route.ComponentProps) {
 - Use `~/` path alias for `app/` directory imports
 - Loader functions handle server-side data fetching with session validation
 - Component imports use absolute paths from `app/`
+
+### Testing Architecture
+- **Cypress E2E Testing**: Comprehensive test coverage across user flows
+- **Test Environment**: Uses seeded test data with known credentials
+- **Test Structure**: 10 test suites covering authentication, prompt management, subscription flows
+- **Test Users**: Pre-seeded with both free and pro users for testing feature gates
+- **Configuration**: Base URL http://localhost:5173, 2 retries in CI mode

@@ -1,23 +1,31 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  navigateViaSidebar, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('4. Dashboard Overview & Navigation', () => {
+  let testUser: any
+
   beforeEach(() => {
     cy.clearCookies()
     cy.clearLocalStorage()
     
-    // Set up authenticated free user
-    createTestUser(TEST_USERS.free)
-    signInTestUser(TEST_USERS.free)
+    // Set up authenticated free user with unique email
+    createAndSignInUser('free', 'dashboard').then((user) => {
+      testUser = user
+    })
   })
 
   context('Dashboard Initial Load', () => {
     it('should display dashboard with correct layout and content', () => {
       cy.visit('/dashboard')
       
-      cy.screenshot('04-dashboard-initial-load')
+      takeContextualScreenshot('04-dashboard', 'initial-load')
       
       // Verify header
-      cy.contains('Dashboard').should('be.visible')
+      waitForPageLoad('Dashboard')
       cy.contains('Welcome back').should('be.visible')
       
       // Verify navigation elements
@@ -25,7 +33,7 @@ describe('4. Dashboard Overview & Navigation', () => {
       cy.contains('Prompts').should('be.visible')
       cy.contains('Dashboard').should('be.visible')
       
-      cy.screenshot('04-dashboard-layout-complete')
+      takeContextualScreenshot('04-dashboard', 'layout-complete')
     })
 
     it('should display user greeting and basic information', () => {
@@ -255,7 +263,7 @@ describe('4. Dashboard Overview & Navigation', () => {
       cy.clearCookies()
       
       // Sign in again
-      signInTestUser(TEST_USERS.free)
+      createAndSignInUser('free', 'perf-test')
       
       // Visit dashboard and measure load time
       const startTime = Date.now()

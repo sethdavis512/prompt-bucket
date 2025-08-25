@@ -1,13 +1,22 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createUserAtPromptLimit,
+  createTestPrompt, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('8. Free User Limit Enforcement', () => {
+  let testUser: any
+
   beforeEach(() => {
     cy.clearCookies()
     cy.clearLocalStorage()
     
-    // Set up authenticated free user
-    createTestUser(TEST_USERS.free)
-    signInTestUser(TEST_USERS.free)
+    // Set up authenticated free user with unique email
+    createAndSignInUser('free', 'limit-enforcement').then((user) => {
+      testUser = user
+    })
   })
 
   context('Prompt Limit Display', () => {

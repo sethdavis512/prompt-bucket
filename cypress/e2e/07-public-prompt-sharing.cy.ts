@@ -1,4 +1,10 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createProUserWithSubscription,
+  createTestPrompt, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('7. Public Prompt Sharing (Pro Feature)', () => {
   beforeEach(() => {
@@ -7,9 +13,12 @@ describe('7. Public Prompt Sharing (Pro Feature)', () => {
   })
 
   context('Free User Sharing Limitations', () => {
+    let freeUser: any
+
     beforeEach(() => {
-      createTestUser(TEST_USERS.free)
-      signInTestUser(TEST_USERS.free)
+      createAndSignInUser('free', 'sharing-free').then((user) => {
+        freeUser = user
+      })
     })
 
     it('should not show public sharing options for free users', () => {
@@ -67,14 +76,15 @@ describe('7. Public Prompt Sharing (Pro Feature)', () => {
   })
 
   context('Pro User Sharing Features', () => {
+    let proUser: any
+
     beforeEach(() => {
-      createTestUser(TEST_USERS.pro)
-      signInTestUser(TEST_USERS.pro)
+      createProUserWithSubscription('sharing-pro').then((user) => {
+        proUser = user
+      })
     })
 
     it('should create and make prompt public', () => {
-      cy.visit('/prompts/new')
-      
       const publicPromptData = {
         title: 'Public Marketing Assistant',
         description: 'A comprehensive marketing assistant for creating engaging content',
@@ -83,16 +93,9 @@ describe('7. Public Prompt Sharing (Pro Feature)', () => {
         examples: 'Example 1: Email subject lines that increase open rates\\nExample 2: Social media posts that drive engagement'
       }
       
-      // Fill in prompt details
-      Object.entries(publicPromptData).forEach(([key, value]) => {
-        if (key === 'title' || key === 'description') {
-          cy.get(`[data-cy=prompt-${key}]`).type(value)
-        } else {
-          cy.get(`[data-cy=${key}]`).type(value)
-        }
-      })
+      takeContextualScreenshot('07-pro', 'prompt-creation')
       
-      cy.screenshot('07-pro-user-prompt-creation')
+      createTestPrompt(publicPromptData).then((createdPrompt) => {
       
       // Make prompt public
       cy.get('[data-cy=public-checkbox]').check()

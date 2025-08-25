@@ -1,4 +1,10 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createProUserWithSubscription,
+  createTestPrompt, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('9. Prompt Scoring & AI Features (Pro)', () => {
   beforeEach(() => {
@@ -7,9 +13,12 @@ describe('9. Prompt Scoring & AI Features (Pro)', () => {
   })
 
   context('Free User AI Feature Limitations', () => {
+    let freeUser: any
+
     beforeEach(() => {
-      createTestUser(TEST_USERS.free)
-      signInTestUser(TEST_USERS.free)
+      createAndSignInUser('free', 'scoring-free').then((user) => {
+        freeUser = user
+      })
     })
 
     it('should show scoring hints but not full AI scoring for free users', () => {

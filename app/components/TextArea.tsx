@@ -22,6 +22,7 @@ interface TextAreaProps {
     minLength?: number;
     maxLength?: number;
     resize?: boolean;
+    'data-cy'?: string;
 }
 
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -47,7 +48,8 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
             cols,
             minLength,
             maxLength,
-            resize = true
+            resize = true,
+            'data-cy': dataCy
         },
         ref
     ) => {
@@ -93,6 +95,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                         cols={cols}
                         className={baseTextAreaClasses}
                         placeholder={placeholder}
+                        data-cy={dataCy}
                     />
                 </div>
                 {error && (

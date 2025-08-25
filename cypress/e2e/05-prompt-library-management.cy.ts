@@ -1,13 +1,22 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  createTestPrompt, 
+  createMultipleTestPrompts,
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('5. Prompt Library Management (Search & Filter)', () => {
+  let testUser: any
+
   beforeEach(() => {
     cy.clearCookies()
     cy.clearLocalStorage()
     
-    // Set up authenticated free user
-    createTestUser(TEST_USERS.free)
-    signInTestUser(TEST_USERS.free)
+    // Set up authenticated free user with unique email
+    createAndSignInUser('free', 'library').then((user) => {
+      testUser = user
+    })
   })
 
   context('Library Overview', () => {

@@ -1,13 +1,20 @@
-import { TEST_USERS, createTestUser, signInTestUser } from '../support/test-helpers'
+import { 
+  createAndSignInUser, 
+  takeContextualScreenshot,
+  waitForPageLoad 
+} from '../support/test-helpers'
 
 describe('6. Subscription Upgrade Flow (Free to Pro)', () => {
+  let testUser: any
+
   beforeEach(() => {
     cy.clearCookies()
     cy.clearLocalStorage()
     
-    // Set up authenticated free user
-    createTestUser(TEST_USERS.free)
-    signInTestUser(TEST_USERS.free)
+    // Set up authenticated free user with unique email
+    createAndSignInUser('free', 'upgrade').then((user) => {
+      testUser = user
+    })
   })
 
   context('Pricing Page Access', () => {
