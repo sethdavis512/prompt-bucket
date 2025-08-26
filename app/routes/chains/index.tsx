@@ -15,22 +15,14 @@ import {
 import type { Route } from './+types/index';
 
 import TextField from '~/components/TextField';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getChainsByUserId, getChainCountByUserId } from '~/models/chain.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
 
     const url = new URL(request.url);
     const search = url.searchParams.get('search') || '';
-
-    // Get user subscription status
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    const isProUser = user?.subscriptionStatus === 'active';
 
     // If not Pro user, return empty data
     if (!isProUser) {
@@ -42,38 +34,9 @@ export async function loader({ request }: Route.LoaderArgs) {
         };
     }
 
-    // Build where clause for chains based on search
-    const chainWhere: any = { userId: session!.user.id };
-
-    if (search) {
-        chainWhere.OR = [
-            { name: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } }
-        ];
-    }
-
     const [chains, chainCount] = await Promise.all([
-        prisma.chain.findMany({
-            where: chainWhere,
-            include: {
-                prompts: {
-                    include: {
-                        prompt: {
-                            select: {
-                                id: true,
-                                title: true,
-                                description: true
-                            }
-                        }
-                    },
-                    orderBy: { order: 'asc' }
-                }
-            },
-            orderBy: { updatedAt: 'desc' }
-        }),
-        prisma.chain.count({
-            where: { userId: session!.user.id }
-        })
+        getChainsByUserId(user.id, { search }),
+        getChainCountByUserId(user.id)
     ]);
 
     return {
@@ -156,6 +119,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                         </div>
                         <Link
                             to="/chains/new"
+                            data-cy="new-chain"
                             className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                         >
                             <Plus className="h-4 w-4" />
@@ -213,6 +177,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                         {loaderData.chains.map((chain) => (
                             <div
                                 key={chain.id}
+                                data-cy="chain-card"
                                 className="bg-white shadow rounded-lg hover:shadow-md transition-shadow"
                             >
                                 <div className="p-6">
@@ -295,13 +260,15 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                     <div className="flex items-center space-x-2">
                                         <Link
                                             to={`/chains/${chain.id}`}
+                                            data-cy="view-chain"
                                             className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-500 text-sm"
                                         >
                                             <Eye className="h-4 w-4" />
                                             <span>View</span>
                                         </Link>
                                         <Link
-                                            to={`/chains/${chain.id}?edit=true`}
+                                            to={`/chains/${chain.id}/edit`}
+                                            data-cy="edit-chain"
                                             className="flex items-center space-x-1 text-gray-600 hover:text-gray-500 text-sm"
                                         >
                                             <Edit className="h-4 w-4" />
@@ -329,6 +296,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                             <div className="mt-6">
                                 <Link
                                     to="/chains/new"
+                                    data-cy="create-first-chain"
                                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />

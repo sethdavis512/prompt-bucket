@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { Route } from './+types/layout';
 
 import { auth } from '~/lib/auth';
-import { prisma } from '~/lib/prisma';
+import { getUserById } from '~/models/user.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -15,17 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     // Fetch user data for authenticated routes
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-            id: true,
-            email: true,
-            name: true,
-            subscriptionStatus: true,
-            customerId: true,
-            createdAt: true
-        }
-    });
+    const user = await getUserById(session.user.id);
 
     return { user };
 }

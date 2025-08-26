@@ -46,6 +46,7 @@ export default [
             ...prefix(`chains`, [
                 index('routes/chains/index.tsx'),
                 route(':id', 'routes/chains/detail.tsx'),
+                route(':id/edit', 'routes/chains/edit.tsx'),
                 route('new', 'routes/chains/new.tsx')
             ])
         ])

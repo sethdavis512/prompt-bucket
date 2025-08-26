@@ -1,25 +1,15 @@
 import { useOutletContext } from 'react-router';
 import { FolderOpen } from 'lucide-react';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getCategoriesByUserId } from '~/models/category.server';
 import CategoryManager from '~/components/CategoryManager';
 import type { Route } from './+types/categories';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user } = await requireAuth(request);
 
     // Get all categories for the user
-    const categories = await prisma.category.findMany({
-        where: {
-            userId: session!.user.id
-        },
-        include: {
-            _count: {
-                select: { prompts: true }
-            }
-        },
-        orderBy: { name: 'asc' }
-    });
+    const categories = await getCategoriesByUserId(user.id);
 
     return { categories };
 }

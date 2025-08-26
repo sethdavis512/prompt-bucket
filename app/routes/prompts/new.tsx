@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import { useOutletContext, Form, redirect } from 'react-router';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';\nimport { getPromptCountByUserId, createPromptWithTransaction } from '~/models/prompt.server';\nimport { getCategoriesWithRecentPrompts } from '~/models/category.server';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
@@ -42,19 +41,9 @@ const createPromptSchema = z.object({
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
 
-    // Check user subscription and prompt count
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    const promptCount = await prisma.prompt.count({
-        where: { userId: session!.user.id }
-    });
-
-    const isProUser = user?.subscriptionStatus === 'active';
+    const promptCount = await getPromptCountByUserId(user.id);
     const canCreateMore = isProUser || promptCount < 5;
 
     // Redirect to pricing if free user has reached limit
@@ -62,44 +51,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         return redirect('/pricing?reason=limit_reached');
     }
 
-    const categories = await prisma.category.findMany({
-        where: {
-            userId: session!.user.id // Only user's own categories
-        },
-        include: {
-            prompts: {
-                where: {
-                    prompt: {
-                        userId: session!.user.id
-                    }
-                },
-                include: {
-                    prompt: {
-                        select: {
-                            id: true,
-                            title: true,
-                            updatedAt: true
-                        }
-                    }
-                }
-            },
-            _count: {
-                select: {
-                    prompts: {
-                        where: {
-                            prompt: {
-                                userId: session!.user.id
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        orderBy: [
-            { userId: 'asc' }, // System categories first (null userId)
-            { name: 'asc' }
-        ]
-    });
+    const categories = await getCategoriesWithRecentPrompts(user.id);
 
     return { categories };
 }
@@ -164,47 +116,8 @@ export async function action({ request }: Route.ActionArgs) {
         // Validate the data
         createPromptSchema.parse(data);
 
-        // Create the prompt first
-        const prompt = await prisma.prompt.create({
-            data: {
-                title: data.title,
-                description: data.description,
-                public: data.public,
-                taskContext: data.taskContext,
-                toneContext: data.toneContext,
-                backgroundData: data.backgroundData,
-                detailedTaskDescription: data.detailedTaskDescription,
-                examples: data.examples,
-                conversationHistory: data.conversationHistory,
-                immediateTask: data.immediateTask,
-                thinkingSteps: data.thinkingSteps,
-                outputFormatting: data.outputFormatting,
-                prefilledResponse: data.prefilledResponse,
-                // Include scoring data
-                taskContextScore: data.taskContextScore,
-                toneContextScore: data.toneContextScore,
-                backgroundDataScore: data.backgroundDataScore,
-                detailedTaskScore: data.detailedTaskScore,
-                examplesScore: data.examplesScore,
-                conversationScore: data.conversationScore,
-                immediateTaskScore: data.immediateTaskScore,
-                thinkingStepsScore: data.thinkingStepsScore,
-                outputFormattingScore: data.outputFormattingScore,
-                prefilledResponseScore: data.prefilledResponseScore,
-                totalScore: data.totalScore,
-                userId: userId
-            }
-        });
-
-        // Create category associations if any categories were selected
-        if (data.categoryIds.length > 0) {
-            await prisma.promptCategory.createMany({
-                data: data.categoryIds.map((categoryId) => ({
-                    promptId: prompt.id,
-                    categoryId: categoryId
-                }))
-            });
-        }
+        // Create the prompt with category associations
+        const prompt = await createPromptWithTransaction(userId, data);
 
         return redirect('/dashboard');
     } catch (error) {

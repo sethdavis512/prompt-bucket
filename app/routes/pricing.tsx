@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { Check, Star, Zap, CreditCard } from 'lucide-react';
 import { auth } from '~/lib/auth';
-import { prisma } from '~/lib/prisma';
+import { getUserById } from '~/models/user.server';
 import type { Route } from './+types/pricing';
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -10,16 +10,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     let user = null;
 
     if (session) {
-        user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                subscriptionStatus: true,
-                customerId: true
-            }
-        });
+        user = await getUserById(session.user.id);
     }
 
     return { products: process.env.POLAR_SUBSCRIPTION_PRODUCT_ID!, user };

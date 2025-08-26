@@ -12,53 +12,28 @@ import {
 import type { Route } from './+types/new';
 
 import TextField from '~/components/TextField';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getPromptsForSelectionByUserId } from '~/models/prompt.server';
+import { createChain } from '~/models/chain.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
-
-    // Check Pro subscription
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    const isProUser = user?.subscriptionStatus === 'active';
+    const { user, isProUser } = await requireAuth(request);
 
     if (!isProUser) {
-        throw redirect('/chains'); // Will show upgrade prompt
+        throw redirect('/dashboard'); // Will show upgrade prompt
     }
 
     // Get user's prompts for selection
-    const prompts = await prisma.prompt.findMany({
-        where: { userId: session!.user.id },
-        select: {
-            id: true,
-            title: true,
-            description: true
-        },
-        orderBy: { updatedAt: 'desc' }
-    });
+    const prompts = await getPromptsForSelectionByUserId(user.id);
 
     return { prompts, isProUser };
 }
 
 export async function action({ request }: Route.ActionArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
-    
-    if (!session) {
-        throw redirect('/auth/signin');
-    }
+    const { user, isProUser } = await requireAuth(request);
 
-    // Check Pro subscription
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    if (user?.subscriptionStatus !== 'active') {
-        throw redirect('/chains');
+    if (!isProUser) {
+        throw redirect('/dashboard');
     }
 
     const formData = await request.formData();
@@ -77,18 +52,10 @@ export async function action({ request }: Route.ActionArgs) {
 
     try {
         // Create chain
-        const chain = await prisma.chain.create({
-            data: {
-                name,
-                description: description || null,
-                userId: session.user.id,
-                prompts: {
-                    create: promptIds.map((promptId, index) => ({
-                        promptId,
-                        order: index
-                    }))
-                }
-            }
+        const chain = await createChain(user.id, {
+            name,
+            description: description || null,
+            promptIds
         });
 
         return redirect(`/chains/${chain.id}`);
@@ -194,6 +161,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                                         Chain Name *
                                     </label>
                                     <TextField
+                                        data-cy="chain-name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="Enter chain name..."
@@ -206,6 +174,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                                         Description (Optional)
                                     </label>
                                     <textarea
+                                        data-cy="chain-description"
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Describe what this chain accomplishes..."
@@ -223,6 +192,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                                 <button
                                     type="button"
                                     onClick={handleAddPrompt}
+                                    data-cy="add-prompt-step"
                                     className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
                                 >
                                     <Plus className="h-4 w-4" />
@@ -240,7 +210,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                             ) : (
                                 <div className="space-y-4">
                                     {selectedPrompts.map((promptId, index) => (
-                                        <div key={index} className="relative">
+                                        <div key={index} className="relative" data-cy="chain-step">
                                             <div className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg">
                                                 {/* Step number and drag handle */}
                                                 <div className="flex items-center space-x-2">
@@ -270,6 +240,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                                                 {/* Prompt selection */}
                                                 <div className="flex-1">
                                                     <select
+                                                        data-cy="prompt-selector"
                                                         value={promptId}
                                                         onChange={(e) => handlePromptChange(index, e.target.value)}
                                                         className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
@@ -289,6 +260,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemovePrompt(index)}
+                                                    data-cy="remove-prompt"
                                                     className="p-2 text-gray-400 hover:text-red-600"
                                                 >
                                                     <X className="h-4 w-4" />
@@ -333,6 +305,7 @@ export default function NewChain({ loaderData }: Route.ComponentProps) {
                             </button>
                             <button
                                 type="submit"
+                                data-cy="save-chain"
                                 disabled={isSubmitting || !name.trim() || selectedPrompts.filter(Boolean).length === 0}
                                 className="bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed px-6 py-2 rounded-md text-sm font-medium"
                             >

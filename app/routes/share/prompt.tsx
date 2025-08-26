@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { redirect } from "react-router"
 import { Copy, Check, Home } from "lucide-react"
-import { prisma } from "~/lib/prisma"
+import { getPromptForSharingById } from "~/models/prompt.server"
 import type { Route } from "./+types/prompt"
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -11,19 +11,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     throw new Response("Prompt not found", { status: 404 })
   }
 
-  const prompt = await prisma.prompt.findUnique({
-    where: { id: promptId },
-    include: {
-      user: {
-        select: { name: true, email: true }
-      },
-      categories: {
-        include: {
-          category: true
-        }
-      }
-    }
-  })
+  const prompt = await getPromptForSharingById(promptId)
 
   if (!prompt) {
     throw new Response("Prompt not found", { status: 404 })

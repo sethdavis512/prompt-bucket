@@ -1,6 +1,6 @@
 import { redirect } from 'react-router';
 import { auth } from '~/lib/auth';
-import { prisma } from '~/lib/prisma';
+import { getUserById } from '~/models/user.server';
 import { polar } from '~/polar';
 import type { Route } from './+types/billing';
 
@@ -13,13 +13,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     }
 
     // Get user with subscription info
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { 
-            subscriptionStatus: true, 
-            customerId: true
-        }
-    });
+    const user = await getUserById(session.user.id);
 
     if (!user) {
         throw redirect('/auth/signin');

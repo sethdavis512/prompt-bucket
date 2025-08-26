@@ -3,8 +3,7 @@ import {
     redirect,
     useNavigate,
     useOutletContext,
-    useFetcher,
-    useSearchParams
+    useFetcher
 } from 'react-router';
 import type { User } from '@prisma/client';
 import {
@@ -21,71 +20,28 @@ import {
 } from 'lucide-react';
 import type { Route } from './+types/detail';
 
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getChainByUserIdAndId } from '~/models/chain.server';
+import { getPromptsForSelectionByUserId } from '~/models/prompt.server';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
     const chainId = params.id;
 
-    // Check Pro subscription
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    const isProUser = user?.subscriptionStatus === 'active';
-
     if (!isProUser) {
-        throw redirect('/chains');
+        throw redirect('/dashboard');
     }
 
     // Get chain data
-    const chain = await prisma.chain.findFirst({
-        where: {
-            id: chainId,
-            userId: session!.user.id
-        },
-        include: {
-            prompts: {
-                include: {
-                    prompt: {
-                        select: {
-                            id: true,
-                            title: true,
-                            description: true,
-                            taskContext: true,
-                            toneContext: true,
-                            backgroundData: true,
-                            detailedTaskDescription: true,
-                            examples: true,
-                            conversationHistory: true,
-                            immediateTask: true,
-                            thinkingSteps: true,
-                            outputFormatting: true,
-                            prefilledResponse: true
-                        }
-                    }
-                },
-                orderBy: { order: 'asc' }
-            }
-        }
-    });
+    const chain = await getChainByUserIdAndId(user.id, chainId!);
 
     if (!chain) {
         throw new Response('Chain not found', { status: 404 });
     }
 
+
     // Get all user prompts for editing
-    const allPrompts = await prisma.prompt.findMany({
-        where: { userId: session!.user.id },
-        select: {
-            id: true,
-            title: true,
-            description: true
-        },
-        orderBy: { updatedAt: 'desc' }
-    });
+    const allPrompts = await getPromptsForSelectionByUserId(user.id);
 
     return { chain, allPrompts, isProUser };
 }
@@ -93,8 +49,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 export default function ChainDetail({ loaderData }: Route.ComponentProps) {
     const { user } = useOutletContext<{ user: User; isProUser: boolean }>();
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const isEditing = searchParams.get('edit') === 'true';
 
     const evaluationFetcher = useFetcher();
     const deleteFetcher = useFetcher();
@@ -147,7 +101,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
 
     // Navigate to chain editing
     const handleEditChain = () => {
-        navigate(`/chains/${chain.id}?edit=true`);
+        navigate(`/chains/${chain.id}/edit`);
     };
 
     // Redirect after successful deletion
@@ -158,7 +112,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
     }, [deleteFetcher.data, deleteFetcher.state, navigate]);
 
     return (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="h-full flex flex-col">
             {/* Header */}
             <div className="bg-white shadow-sm border-b border-gray-200">
                 <div className="px-6 py-4">
@@ -375,7 +329,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
 
                     {/* Evaluation Panel */}
                     {(evaluationResult || isEvaluating) && (
-                        <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
+                        <div className="w-96 bg-white border-l border-gray-200 flex flex-col h-full">
                             <div className="bg-purple-50 px-4 py-3 border-b border-gray-200">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">

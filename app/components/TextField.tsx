@@ -13,6 +13,7 @@ interface TextFieldProps {
     value?: string;
     defaultValue?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     name?: string;
     id?: string;
@@ -41,6 +42,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             value,
             defaultValue,
             onChange,
+            onBlur,
             onKeyDown,
             name,
             id,
@@ -92,6 +94,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
                         value={value}
                         defaultValue={defaultValue}
                         onChange={onChange}
+                        onBlur={onBlur}
                         onKeyDown={onKeyDown}
                         autoComplete={autoComplete}
                         disabled={disabled}

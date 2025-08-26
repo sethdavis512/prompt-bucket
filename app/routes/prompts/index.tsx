@@ -16,23 +16,17 @@ import type { Route } from './+types/index';
 
 import TextField from '~/components/TextField';
 import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
 
     const url = new URL(request.url);
     const search = url.searchParams.get('search') || '';
     const categoryId = url.searchParams.get('category') || '';
 
-    // Get user subscription status
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
     // Build where clause for prompts based on filters
-    const promptWhere: any = { userId: session!.user.id };
+    const promptWhere: any = { userId: user.id };
 
     if (search) {
         promptWhere.OR = [
@@ -63,7 +57,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         }),
         prisma.category.findMany({
             where: {
-                userId: session!.user.id // Only user's own categories
+                userId: user.id // Only user's own categories
             },
             include: {
                 _count: {
@@ -71,7 +65,7 @@ export async function loader({ request }: Route.LoaderArgs) {
                         prompts: {
                             where: {
                                 prompt: {
-                                    userId: session!.user.id
+                                    userId: user.id
                                 }
                             }
                         }
@@ -80,12 +74,11 @@ export async function loader({ request }: Route.LoaderArgs) {
             }
         }),
         prisma.prompt.count({
-            where: { userId: session!.user.id }
+            where: { userId: user.id }
         })
     ]);
 
     // Check if user is on pro plan
-    const isProUser = user?.subscriptionStatus === 'active';
     const promptLimit = isProUser ? null : 5; // null means unlimited for pro users
     const canCreateMore = isProUser || promptCount < 5;
 

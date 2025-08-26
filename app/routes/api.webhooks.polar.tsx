@@ -1,5 +1,5 @@
 import { Webhooks } from '@polar-sh/remix';
-import { prisma } from '~/lib/prisma';
+import { updateUserSubscriptionByCustomerId, cancelUserSubscriptionByCustomerId, updateUserSubscriptionById, getAllUsers, updateUserByEmail, getAllUsersForDebugging } from '~/models/user.server';
 
 export const action = Webhooks({
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
@@ -24,14 +24,9 @@ export const action = Webhooks({
                     );
 
                     // Find user by customer ID and update subscription status
-                    const result = await prisma.user.updateMany({
-                        where: {
-                            customerId: subscription.customerId
-                        },
-                        data: {
-                            subscriptionStatus: subscription.status,
-                            subscriptionId: subscription.id
-                        }
+                    const result = await updateUserSubscriptionByCustomerId(subscription.customerId, {
+                        subscriptionStatus: subscription.status,
+                        subscriptionId: subscription.id
                     });
                     console.log(`✅ Updated ${result.count} users`);
                     break;
@@ -41,12 +36,7 @@ export const action = Webhooks({
                     const subscription = payload.data;
 
                     // Update user subscription status to canceled
-                    await prisma.user.updateMany({
-                        where: { customerId: subscription.customerId },
-                        data: {
-                            subscriptionStatus: 'canceled'
-                        }
-                    });
+                    await cancelUserSubscriptionByCustomerId(subscription.customerId);
                     break;
                 }
 
@@ -63,11 +53,8 @@ export const action = Webhooks({
 
                     // Update user with customer ID if we can match by email
                     if (customer.email) {
-                        const result = await prisma.user.updateMany({
-                            where: { email: customer.email },
-                            data: {
-                                customerId: customer.id
-                            }
+                        const result = await updateUserByEmail(customer.email, {
+                            customerId: customer.id
                         });
                         console.log(
                             `✅ Updated ${result.count} users with customer ID: ${customer.id}`
@@ -78,9 +65,7 @@ export const action = Webhooks({
                                 `⚠️ No users found with email: ${customer.email}`
                             );
                             // List all users for debugging
-                            const allUsers = await prisma.user.findMany({
-                                select: { email: true, id: true }
-                            });
+                            const allUsers = await getAllUsersForDebugging();
                             console.log('📋 All users in database:', allUsers);
                         }
                     } else {

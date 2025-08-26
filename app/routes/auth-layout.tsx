@@ -1,4 +1,4 @@
-import { Outlet, redirect, NavLink, Link, Form } from 'react-router';
+import { Outlet, NavLink, Link, Form } from 'react-router';
 import {
     Home,
     FileText,
@@ -13,41 +13,12 @@ import {
     Settings
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import { auth } from '~/lib/auth';
-import { prisma } from '~/lib/prisma';
+import { requireAuth } from '~/lib/session';
 import AdminToolsDrawer from '~/components/AdminToolsDrawer';
 import type { Route } from './+types/auth-layout';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
-
-    if (!session) {
-        throw redirect('/auth/signin');
-    }
-
-    // Fetch full user data including subscription status
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-            id: true,
-            email: true,
-            name: true,
-            role: true,
-            subscriptionStatus: true,
-            customerId: true,
-            createdAt: true
-        }
-    });
-
-    if (!user) {
-        throw redirect('/auth/signin');
-    }
-
-    // Calculate Pro status and admin status once for all child routes
-    const isProUser = user.subscriptionStatus === 'active';
-    const isAdmin = user.role === 'ADMIN';
-
-    return { user, isProUser, isAdmin };
+    return await requireAuth(request);
 }
 
 export default function AuthLayout({ loaderData }: Route.ComponentProps) {
@@ -262,7 +233,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
             </div>
 
             {/* Main content area */}
-            <div className="flex flex-col w-0 flex-1 pt-16">
+            <div className="flex flex-col w-0 flex-1 pt-16 h-screen">
                 <Outlet context={loaderData} />
             </div>
 

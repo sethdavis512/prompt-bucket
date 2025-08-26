@@ -9,52 +9,22 @@ import {
     Plus
 } from 'lucide-react';
 import type { Route } from './+types/dashboard';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getCategoryCountByUserId } from '~/models/category.server';
+import { getPromptCountByUserId, getPromptScoringStats } from '~/models/prompt.server';
+import { getChainCountByUserId, getChainScoringStats } from '~/models/chain.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
-
-    // Get user subscription status
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    // Check if user is on pro plan
-    const isProUser = user?.subscriptionStatus === 'active';
+    const { user, isProUser } = await requireAuth(request);
 
     const [categories, promptCount, promptStats, chainStats] = await Promise.all([
-        prisma.category.count({
-            where: { userId: session!.user.id }
-        }),
-        prisma.prompt.count({
-            where: { userId: session!.user.id }
-        }),
-        // Prompt scoring statistics
-        prisma.prompt.aggregate({
-            where: { 
-                userId: session!.user.id,
-                totalScore: { gt: 0 }
-            },
-            _avg: { totalScore: true },
-            _max: { totalScore: true },
-            _count: { totalScore: true }
-        }),
+        getCategoryCountByUserId(user.id),
+        getPromptCountByUserId(user.id),
+        getPromptScoringStats(user.id),
         // Chain statistics (only for Pro users)
         isProUser ? Promise.all([
-            prisma.chain.count({
-                where: { userId: session!.user.id }
-            }),
-            prisma.chain.aggregate({
-                where: { 
-                    userId: session!.user.id,
-                    chainScore: { gt: 0 }
-                },
-                _avg: { chainScore: true },
-                _max: { chainScore: true },
-                _count: { chainScore: true }
-            })
+            getChainCountByUserId(user.id),
+            getChainScoringStats(user.id)
         ]).then(([count, agg]) => ({ count, ...agg })) : { count: 0, _avg: { chainScore: null }, _max: { chainScore: null }, _count: { chainScore: 0 } }
     ]);
 

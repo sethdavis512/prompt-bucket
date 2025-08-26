@@ -337,3 +337,120 @@ export function takeContextualScreenshot(context: string, description: string) {
   const timestamp = Date.now()
   cy.screenshot(`${context}-${description}-${timestamp}`)
 }
+
+// =================== CHAIN HELPERS ===================
+
+export interface ChainData {
+  name: string
+  description: string
+  promptIds: string[]
+}
+
+/**
+ * Creates a test chain with specified prompts
+ */
+export function createTestChain(chainData: Partial<ChainData> = {}, skipNavigation: boolean = false) {
+  const defaultData: ChainData = {
+    name: `Test Chain ${Date.now()}`,
+    description: 'A test chain created by Cypress',
+    promptIds: [],
+    ...chainData
+  }
+
+  if (!skipNavigation) {
+    cy.visit('/chains/new')
+  }
+  
+  // Wait for the form to be visible and stable
+  cy.get('[data-cy=chain-name]').should('be.visible')
+  cy.wait(1000) // Wait for React to stabilize
+  
+  // Fill in chain details
+  cy.get('[data-cy=chain-name]').should('be.visible').then(($el) => {
+    cy.wrap($el).clear({ force: true }).type(defaultData.name, { force: true })
+  })
+  
+  cy.wait(200)
+  
+  cy.get('[data-cy=chain-description]').should('be.visible').then(($el) => {
+    cy.wrap($el).clear({ force: true }).type(defaultData.description, { force: true })
+  })
+  
+  // Add prompts if available
+  if (defaultData.promptIds.length === 0) {
+    // Add first available prompt
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-cy=available-prompt]').length > 0) {
+        cy.get('[data-cy=available-prompt]').first().click()
+        cy.wait(500)
+      }
+    })
+  }
+  
+  // Wait for all form interactions to complete before saving
+  cy.wait(1000)
+  cy.get('[data-cy=save-chain]').should('be.visible').click({ force: true })
+  
+  // Return the chain data for verification
+  return cy.wrap(defaultData)
+}
+
+/**
+ * Creates a chain with specific prompts for testing
+ */
+export function createChainWithPrompts(chainName: string, promptCount: number = 2) {
+  const prompts: PromptData[] = []
+  
+  // Create the required number of prompts first
+  for (let i = 0; i < promptCount; i++) {
+    const promptData: Partial<PromptData> = {
+      title: `Chain Prompt ${i + 1} - ${Date.now()}`,
+      description: `Prompt ${i + 1} for chain testing`,
+      taskContext: `Act as a professional in step ${i + 1}.`,
+    }
+    
+    cy.visit('/prompts/new')
+    createTestPrompt(promptData, true).then((data) => {
+      prompts.push(data as PromptData)
+    })
+  }
+  
+  // Now create the chain
+  cy.visit('/chains/new')
+  
+  cy.get('[data-cy=chain-name]').type(chainName)
+  cy.get('[data-cy=chain-description]').type(`Chain with ${promptCount} prompts`)
+  
+  // Add all available prompts
+  for (let i = 0; i < promptCount; i++) {
+    cy.get('[data-cy=available-prompt]').then(($prompts) => {
+      if ($prompts.length > i) {
+        cy.wrap($prompts[i]).click()
+        cy.wait(300)
+      }
+    })
+  }
+  
+  cy.get('[data-cy=save-chain]').click()
+  
+  return cy.wrap({ name: chainName, prompts })
+}
+
+/**
+ * Adds data-cy attributes to components for easier testing
+ */
+export function addTestIds() {
+  // This would ideally be added to the actual components
+  // but can be injected via Cypress for testing
+  cy.get('input[placeholder*="name"]').first().then(($el) => {
+    if (!$el.attr('data-cy')) {
+      $el.attr('data-cy', 'chain-name')
+    }
+  })
+  
+  cy.get('textarea[placeholder*="description"]').first().then(($el) => {
+    if (!$el.attr('data-cy')) {
+      $el.attr('data-cy', 'chain-description')
+    }
+  })
+}

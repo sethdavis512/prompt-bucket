@@ -1,32 +1,20 @@
 import { useState } from 'react';
 import { Link, useOutletContext } from 'react-router';
 import { Edit, Copy, Share2, ArrowLeft } from 'lucide-react';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getPromptByUserIdAndId } from '~/models/prompt.server';
 import PromptPreview from '~/components/PromptPreview';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user } = await requireAuth(request);
     const promptId = params.id;
 
     if (!promptId) {
         throw new Response('Prompt not found', { status: 404 });
     }
 
-    const prompt = await prisma.prompt.findUnique({
-        where: {
-            id: promptId,
-            userId: session!.user.id // Ensure user owns the prompt
-        },
-        include: {
-            categories: {
-                include: {
-                    category: true
-                }
-            }
-        }
-    });
+    const prompt = await getPromptByUserIdAndId(user.id, promptId);
 
     if (!prompt) {
         throw new Response('Prompt not found', { status: 404 });

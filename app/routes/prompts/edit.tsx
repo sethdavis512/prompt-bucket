@@ -6,58 +6,40 @@ import {
     useNavigate
 } from 'react-router';
 import { ArrowLeft, Check, X } from 'lucide-react';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
+import { requireAuth } from '~/lib/session';
+import { getPromptByUserIdAndId, updatePrompt } from '~/models/prompt.server';
+import { getCategoriesForPromptsByUserId } from '~/models/category.server';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
 import CategoryManager from '~/components/CategoryManager';
+import FieldScoring from '~/components/FieldScoring';
+import { usePromptScoring } from '~/hooks/usePromptScoring';
+import { usePromptAPI } from '~/hooks/usePromptAPI';
 import type { Route } from './+types/edit';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
     const promptId = params.id;
 
     if (!promptId) {
         throw new Response('Prompt not found', { status: 404 });
     }
 
-    const prompt = await prisma.prompt.findUnique({
-        where: {
-            id: promptId,
-            userId: session!.user.id // Ensure user owns the prompt
-        },
-        include: {
-            categories: {
-                include: {
-                    category: true
-                }
-            }
-        }
-    });
+    const prompt = await getPromptByUserIdAndId(user.id, promptId);
 
     if (!prompt) {
         throw new Response('Prompt not found', { status: 404 });
     }
 
     // Get all available categories for the user
-    const allCategories = await prisma.category.findMany({
-        where: {
-            userId: session!.user.id
-        },
-        include: {
-            _count: {
-                select: { prompts: true }
-            }
-        },
-        orderBy: { name: 'asc' }
-    });
+    const allCategories = await getCategoriesForPromptsByUserId(user.id);
 
     return { prompt, allCategories };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user } = await requireAuth(request);
     const promptId = params.id!;
     const formData = await request.formData();
     const intent = formData.get('intent') as string;
@@ -81,33 +63,21 @@ export async function action({ request, params }: Route.ActionArgs) {
 
         try {
             // Update the prompt
-            const updatedPrompt = await prisma.prompt.update({
-                where: {
-                    id: promptId,
-                    userId: session!.user.id
-                },
-                data: {
-                    title,
-                    description,
-                    public: isPublic,
-                    taskContext,
-                    toneContext,
-                    backgroundData,
-                    detailedTaskDescription,
-                    examples,
-                    conversationHistory,
-                    immediateTask,
-                    thinkingSteps,
-                    outputFormatting,
-                    prefilledResponse,
-                    updatedAt: new Date(),
-                    categories: {
-                        deleteMany: {},
-                        create: categoryIds.map(categoryId => ({
-                            category: { connect: { id: categoryId } }
-                        }))
-                    }
-                }
+            const updatedPrompt = await updatePrompt(user.id, promptId, {
+                title,
+                description,
+                public: isPublic,
+                taskContext,
+                toneContext,
+                backgroundData,
+                detailedTaskDescription,
+                examples,
+                conversationHistory,
+                immediateTask,
+                thinkingSteps,
+                outputFormatting,
+                prefilledResponse,
+                categoryIds
             });
 
             return { success: true, prompt: updatedPrompt };
@@ -149,9 +119,25 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
     const [copyStatus, setCopyStatus] = useState<Record<string, boolean>>({});
 
     // Pro status from auth layout context
-    const isProUser = user?.subscription?.status === 'active';
+    const { isProUser } = useOutletContext<{ user: any; isProUser: boolean }>();
 
-    // TODO: Add scoring hooks when available
+    // Scoring hooks
+    const { scores, suggestions, totalScore, updateFieldScore } = usePromptScoring();
+
+    const {
+        scoringField,
+        generatingField,
+        scoreField,
+        generateField,
+        canGenerate
+    } = usePromptAPI({
+        isProUser,
+        promptValues: editedPrompt,
+        onScoreUpdate: updateFieldScore,
+        onContentGenerated: (fieldType: string, content: string) => {
+            updateEditedValue(fieldType, content);
+        }
+    });
 
     const promptSections = [
         {
@@ -208,6 +194,12 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
 
     const updateEditedValue = (field: string, value: string | boolean) => {
         setEditedPrompt(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleFieldBlur = (fieldType: string, content: string) => {
+        if (content.trim() && isProUser) {
+            scoreField(fieldType, content);
+        }
     };
 
     const handleCategoryToggle = (categoryId: string) => {
@@ -276,6 +268,13 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
                         </div>
 
                         <div className="flex items-center space-x-3">
+                            {isProUser && totalScore > 0 && (
+                                <div className="flex items-center px-3 py-2 bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-200 rounded-md">
+                                    <span className="text-sm font-medium text-purple-700">
+                                        Total Score: {totalScore}/100
+                                    </span>
+                                </div>
+                            )}
                             <Link
                                 to={`/prompts/${prompt.id}`}
                                 className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -303,21 +302,53 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
                         {/* Basic Information */}
                         <div className="bg-white shadow rounded-lg p-6">
                             <div className="space-y-4">
-                                <TextField
-                                    label="Title"
-                                    required
-                                    value={editedPrompt.title}
-                                    onChange={(e) => updateEditedValue('title', e.target.value)}
-                                    placeholder="Give your prompt a descriptive title"
-                                />
+                                <div>
+                                    <FieldScoring
+                                        fieldType="title"
+                                        label="Title"
+                                        score={scores.title}
+                                        suggestion={suggestions.title}
+                                        isProUser={isProUser}
+                                        isLoading={scoringField === 'title'}
+                                    />
+                                    <TextField
+                                        required
+                                        value={editedPrompt.title}
+                                        onChange={(e) => updateEditedValue('title', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur('title', e.target.value)}
+                                        placeholder="Give your prompt a descriptive title"
+                                    />
+                                    {suggestions.title && isProUser && (
+                                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                            <p className="text-xs font-medium text-blue-800 mb-1">AI Suggestion:</p>
+                                            <p className="text-xs text-blue-700">{suggestions.title}</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                                <TextArea
-                                    label="Description"
-                                    value={editedPrompt.description}
-                                    onChange={(e) => updateEditedValue('description', e.target.value)}
-                                    placeholder="Describe what this prompt does and when to use it"
-                                    rows={3}
-                                />
+                                <div>
+                                    <FieldScoring
+                                        fieldType="description"
+                                        label="Description"
+                                        score={scores.description}
+                                        suggestion={suggestions.description}
+                                        isProUser={isProUser}
+                                        isLoading={scoringField === 'description'}
+                                    />
+                                    <TextArea
+                                        value={editedPrompt.description}
+                                        onChange={(e) => updateEditedValue('description', e.target.value)}
+                                        onBlur={(e) => handleFieldBlur('description', e.target.value)}
+                                        placeholder="Describe what this prompt does and when to use it"
+                                        rows={3}
+                                    />
+                                    {suggestions.description && isProUser && (
+                                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                            <p className="text-xs font-medium text-blue-800 mb-1">AI Suggestion:</p>
+                                            <p className="text-xs text-blue-700">{suggestions.description}</p>
+                                        </div>
+                                    )}
+                                </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -390,22 +421,46 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
 
                                 return (
                                     <div key={section.id} className="bg-white shadow rounded-lg p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h4 className="text-sm font-medium text-gray-900">
-                                                {section.title}
-                                            </h4>
-                                        </div>
+                                        <FieldScoring
+                                            fieldType={section.id}
+                                            label={section.title}
+                                            score={scores[section.id]}
+                                            suggestion={suggestions[section.id]}
+                                            isProUser={isProUser}
+                                            isLoading={scoringField === section.id}
+                                        />
 
-                                        <p className="text-xs text-gray-500 mb-3">
+                                        <p className="text-xs text-gray-500 mt-2 mb-3">
                                             {section.description}
                                         </p>
 
                                         <TextArea
                                             value={content}
                                             onChange={(e) => updateEditedValue(section.id, e.target.value)}
+                                            onBlur={(e) => handleFieldBlur(section.id, e.target.value)}
                                             placeholder={`Enter ${section.title.toLowerCase()}...`}
                                             rows={4}
                                         />
+
+                                        {suggestions[section.id] && isProUser && (
+                                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                                <p className="text-xs font-medium text-blue-800 mb-1">AI Suggestion:</p>
+                                                <p className="text-xs text-blue-700">{suggestions[section.id]}</p>
+                                            </div>
+                                        )}
+
+                                        {isProUser && canGenerate(section.id) && (
+                                            <div className="mt-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => generateField(section.id)}
+                                                    disabled={generatingField === section.id}
+                                                    className="text-xs text-indigo-600 hover:text-indigo-700 font-medium disabled:opacity-50"
+                                                >
+                                                    {generatingField === section.id ? 'Generating...' : 'Generate with AI'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
