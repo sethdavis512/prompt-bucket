@@ -2,6 +2,7 @@ import { useState } from "react"
 import { redirect } from "react-router"
 import { Copy, Check, Home } from "lucide-react"
 import { getPromptForSharingById } from "~/models/prompt.server"
+import Button from "~/components/Button"
 import type { Route } from "./+types/prompt"
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -136,9 +137,9 @@ export default function SharedPrompt({ loaderData }: Route.ComponentProps) {
             </div>
             
             <div className="flex items-center space-x-3">
-              <button
+              <Button
                 onClick={copyToClipboard}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                className="shadow-sm"
               >
                 {copied ? (
                   <>
@@ -151,7 +152,7 @@ export default function SharedPrompt({ loaderData }: Route.ComponentProps) {
                     Copy Prompt
                   </>
                 )}
-              </button>
+              </Button>
               
               <a
                 href="/"
@@ -175,9 +176,10 @@ export default function SharedPrompt({ loaderData }: Route.ComponentProps) {
           </div>
           
           <div className="mt-6 flex justify-center">
-            <button
+            <Button
               onClick={copyToClipboard}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+              size="lg"
+              className="shadow-sm"
             >
               {copied ? (
                 <>
@@ -190,7 +192,7 @@ export default function SharedPrompt({ loaderData }: Route.ComponentProps) {
                   Copy to Clipboard
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
 

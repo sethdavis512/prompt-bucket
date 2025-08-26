@@ -11,6 +11,7 @@ import { getChainByUserIdAndIdForEdit, updateChain, checkChainExists } from '~/m
 import { getPromptsForSelectionByUserId, getPromptsByIds, validatePromptsExist } from '~/models/prompt.server';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
+import Button from '~/components/Button';
 import type { Route } from './+types/edit';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -177,15 +178,16 @@ export default function EditChain({ loaderData }: Route.ComponentProps) {
                                 <X className="w-4 h-4 mr-1" />
                                 Cancel
                             </Link>
-                            <button
+                            <Button
                                 onClick={handleSave}
                                 data-cy="save-chain"
                                 disabled={updateFetcher.state !== 'idle' || !editedChain.name || selectedPrompts.length === 0}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                                loading={updateFetcher.state === 'submitting'}
+                                size="sm"
                             >
                                 <Check className="w-4 h-4 mr-1" />
                                 {updateFetcher.state === 'submitting' ? 'Saving...' : 'Save Changes'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

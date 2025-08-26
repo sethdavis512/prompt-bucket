@@ -4,6 +4,7 @@ import { Edit, Copy, Share2, ArrowLeft } from 'lucide-react';
 import { requireAuth } from '~/lib/session';
 import { getPromptByUserIdAndId } from '~/models/prompt.server';
 import PromptPreview from '~/components/PromptPreview';
+import Button from '~/components/Button';
 import type { Route } from './+types/detail';
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -152,13 +153,14 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                 <Share2 className="w-4 h-4 mr-1" />
                                 {copyStatus.share ? 'Copied!' : 'Share'}
                             </button>
-                            <Link
+                            <Button
+                                as="link"
                                 to={`/prompts/${prompt.id}/edit`}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                size="sm"
                             >
                                 <Edit className="w-4 h-4 mr-1" />
                                 Edit
-                            </Link>
+                            </Button>
                         </div>
                     </div>
                 </div>

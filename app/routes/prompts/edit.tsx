@@ -13,6 +13,7 @@ import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
 import CategoryManager from '~/components/CategoryManager';
+import Button from '~/components/Button';
 import FieldScoring from '~/components/FieldScoring';
 import { usePromptScoring } from '~/hooks/usePromptScoring';
 import { usePromptAPI } from '~/hooks/usePromptAPI';
@@ -275,21 +276,24 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
                                     </span>
                                 </div>
                             )}
-                            <Link
+                            <Button
+                                as="link"
                                 to={`/prompts/${prompt.id}`}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                variant="secondary"
+                                size="sm"
                             >
                                 <X className="w-4 h-4 mr-1" />
                                 Cancel
-                            </Link>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={handleSave}
                                 disabled={updateFetcher.state !== 'idle'}
-                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                                loading={updateFetcher.state === 'submitting'}
+                                size="sm"
                             >
                                 <Check className="w-4 h-4 mr-1" />
                                 {updateFetcher.state === 'submitting' ? 'Saving...' : 'Save Changes'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

@@ -13,6 +13,7 @@ import { requireAuth } from '~/lib/session';
 import { getCategoryCountByUserId } from '~/models/category.server';
 import { getPromptCountByUserId, getPromptScoringStats } from '~/models/prompt.server';
 import { getChainCountByUserId, getChainScoringStats } from '~/models/chain.server';
+import Button from '~/components/Button';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const { user, isProUser } = await requireAuth(request);
@@ -59,14 +60,15 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         </div>
                         <div className="flex items-center space-x-3">
                             {loaderData.canCreateMore ? (
-                                <Link
+                                <Button
+                                    as="link"
                                     to="/prompts/new"
                                     data-cy="new-prompt-button"
-                                    className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                    className="flex items-center space-x-2"
                                 >
                                     <Plus className="h-4 w-4" />
                                     <span>New Prompt</span>
-                                </Link>
+                                </Button>
                             ) : (
                                 <div className="relative">
                                     <button
