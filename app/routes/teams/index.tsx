@@ -37,6 +37,7 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
             {isProUser ? (
               <Link
                 to="/teams/new"
+                data-cy="create-team-btn"
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,6 +49,7 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
               <div className="text-right">
                 <Link
                   to="/pricing"
+                  data-cy="upgrade-to-pro-btn"
                   className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100"
                 >
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,6 +154,7 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
                   <div className="flex items-center space-x-2 pt-4 border-t border-gray-100">
                     <Link
                       to={`/teams/${team.slug}/dashboard`}
+                      data-cy="open-team-btn"
                       className="flex-1 text-center py-2 px-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       Open Team

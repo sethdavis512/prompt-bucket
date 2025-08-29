@@ -122,6 +122,7 @@ export default function NewTeam({ loaderData, actionData }: Route.ComponentProps
               <div className="mt-4">
                 <Link
                   to="/pricing"
+                  data-cy="upgrade-link"
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-amber-700 bg-amber-100 hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   Upgrade to Pro
@@ -174,6 +175,7 @@ export default function NewTeam({ loaderData, actionData }: Route.ComponentProps
               id="name"
               required
               autoFocus
+              data-cy="team-name"
               className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 actionData?.fieldErrors?.name ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -198,6 +200,7 @@ export default function NewTeam({ loaderData, actionData }: Route.ComponentProps
               name="slug"
               id="slug"
               required
+              data-cy="team-slug"
               className={`flex-1 px-3 py-2 border rounded-r-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 actionData?.fieldErrors?.slug ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -246,6 +249,7 @@ export default function NewTeam({ loaderData, actionData }: Route.ComponentProps
           </Link>
           <button
             type="submit"
+            data-cy="create-team-btn"
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Create Team

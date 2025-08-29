@@ -436,6 +436,108 @@ export function createChainWithPrompts(chainName: string, promptCount: number = 
   return cy.wrap({ name: chainName, prompts })
 }
 
+// =================== TEAM HELPERS ===================
+
+export interface TeamData {
+  name: string
+  slug: string
+  description?: string
+}
+
+/**
+ * Creates a test team with given data
+ */
+export function createTestTeam(teamData: Partial<TeamData> = {}, skipNavigation: boolean = false) {
+  const defaultData: TeamData = {
+    name: `Test Team ${Date.now()}`,
+    slug: `test-team-${Date.now()}`,
+    description: 'A test team created by Cypress',
+    ...teamData
+  }
+
+  if (!skipNavigation) {
+    cy.visit('/teams/new')
+  }
+  
+  // Wait for the form to be visible and stable
+  cy.get('[data-cy=team-name]').should('be.visible')
+  cy.wait(1000)
+  
+  // Fill in team details
+  cy.get('[data-cy=team-name]').clear({ force: true }).type(defaultData.name, { force: true })
+  cy.wait(200)
+  
+  cy.get('[data-cy=team-slug]').clear({ force: true }).type(defaultData.slug, { force: true })
+  cy.wait(200)
+  
+  if (defaultData.description) {
+    cy.get('[data-cy=team-description]').clear({ force: true }).type(defaultData.description, { force: true })
+  }
+  
+  cy.wait(500)
+  cy.get('[data-cy=create-team-btn]').click({ force: true })
+  
+  return cy.wrap(defaultData)
+}
+
+/**
+ * Creates team with Pro user and signs in
+ */
+export function createTeamWithProUser(teamName: string) {
+  return createProUserWithSubscription('team-owner').then((user) => {
+    return createTestTeam({ name: teamName, slug: teamName.toLowerCase().replace(/\s+/g, '-') }).then((team) => {
+      return cy.wrap({ user, team })
+    })
+  })
+}
+
+/**
+ * Invites a user to a team via UI
+ */
+export function inviteUserToTeam(teamSlug: string, email: string, role: 'ADMIN' | 'MEMBER' = 'MEMBER') {
+  cy.visit(`/teams/${teamSlug}/settings/members`)
+  cy.get('[data-cy=invite-member-btn]').click()
+  cy.get('[data-cy=invite-email]').type(email)
+  cy.get('[data-cy=invite-role]').select(role)
+  cy.get('[data-cy=send-invitation]').click()
+  
+  return cy.wrap({ teamSlug, email, role })
+}
+
+/**
+ * Switches to a team workspace via team switcher
+ */
+export function switchToTeam(teamSlug: string) {
+  cy.get('[data-cy=team-switcher]').click()
+  cy.get(`[data-cy=switch-to-${teamSlug}]`).click()
+  cy.url().should('include', `/teams/${teamSlug}`)
+}
+
+/**
+ * Creates team prompt in team context
+ */
+export function createTeamPrompt(teamSlug: string, promptData: Partial<PromptData> = {}) {
+  cy.visit(`/teams/${teamSlug}/prompts/new`)
+  return createTestPrompt(promptData, true)
+}
+
+/**
+ * Setup complete team test scenario with owner and member
+ */
+export function setupTeamScenario(teamName: string) {
+  return createTeamWithProUser(teamName).then(({ user: owner, team }) => {
+    // Create a member user
+    return createAndSignInUser('free', 'team-member').then((member) => {
+      // Sign back in as owner to send invitation
+      return signInTestUser(owner).then(() => {
+        return inviteUserToTeam(team.slug, member.email).then(() => {
+          return cy.wrap({ owner, member, team })
+        })
+      })
+    })
+  })
+}
+
 /**
  * Adds data-cy attributes to components for easier testing
  */
