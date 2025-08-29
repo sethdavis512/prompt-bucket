@@ -110,7 +110,7 @@ export default function EditChain({ loaderData }: Route.ComponentProps) {
     const handleAddPrompt = (promptId: string) => {
         const prompt = allPrompts.find(p => p.id === promptId);
         if (prompt && !selectedPrompts.find(p => p.id === promptId)) {
-            setSelectedPrompts(prev => [...prev, prompt]);
+            setSelectedPrompts(prev => [...prev, { ...prompt, description: prompt.description ?? undefined }]);
         }
     };
 

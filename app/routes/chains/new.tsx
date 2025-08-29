@@ -54,7 +54,7 @@ export async function action({ request }: Route.ActionArgs) {
         // Create chain
         const chain = await createChain(user.id, {
             name,
-            description: description || null,
+            description: description || undefined,
             promptIds
         });
 

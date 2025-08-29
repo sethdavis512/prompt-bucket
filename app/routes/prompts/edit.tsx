@@ -133,7 +133,7 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
         canGenerate
     } = usePromptAPI({
         isProUser,
-        promptValues: editedPrompt,
+        promptValues: { ...editedPrompt, public: editedPrompt.public.toString() },
         onScoreUpdate: updateFieldScore,
         onContentGenerated: (fieldType: string, content: string) => {
             updateEditedValue(fieldType, content);

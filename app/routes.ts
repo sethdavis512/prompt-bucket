@@ -15,7 +15,7 @@ export default [
         route('chains', 'routes/api/chains.ts'),
         route('evaluate-chain', 'routes/api/evaluate-chain.ts'),
         route('score-prompt', 'routes/api/score-prompt.ts'),
-        route('webhooks/polar', 'routes/api.webhooks.polar.tsx'),
+        route('webhooks/polar', 'routes/api/webhooks/polar.tsx'),
         // Team API routes
         route('teams', 'routes/api/teams/index.ts'),
         route('teams/:id', 'routes/api/teams/detail.ts'),
