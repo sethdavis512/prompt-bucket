@@ -1,6 +1,6 @@
 # Cypress E2E Testing
 
-This directory contains end-to-end tests for the Prompt Lab application using Cypress.
+This directory contains end-to-end tests for the Prompt Bucket application using Cypress.
 
 ## Setup
 

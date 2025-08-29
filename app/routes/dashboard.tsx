@@ -6,6 +6,7 @@ import {
     FolderOpen,
     TrendingUp,
     Link2,
+    Users,
     Plus
 } from 'lucide-react';
 import type { Route } from './+types/dashboard';
@@ -13,12 +14,13 @@ import { requireAuth } from '~/lib/session';
 import { getCategoryCountByUserId } from '~/models/category.server';
 import { getPromptCountByUserId, getPromptScoringStats } from '~/models/prompt.server';
 import { getChainCountByUserId, getChainScoringStats } from '~/models/chain.server';
+import { getUserTeams } from '~/models/team.server';
 import Button from '~/components/Button';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const { user, isProUser } = await requireAuth(request);
 
-    const [categories, promptCount, promptStats, chainStats] = await Promise.all([
+    const [categories, promptCount, promptStats, chainStats, teams] = await Promise.all([
         getCategoryCountByUserId(user.id),
         getPromptCountByUserId(user.id),
         getPromptScoringStats(user.id),
@@ -26,7 +28,9 @@ export async function loader({ request }: Route.LoaderArgs) {
         isProUser ? Promise.all([
             getChainCountByUserId(user.id),
             getChainScoringStats(user.id)
-        ]).then(([count, agg]) => ({ count, ...agg })) : { count: 0, _avg: { chainScore: null }, _max: { chainScore: null }, _count: { chainScore: 0 } }
+        ]).then(([count, agg]) => ({ count, ...agg })) : { count: 0, _avg: { chainScore: null }, _max: { chainScore: null }, _count: { chainScore: 0 } },
+        // Team statistics (only for Pro users)
+        isProUser ? getUserTeams(user.id) : []
     ]);
 
     const promptLimit = isProUser ? null : 5;
@@ -37,6 +41,8 @@ export async function loader({ request }: Route.LoaderArgs) {
         promptCount,
         promptStats,
         chainStats,
+        teams,
+        teamsCount: teams.length,
         isProUser,
         promptLimit,
         canCreateMore
@@ -176,6 +182,42 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         </div>
                     )}
 
+                    {/* Teams (Pro Users Only) */}
+                    {loaderData.isProUser && (
+                        <div className="bg-white shadow rounded-lg">
+                            <div className="px-4 py-5 sm:p-6">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <Users className="h-8 w-8 text-indigo-600" />
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">
+                                                My Teams
+                                            </dt>
+                                            <dd className="text-3xl font-bold text-gray-900">
+                                                {loaderData.teamsCount}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                {loaderData.teamsCount === 0 && (
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            Create teams to collaborate with colleagues
+                                        </p>
+                                        <Link
+                                            to="/teams/new"
+                                            className="text-xs text-indigo-600 hover:text-indigo-500 font-medium"
+                                        >
+                                            Create your first team →
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Account Status */}
                     <div className="bg-white shadow rounded-lg">
                         <div className="px-4 py-5 sm:p-6">
@@ -270,6 +312,42 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
                         </div>
                     )}
                 </div>
+
+                {/* Team Collaboration CTA for Free Users */}
+                {!loaderData.isProUser && (
+                    <div className="mt-8">
+                        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-6">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <Users className="h-6 w-6 text-indigo-600" />
+                                </div>
+                                <div className="ml-3 flex-1">
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        Ready to collaborate?
+                                    </h3>
+                                    <p className="mt-1 text-sm text-gray-600">
+                                        Create teams, invite colleagues, and work together on prompts and chains. 
+                                        Teams start at just $8/user/month.
+                                    </p>
+                                    <div className="mt-4 flex space-x-3">
+                                        <Link
+                                            to="/pricing"
+                                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+                                        >
+                                            View Team Pricing
+                                        </Link>
+                                        <Link
+                                            to="/teams"
+                                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-100 border border-transparent rounded-md hover:bg-indigo-200"
+                                        >
+                                            Learn More
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

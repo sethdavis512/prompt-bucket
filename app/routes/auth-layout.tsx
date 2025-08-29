@@ -4,6 +4,7 @@ import {
     FileText,
     Link2,
     FolderOpen,
+    Users,
     Star,
     Crown,
     User,
@@ -68,6 +69,13 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
             name: 'Categories',
             href: '/categories',
             icon: FolderOpen,
+            enabled: isProUser,
+            isPro: true
+        },
+        {
+            name: 'Teams',
+            href: '/teams',
+            icon: Users,
             enabled: isProUser,
             isPro: true
         }
@@ -214,7 +222,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                             Upgrade to Pro
                                         </p>
                                         <p className="text-xs text-purple-100">
-                                            Unlock chains & categories
+                                            Unlock teams & collaboration
                                         </p>
                                     </div>
                                 </div>

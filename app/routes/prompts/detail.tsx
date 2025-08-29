@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useOutletContext } from 'react-router';
-import { Edit, Copy, Share2, ArrowLeft } from 'lucide-react';
+import { Edit, Copy, Share2, ArrowLeft, Users } from 'lucide-react';
 import { requireAuth } from '~/lib/session';
 import { getPromptByUserIdAndId } from '~/models/prompt.server';
 import PromptPreview from '~/components/PromptPreview';
@@ -232,6 +232,31 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                 );
                             })}
                         </div>
+
+                        {/* Team Collaboration Prompt (Free Users Only) */}
+                        {!isProUser && (
+                            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-4">
+                                <div className="flex items-start space-x-3">
+                                    <div className="flex-shrink-0">
+                                        <Users className="h-5 w-5 text-indigo-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                            Love this prompt? Share it with your team
+                                        </h4>
+                                        <p className="text-xs text-gray-600 mb-3">
+                                            Upgrade to Pro to create teams, share prompts, and collaborate on better AI outputs together.
+                                        </p>
+                                        <Link
+                                            to="/pricing"
+                                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded-md hover:bg-indigo-50"
+                                        >
+                                            Start Team Collaboration
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Preview */}

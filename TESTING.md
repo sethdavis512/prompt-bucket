@@ -1,4 +1,4 @@
-# Testing Strategy for Prompt Lab
+# Testing Strategy for Prompt Bucket
 
 ## Overview
 
