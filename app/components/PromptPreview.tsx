@@ -81,7 +81,7 @@ export default function PromptPreview({
                         </button>
                     </div>
                 </div>
-                <div className="block w-full h-screen max-h-[calc(100vh-10rem)] p-6 bg-gradient-to-br from-slate-50 to-gray-100 rounded-lg border border-gray-200 overflow-y-auto text-sm leading-relaxed">
+                <div className="block w-full h-screen max-h-[calc(100vh-18rem)] p-6 bg-gradient-to-br from-slate-50 to-gray-100 rounded-lg border border-gray-200 overflow-y-auto text-sm leading-relaxed">
                     <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap font-sans">
                         {content || "Your prompt preview will appear here as you type..."}
                     </div>

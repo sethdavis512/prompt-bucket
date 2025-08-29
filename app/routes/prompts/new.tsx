@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react';
 import { z } from 'zod';
 import { useOutletContext, Form, redirect } from 'react-router';
-import { prisma } from '~/lib/prisma';
-import { auth } from '~/lib/auth';
-import Layout from '~/components/Layout';
+import { requireAuth } from '~/lib/session';
+import {
+    getPromptCountByUserId,
+    createPromptWithTransaction
+} from '~/models/prompt.server';
+import { getCategoriesWithRecentPrompts } from '~/models/category.server';
 import TextField from '~/components/TextField';
 import TextArea from '~/components/TextArea';
 import PromptPreview from '~/components/PromptPreview';
@@ -43,19 +46,9 @@ const createPromptSchema = z.object({
 });
 
 export async function loader({ request }: Route.LoaderArgs) {
-    const session = await auth.api.getSession({ headers: request.headers });
+    const { user, isProUser } = await requireAuth(request);
 
-    // Check user subscription and prompt count
-    const user = await prisma.user.findUnique({
-        where: { id: session!.user.id },
-        select: { subscriptionStatus: true }
-    });
-
-    const promptCount = await prisma.prompt.count({
-        where: { userId: session!.user.id }
-    });
-
-    const isProUser = user?.subscriptionStatus === 'active';
+    const promptCount = await getPromptCountByUserId(user.id);
     const canCreateMore = isProUser || promptCount < 5;
 
     // Redirect to pricing if free user has reached limit
@@ -63,44 +56,7 @@ export async function loader({ request }: Route.LoaderArgs) {
         return redirect('/pricing?reason=limit_reached');
     }
 
-    const categories = await prisma.category.findMany({
-        where: {
-            userId: session!.user.id // Only user's own categories
-        },
-        include: {
-            prompts: {
-                where: {
-                    prompt: {
-                        userId: session!.user.id
-                    }
-                },
-                include: {
-                    prompt: {
-                        select: {
-                            id: true,
-                            title: true,
-                            updatedAt: true
-                        }
-                    }
-                }
-            },
-            _count: {
-                select: {
-                    prompts: {
-                        where: {
-                            prompt: {
-                                userId: session!.user.id
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        orderBy: [
-            { userId: 'asc' }, // System categories first (null userId)
-            { name: 'asc' }
-        ]
-    });
+    const categories = await getCategoriesWithRecentPrompts(user.id);
 
     return { categories };
 }
@@ -165,47 +121,8 @@ export async function action({ request }: Route.ActionArgs) {
         // Validate the data
         createPromptSchema.parse(data);
 
-        // Create the prompt first
-        const prompt = await prisma.prompt.create({
-            data: {
-                title: data.title,
-                description: data.description,
-                public: data.public,
-                taskContext: data.taskContext,
-                toneContext: data.toneContext,
-                backgroundData: data.backgroundData,
-                detailedTaskDescription: data.detailedTaskDescription,
-                examples: data.examples,
-                conversationHistory: data.conversationHistory,
-                immediateTask: data.immediateTask,
-                thinkingSteps: data.thinkingSteps,
-                outputFormatting: data.outputFormatting,
-                prefilledResponse: data.prefilledResponse,
-                // Include scoring data
-                taskContextScore: data.taskContextScore,
-                toneContextScore: data.toneContextScore,
-                backgroundDataScore: data.backgroundDataScore,
-                detailedTaskScore: data.detailedTaskScore,
-                examplesScore: data.examplesScore,
-                conversationScore: data.conversationScore,
-                immediateTaskScore: data.immediateTaskScore,
-                thinkingStepsScore: data.thinkingStepsScore,
-                outputFormattingScore: data.outputFormattingScore,
-                prefilledResponseScore: data.prefilledResponseScore,
-                totalScore: data.totalScore,
-                userId: userId
-            }
-        });
-
-        // Create category associations if any categories were selected
-        if (data.categoryIds.length > 0) {
-            await prisma.promptCategory.createMany({
-                data: data.categoryIds.map((categoryId) => ({
-                    promptId: prompt.id,
-                    categoryId: categoryId
-                }))
-            });
-        }
+        // Create the prompt with category associations
+        const prompt = await createPromptWithTransaction(userId, data);
 
         return redirect('/dashboard');
     } catch (error) {
@@ -333,7 +250,10 @@ export default function NewPrompt({
         values?: any;
     };
 }) {
-    const { user, isProUser } = useOutletContext<{ user: any, isProUser: boolean }>();
+    const { user, isProUser } = useOutletContext<{
+        user: any;
+        isProUser: boolean;
+    }>();
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [isPublic, setIsPublic] = useState(false);
 
@@ -377,51 +297,60 @@ export default function NewPrompt({
     const getContextualHint = (fieldType: string): string => {
         const taskContext = promptValues.taskContext?.toLowerCase() || '';
         const title = promptValues.title?.toLowerCase() || '';
-        
+
         // Extract key themes from task context and title
-        const isMarketing = taskContext.includes('marketing') || title.includes('marketing');
-        const isSoftware = taskContext.includes('software') || taskContext.includes('saas') || taskContext.includes('tech');
-        const isWriting = taskContext.includes('writer') || taskContext.includes('content') || title.includes('writer');
-        const isStrategy = taskContext.includes('strategy') || taskContext.includes('strategist');
-        
+        const isMarketing =
+            taskContext.includes('marketing') || title.includes('marketing');
+        const isSoftware =
+            taskContext.includes('software') ||
+            taskContext.includes('saas') ||
+            taskContext.includes('tech');
+        const isWriting =
+            taskContext.includes('writer') ||
+            taskContext.includes('content') ||
+            title.includes('writer');
+        const isStrategy =
+            taskContext.includes('strategy') ||
+            taskContext.includes('strategist');
+
         // Generate hints based on field type and context
         switch (fieldType) {
             case 'toneContext':
-                if (isMarketing && isSoftware) return "Define marketing tone";
-                if (isWriting) return "Set writing style";
-                if (isStrategy) return "Choose strategic voice";
-                return "Specify desired tone";
-                
+                if (isMarketing && isSoftware) return 'Define marketing tone';
+                if (isWriting) return 'Set writing style';
+                if (isStrategy) return 'Choose strategic voice';
+                return 'Specify desired tone';
+
             case 'backgroundData':
-                if (isMarketing && isSoftware) return "Add market context";
-                if (isSoftware) return "Include tech background";
-                if (isMarketing) return "Provide market data";
-                return "Share relevant context";
-                
+                if (isMarketing && isSoftware) return 'Add market context';
+                if (isSoftware) return 'Include tech background';
+                if (isMarketing) return 'Provide market data';
+                return 'Share relevant context';
+
             case 'detailedTaskDescription':
-                if (isMarketing) return "Detail marketing goals";
-                if (isSoftware) return "Outline tech requirements";
-                if (isWriting) return "Specify content needs";
-                return "Provide context or details";
-                
+                if (isMarketing) return 'Detail marketing goals';
+                if (isSoftware) return 'Outline tech requirements';
+                if (isWriting) return 'Specify content needs';
+                return 'Provide context or details';
+
             case 'examples':
-                if (isMarketing) return "Show campaign examples";
-                if (isSoftware) return "Include product examples";
-                if (isWriting) return "Add writing samples";
-                return "Provide examples";
-                
+                if (isMarketing) return 'Show campaign examples';
+                if (isSoftware) return 'Include product examples';
+                if (isWriting) return 'Add writing samples';
+                return 'Provide examples';
+
             case 'immediateTask':
-                if (isMarketing) return "State marketing request";
-                if (isSoftware) return "Define current need";
-                return "Describe specific task";
-                
+                if (isMarketing) return 'State marketing request';
+                if (isSoftware) return 'Define current need';
+                return 'Describe specific task';
+
             case 'outputFormatting':
-                if (isMarketing) return "Set content format";
-                if (isWriting) return "Choose output style";
-                return "Specify format needs";
-                
+                if (isMarketing) return 'Set content format';
+                if (isWriting) return 'Choose output style';
+                return 'Specify format needs';
+
             default:
-                return "AI will rate this";
+                return 'AI will rate this';
         }
     };
 
@@ -463,18 +392,26 @@ export default function NewPrompt({
     };
 
     return (
-        <Layout user={user}>
-            <div className="px-4 py-6 sm:px-0">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Create New Prompt
-                    </h1>
-                    <p className="text-gray-600">
-                        Build a structured prompt using the 10-section
-                        methodology
-                    </p>
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">
+                                Create New Prompt
+                            </h1>
+                            <p className="text-gray-600 mt-1">
+                                Build a structured prompt using the 10-section
+                                methodology
+                            </p>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
                 {actionData?.error && (
                     <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                         {actionData.error}
@@ -536,6 +473,7 @@ export default function NewPrompt({
                                         }
                                         placeholder="e.g., Blog Article Writer"
                                         error={actionData?.errors?.title?.[0]}
+                                        data-cy="prompt-title"
                                     />
 
                                     <TextField
@@ -550,6 +488,7 @@ export default function NewPrompt({
                                             )
                                         }
                                         placeholder="Brief description of what this prompt does"
+                                        data-cy="prompt-description"
                                     />
 
                                     <CategoryManager
@@ -595,6 +534,7 @@ export default function NewPrompt({
                                                         onChange={() =>
                                                             setIsPublic(true)
                                                         }
+                                                        data-cy="public-checkbox"
                                                         className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                                                     />
                                                     <span className="ml-2 text-sm text-gray-700">
@@ -764,7 +704,9 @@ export default function NewPrompt({
                                                                 suggestion
                                                             )
                                                         }
-                                                        contextualHint={getContextualHint(section.id)}
+                                                        contextualHint={getContextualHint(
+                                                            section.id
+                                                        )}
                                                     />
                                                 </div>
 
@@ -854,6 +796,7 @@ export default function NewPrompt({
                                                 scoringField === section.id
                                             }
                                             maxLength={section.maxChars}
+                                            data-cy={section.id}
                                         />
 
                                         {/* Character count indicator */}
@@ -908,6 +851,7 @@ export default function NewPrompt({
                                 </button>
                                 <button
                                     type="submit"
+                                    data-cy="save-prompt"
                                     className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700"
                                 >
                                     Create Prompt
@@ -917,7 +861,7 @@ export default function NewPrompt({
                     </div>
 
                     {/* Live Preview Column */}
-                    <div className="sticky top-6 self-start">
+                    <div className="sticky top-0 self-start">
                         <PromptPreview
                             content={generatePromptPreview()}
                             totalScore={totalScore}
@@ -926,6 +870,6 @@ export default function NewPrompt({
                     </div>
                 </div>
             </div>
-        </Layout>
+        </div>
     );
 }

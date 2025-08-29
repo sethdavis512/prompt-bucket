@@ -7,7 +7,14 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(npm run typecheck:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "WebFetch(domain:github.com)",
+      "Bash(grep:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

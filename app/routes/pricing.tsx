@@ -1,8 +1,7 @@
 import { Link } from 'react-router';
-import { Check, Star, Zap } from 'lucide-react';
-import Layout from '~/components/Layout';
+import { Check, Star, Zap, CreditCard, Users } from 'lucide-react';
 import { auth } from '~/lib/auth';
-import { prisma } from '~/lib/prisma';
+import { getUserById } from '~/models/user.server';
 import type { Route } from './+types/pricing';
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -11,16 +10,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     let user = null;
 
     if (session) {
-        user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                subscriptionStatus: true,
-                customerId: true
-            }
-        });
+        user = await getUserById(session.user.id);
     }
 
     return { products: process.env.POLAR_SUBSCRIPTION_PRODUCT_ID!, user };
@@ -66,14 +56,19 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
             name: 'Pro',
             price: '$10',
             period: 'month',
-            description: 'Everything you need to build amazing prompts',
+            teamPrice: '$8',
+            description: 'For individuals and teams who want to collaborate on prompts',
             features: [
                 'Unlimited prompt templates',
                 'Advanced prompt structure',
                 'Public prompt sharing',
                 'Priority support',
                 'Advanced categorization',
-                'Export & import features'
+                'Export & import features',
+                'Create and manage teams',
+                'Team collaboration workspace',
+                'Shared prompts, chains & categories',
+                'Team member invitations'
             ],
             buttonText: isProUser ? 'Current Plan' : 'Upgrade to Pro',
             buttonVariant: isProUser
@@ -86,15 +81,31 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
     ];
 
     return (
-        <Layout user={user}>
-            <div className="px-4 py-12 sm:px-0">
+        <div className="flex-1 flex flex-col min-h-0">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                        <CreditCard className="h-6 w-6 text-gray-400" />
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Pricing
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 mt-2">
+                        Choose the plan that's right for you and your team
+                    </p>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">
                         Simple, Transparent Pricing
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Choose the plan that's right for you. Upgrade or
-                        downgrade at any time.
+                        Scale from individual productivity to team collaboration.
+                        Upgrade or downgrade at any time.
                     </p>
                 </div>
 
@@ -137,6 +148,15 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                                         <span className="text-gray-600">
                                             /{plan.period}
                                         </span>
+                                        {plan.teamPrice && (
+                                            <div className="mt-2 text-sm text-gray-600">
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <Users className="h-4 w-4" />
+                                                    <span>Teams: <strong className="text-indigo-600">{plan.teamPrice}/user/month</strong></span>
+                                                </div>
+                                                <p className="text-xs mt-1 text-gray-500">Minimum 2 seats</p>
+                                            </div>
+                                        )}
                                     </div>
                                     <p className="text-gray-600">
                                         {plan.description}
@@ -185,6 +205,53 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                             </div>
                         ))}
                     </div>
+                    
+                    {/* Team Savings Calculator */}
+                    <div className="mt-16 max-w-4xl mx-auto">
+                        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-8">
+                            <div className="text-center mb-6">
+                                <div className="flex items-center justify-center mb-4">
+                                    <Users className="h-8 w-8 text-indigo-600" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">Team Savings</h3>
+                                <p className="text-gray-600">Save money when you bring your team together</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                                <div className="bg-white rounded-lg p-6">
+                                    <div className="text-lg font-semibold text-gray-900 mb-1">2-Person Team</div>
+                                    <div className="text-3xl font-bold text-indigo-600 mb-2">$16<span className="text-base text-gray-500">/month</span></div>
+                                    <div className="text-sm text-gray-500">vs $20 individual plans</div>
+                                    <div className="text-sm font-medium text-green-600 mt-1">Save $4/month</div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg p-6">
+                                    <div className="text-lg font-semibold text-gray-900 mb-1">5-Person Team</div>
+                                    <div className="text-3xl font-bold text-indigo-600 mb-2">$40<span className="text-base text-gray-500">/month</span></div>
+                                    <div className="text-sm text-gray-500">vs $50 individual plans</div>
+                                    <div className="text-sm font-medium text-green-600 mt-1">Save $10/month</div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg p-6">
+                                    <div className="text-lg font-semibold text-gray-900 mb-1">10-Person Team</div>
+                                    <div className="text-3xl font-bold text-indigo-600 mb-2">$80<span className="text-base text-gray-500">/month</span></div>
+                                    <div className="text-sm text-gray-500">vs $100 individual plans</div>
+                                    <div className="text-sm font-medium text-green-600 mt-1">Save $20/month</div>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-8 text-center">
+                                <p className="text-gray-600 mb-4">Ready to collaborate with your team?</p>
+                                <Link
+                                    to={user ? "/teams" : "/auth/signup"}
+                                    className="inline-flex items-center px-6 py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors"
+                                >
+                                    <Users className="w-4 h-4 mr-2" />
+                                    {user ? "Manage Teams" : "Start Your Team"}
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {!user && (
@@ -227,10 +294,37 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                                     the free plan limit.
                                 </p>
                             </div>
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h4 className="font-medium text-gray-900 mb-2">
+                                    How does team pricing work?
+                                </h4>
+                                <p className="text-gray-600">
+                                    Teams are billed at $8 per user per month with a minimum of 2 seats. 
+                                    Each team member gets full Pro features plus access to shared team workspaces.
+                                </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h4 className="font-medium text-gray-900 mb-2">
+                                    Can I mix individual and team subscriptions?
+                                </h4>
+                                <p className="text-gray-600">
+                                    Yes! You can have a personal Pro subscription and also be part of team workspaces. 
+                                    Team admins manage team billing separately from individual subscriptions.
+                                </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-6">
+                                <h4 className="font-medium text-gray-900 mb-2">
+                                    What team features are included?
+                                </h4>
+                                <p className="text-gray-600">
+                                    Teams get shared workspaces for prompts, chains, and categories, member invitation system, 
+                                    role-based permissions, and collaborative editing features.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </Layout>
+        </div>
     );
 }

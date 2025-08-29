@@ -85,6 +85,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
             placeholder="Full name"
             labelClassName="sr-only"
             label="Full name"
+            data-cy="name-input"
           />
           <TextField
             id="email"
@@ -95,6 +96,7 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
             placeholder="Email address"
             labelClassName="sr-only"
             label="Email address"
+            data-cy="email-input"
           />
           <TextField
             id="password"
@@ -106,11 +108,13 @@ export default function SignUp({ actionData }: Route.ComponentProps) {
             placeholder="Password (min 8 characters)"
             labelClassName="sr-only"
             label="Password"
+            data-cy="password-input"
           />
 
           <div>
             <button
               type="submit"
+              data-cy="signup-button"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Create account

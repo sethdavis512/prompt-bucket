@@ -1,8 +1,8 @@
-# Copilot Instructions for Prompt Lab
+# Copilot Instructions for Prompt Bucket
 
 ## Project Overview
 
-Prompt Lab is a React Router v7 application for managing and organizing AI prompts with authentication, categorization, and public sharing capabilities. Built with TypeScript, Prisma, Better Auth, and TailwindCSS.
+Prompt Bucket is a React Router v7 application for managing and organizing AI prompts with authentication, categorization, and public sharing capabilities. Built with TypeScript, Prisma, Better Auth, and TailwindCSS.
 
 ## Architecture & Patterns
 

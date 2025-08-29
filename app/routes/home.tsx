@@ -1,11 +1,10 @@
 import { Link } from "react-router"
 import { FileText, Zap, BookOpen, Users, ArrowRight, Check } from "lucide-react"
-import Layout from "~/components/Layout"
 import type { Route } from "./+types/home"
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Prompt Lab - Structure Your AI Prompts" },
+    { title: "Prompt Bucket - Structure Your AI Prompts" },
     { name: "description", content: "Create, organize, and manage AI prompts with our 10-section methodology. Build better prompts for better results." },
   ];
 }
@@ -41,7 +40,6 @@ const promptSections = [
 
 export default function Home({ loaderData, actionData, params, matches }: Route.ComponentProps) {
   return (
-    <Layout>
       <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen">
         {/* Hero Section */}
         <div className="relative px-6 lg:px-8">
@@ -158,6 +156,5 @@ export default function Home({ loaderData, actionData, params, matches }: Route.
           </div>
         </div>
       </div>
-    </Layout>
   )
 }

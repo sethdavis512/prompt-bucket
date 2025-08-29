@@ -13,6 +13,7 @@ interface TextFieldProps {
     value?: string;
     defaultValue?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     name?: string;
     id?: string;
@@ -23,6 +24,7 @@ interface TextFieldProps {
     maxLength?: number;
     pattern?: string;
     size?: 'sm' | 'md' | 'lg';
+    'data-cy'?: string;
 }
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
@@ -40,6 +42,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             value,
             defaultValue,
             onChange,
+            onBlur,
             onKeyDown,
             name,
             id,
@@ -49,7 +52,8 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             minLength,
             maxLength,
             pattern,
-            size = 'md'
+            size = 'md',
+            'data-cy': dataCy
         },
         ref
     ) => {
@@ -90,6 +94,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
                         value={value}
                         defaultValue={defaultValue}
                         onChange={onChange}
+                        onBlur={onBlur}
                         onKeyDown={onKeyDown}
                         autoComplete={autoComplete}
                         disabled={disabled}
@@ -100,6 +105,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
                         pattern={pattern}
                         className={baseInputClasses}
                         placeholder={placeholder}
+                        data-cy={dataCy}
                     />
                 </div>
                 {error && (

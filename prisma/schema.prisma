@@ -13,10 +13,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TeamRole {
+  ADMIN
+  MEMBER
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -32,8 +43,13 @@ model User {
   // Relations
   prompts    Prompt[]
   categories Category[]
+  chains     Chain[]
   sessions   Session[]
   accounts   Account[]
+  
+  // Team relations
+  teamMemberships TeamMember[]
+  teamInvitations TeamInvitation[] @relation("TeamInviter")
 
   @@map("users")
 }
@@ -82,12 +98,16 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Team relation (optional - null means personal category)
+  teamId String?
+
   // Relations
   user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team    Team?            @relation(fields: [teamId], references: [id], onDelete: Cascade)
   prompts PromptCategory[]
 
-  // Ensure unique category names per user
-  @@unique([name, userId])
+  // Ensure unique category names per user (or per team)
+  @@unique([name, userId, teamId])
   @@map("categories")
 }
 
@@ -102,6 +122,10 @@ model Prompt {
   // User relation
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Team relation (optional - null means personal prompt)
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   // Prompt structure sections
   taskContext             String?
@@ -132,6 +156,7 @@ model Prompt {
 
   // Relations
   categories PromptCategory[]
+  chainPrompts ChainPrompt[]
 
   @@map("prompts")
 }
@@ -149,6 +174,50 @@ model PromptCategory {
   @@map("prompt_categories")
 }
 
+model Chain {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // User relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Team relation (optional - null means personal chain)
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Overall chain score from AI evaluation
+  chainScore Int? @default(0)
+  
+  // AI evaluation feedback
+  evaluationFeedback String?
+  lastEvaluatedAt    DateTime?
+
+  // Relations
+  prompts ChainPrompt[]
+
+  @@map("chains")
+}
+
+model ChainPrompt {
+  id       String @id @default(cuid())
+  chainId  String
+  promptId String
+  order    Int    // Position in the chain (0-based)
+  createdAt DateTime @default(now())
+
+  chain  Chain  @relation(fields: [chainId], references: [id], onDelete: Cascade)
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  // Ensure unique ordering per chain and no duplicate prompts in same chain
+  @@unique([chainId, order])
+  @@unique([chainId, promptId])
+  @@map("chain_prompts")
+}
+
 model Verification {
   id         String    @id
   identifier String
@@ -158,4 +227,61 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique // for team URLs like /teams/acme-corp
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Subscription fields (team-level billing)
+  subscriptionStatus String? @default("free") // free, active, canceled, etc.
+  subscriptionId     String?
+  customerId         String?
+
+  // Relations
+  members     TeamMember[]
+  invitations TeamInvitation[]
+  prompts     Prompt[]
+  categories  Category[]
+  chains      Chain[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  // Relations
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamInvitation {
+  id         String    @id @default(cuid())
+  teamId     String
+  email      String
+  role       TeamRole  @default(MEMBER)
+  token      String    @unique // for invitation links
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+  invitedBy  String
+
+  // Relations
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation("TeamInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, email])
+  @@map("team_invitations")
 }
