@@ -15,7 +15,13 @@ export default [
         route('chains', 'routes/api/chains.ts'),
         route('evaluate-chain', 'routes/api/evaluate-chain.ts'),
         route('score-prompt', 'routes/api/score-prompt.ts'),
-        route('webhooks/polar', 'routes/api.webhooks.polar.tsx')
+        route('webhooks/polar', 'routes/api.webhooks.polar.tsx'),
+        // Team API routes
+        route('teams', 'routes/api/teams/index.ts'),
+        route('teams/:id', 'routes/api/teams/detail.ts'),
+        route('teams/:id/members', 'routes/api/teams/members.ts'),
+        route('teams/:id/invitations', 'routes/api/teams/invitations.ts'),
+        route('invitations/:token/accept', 'routes/api/invitations/accept.ts')
     ]),
 
     // All UI routes wrapped in main layout
@@ -48,7 +54,30 @@ export default [
                 route(':id', 'routes/chains/detail.tsx'),
                 route(':id/edit', 'routes/chains/edit.tsx'),
                 route('new', 'routes/chains/new.tsx')
-            ])
+            ]),
+            // Team routes
+            route('teams', 'routes/teams/index.tsx'),
+            route('teams/new', 'routes/teams/new.tsx'),
+            // Team workspace routes
+            ...prefix(`teams/:slug`, [
+                route('dashboard', 'routes/teams/workspace/dashboard.tsx'),
+                ...prefix('prompts', [
+                    index('routes/teams/workspace/prompts/index.tsx'),
+                    route(':id', 'routes/teams/workspace/prompts/detail.tsx'),
+                    route(':id/edit', 'routes/teams/workspace/prompts/edit.tsx'),
+                    route('new', 'routes/teams/workspace/prompts/new.tsx')
+                ]),
+                ...prefix('chains', [
+                    index('routes/teams/workspace/chains/index.tsx')
+                ]),
+                route('categories', 'routes/teams/workspace/categories.tsx'),
+                ...prefix('settings', [
+                    index('routes/teams/workspace/settings/index.tsx'),
+                    route('members', 'routes/teams/workspace/settings/members.tsx')
+                ])
+            ]),
+            // Team invitation acceptance
+            route('invitations/:token', 'routes/invitations/accept.tsx')
         ])
     ])
 ] satisfies RouteConfig;

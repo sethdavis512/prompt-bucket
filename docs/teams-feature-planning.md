@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add team collaboration capabilities to Prompt Lab, allowing companies to create shared workspaces where team members can collaborate on prompts, chains, and categories.
+Add team collaboration capabilities to Prompt Bucket, allowing companies to create shared workspaces where team members can collaborate on prompts, chains, and categories.
 
 ## Core Requirements
 
@@ -451,6 +451,233 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 - Implement team member caching for permission checks
 - Use Prisma's `include` strategically to avoid N+1 queries
 
+## E2E Testing Strategy
+
+### New Test Suites Required
+
+Following your existing Cypress test pattern, add these team-focused test files:
+
+```
+cypress/e2e/
+├── 12-team-creation-flow.cy.ts
+├── 13-team-invitation-management.cy.ts
+├── 14-team-workspace-collaboration.cy.ts
+├── 15-team-member-permissions.cy.ts
+├── 16-team-content-management.cy.ts
+├── 17-team-subscription-upgrade.cy.ts
+└── 18-team-admin-management.cy.ts
+```
+
+### Test Data Setup
+
+```typescript
+// cypress/support/team-test-helpers.ts
+export const createTestTeam = (teamData: {
+  name: string;
+  slug: string;
+  ownerId: string;
+}) => {
+  return cy.task('createTeam', teamData);
+};
+
+export const inviteTeamMember = (teamId: string, email: string, role: 'ADMIN' | 'MEMBER') => {
+  return cy.task('inviteTeamMember', { teamId, email, role });
+};
+
+export const seedTeamTestData = () => {
+  // Create test teams with known members
+  return cy.task('seedTeamData', {
+    teams: [
+      {
+        name: 'Acme Corp',
+        slug: 'acme-corp',
+        owner: 'team-owner@test.com',
+        members: ['team-member@test.com', 'team-admin@test.com']
+      }
+    ]
+  });
+};
+```
+
+### Critical Test Scenarios
+
+#### 12. Team Creation Flow
+```typescript
+describe('12. Team Creation and Basic Management', () => {
+  it('should allow Pro user to create a team', () => {
+    cy.loginAs('pro@test.com');
+    cy.visit('/teams/new');
+    cy.get('[data-cy=team-name]').type('Test Team');
+    cy.get('[data-cy=team-slug]').type('test-team');
+    cy.get('[data-cy=create-team-btn]').click();
+    cy.url().should('include', '/teams/test-team/dashboard');
+    cy.contains('Test Team').should('be.visible');
+  });
+
+  it('should prevent free users from creating teams', () => {
+    cy.loginAs('free@test.com');
+    cy.visit('/teams/new');
+    cy.contains('Upgrade to Pro').should('be.visible');
+    cy.get('[data-cy=create-team-btn]').should('be.disabled');
+  });
+});
+```
+
+#### 13. Team Invitation Management
+```typescript
+describe('13. Team Invitation System', () => {
+  beforeEach(() => {
+    cy.seedTeamTestData();
+    cy.loginAs('team-owner@test.com');
+  });
+
+  it('should send team invitation via email', () => {
+    cy.visit('/teams/acme-corp/settings/members');
+    cy.get('[data-cy=invite-member-btn]').click();
+    cy.get('[data-cy=invite-email]').type('newmember@test.com');
+    cy.get('[data-cy=invite-role]').select('MEMBER');
+    cy.get('[data-cy=send-invitation]').click();
+    cy.contains('Invitation sent').should('be.visible');
+  });
+
+  it('should allow invited user to accept invitation', () => {
+    const inviteToken = 'test-invite-token-123';
+    cy.logout();
+    cy.visit(`/invitations/${inviteToken}`);
+    cy.get('[data-cy=accept-invitation]').click();
+    cy.loginAs('newmember@test.com');
+    cy.visit('/teams');
+    cy.contains('Acme Corp').should('be.visible');
+  });
+});
+```
+
+#### 14. Team Workspace Collaboration
+```typescript
+describe('14. Team Content Collaboration', () => {
+  beforeEach(() => {
+    cy.seedTeamTestData();
+  });
+
+  it('should show team prompts to all members', () => {
+    cy.loginAs('team-owner@test.com');
+    cy.visit('/teams/acme-corp/prompts/new');
+    cy.createPrompt({
+      title: 'Team Marketing Prompt',
+      description: 'Shared prompt for marketing team'
+    });
+    
+    cy.logout();
+    cy.loginAs('team-member@test.com');
+    cy.visit('/teams/acme-corp/prompts');
+    cy.contains('Team Marketing Prompt').should('be.visible');
+    cy.get('[data-cy=prompt-creator]').should('contain', 'team-owner@test.com');
+  });
+
+  it('should allow team context switching', () => {
+    cy.loginAs('team-member@test.com');
+    cy.visit('/dashboard');
+    cy.get('[data-cy=team-switcher]').click();
+    cy.get('[data-cy=switch-to-acme-corp]').click();
+    cy.url().should('include', '/teams/acme-corp/dashboard');
+    cy.get('[data-cy=current-workspace]').should('contain', 'Acme Corp');
+  });
+});
+```
+
+#### 15. Team Member Permissions
+```typescript
+describe('15. Role-Based Team Permissions', () => {
+  it('should allow team admins to manage members', () => {
+    cy.loginAs('team-admin@test.com');
+    cy.visit('/teams/acme-corp/settings/members');
+    cy.get('[data-cy=member-role-team-member]').select('ADMIN');
+    cy.get('[data-cy=update-member-role]').click();
+    cy.contains('Role updated').should('be.visible');
+  });
+
+  it('should prevent regular members from accessing team settings', () => {
+    cy.loginAs('team-member@test.com');
+    cy.visit('/teams/acme-corp/settings');
+    cy.url().should('include', '/access-denied');
+  });
+});
+```
+
+### Test Environment Setup
+
+```typescript
+// cypress/support/commands.ts - Add team commands
+Cypress.Commands.add('createTeamPrompt', (teamSlug: string, promptData: any) => {
+  cy.visit(`/teams/${teamSlug}/prompts/new`);
+  cy.get('[data-cy=prompt-title]').type(promptData.title);
+  cy.get('[data-cy=prompt-description]').type(promptData.description);
+  cy.get('[data-cy=save-prompt]').click();
+});
+
+Cypress.Commands.add('switchToTeam', (teamSlug: string) => {
+  cy.get('[data-cy=team-switcher]').click();
+  cy.get(`[data-cy=switch-to-${teamSlug}]`).click();
+});
+
+// Add to cypress/support/e2e.ts
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      createTeamPrompt(teamSlug: string, promptData: any): Chainable<void>;
+      switchToTeam(teamSlug: string): Chainable<void>;
+    }
+  }
+}
+```
+
+### Database Test Seeding
+
+```typescript
+// prisma/seed-teams.ts
+export async function seedTeamsTestData() {
+  // Create test team
+  const testTeam = await prisma.team.create({
+    data: {
+      name: 'Acme Corp',
+      slug: 'acme-corp',
+      subscriptionStatus: 'active'
+    }
+  });
+
+  // Add team members with different roles
+  const owner = await prisma.user.findUnique({ where: { email: 'team-owner@test.com' }});
+  const member = await prisma.user.findUnique({ where: { email: 'team-member@test.com' }});
+  const admin = await prisma.user.findUnique({ where: { email: 'team-admin@test.com' }});
+
+  await prisma.teamMember.createMany({
+    data: [
+      { teamId: testTeam.id, userId: owner!.id, role: 'ADMIN' },
+      { teamId: testTeam.id, userId: member!.id, role: 'MEMBER' },
+      { teamId: testTeam.id, userId: admin!.id, role: 'ADMIN' }
+    ]
+  });
+
+  // Create team content for testing
+  await prisma.prompt.create({
+    data: {
+      title: 'Team Marketing Template',
+      description: 'Shared marketing prompt',
+      userId: owner!.id,
+      teamId: testTeam.id,
+      public: false
+    }
+  });
+}
+```
+
+### Integration with Existing Tests
+
+Update existing test suites to handle team context:
+- **09-prompt-scoring-ai-features.cy.ts**: Test AI features on team prompts
+- **10-category-management.cy.ts**: Test team-scoped categories
+- **11-chain-crud-operations.cy.ts**: Test team chains with multiple contributors
+
 ## Success Metrics
 
 - Team signup conversion rate
@@ -458,3 +685,4 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 - Active team collaboration (shared content creation)
 - Team subscription upgrades
 - User retention within teams
+- **Test Coverage**: 80%+ E2E coverage of team features

@@ -55,6 +55,11 @@ async function main() {
   const testUser = await createUserWithAuth('test@example.com', 'Test User')
   const proTestUser = await createUserWithAuth('pro@example.com', 'Pro Test User')
   const adminUser = await createUserWithAuth('admin@example.com', 'Admin User')
+  
+  // Team-specific test users
+  const teamOwner = await createUserWithAuth('team-owner@test.com', 'Team Owner')
+  const teamMember = await createUserWithAuth('team-member@test.com', 'Team Member')
+  const teamAdmin = await createUserWithAuth('team-admin@test.com', 'Team Admin')
 
   // Update user properties that can't be set during creation
   if (testUser) {
@@ -83,6 +88,37 @@ async function main() {
       data: { 
         role: 'ADMIN',
         subscriptionStatus: 'active', // Admin user with Pro features
+        emailVerified: true
+      }
+    })
+  }
+
+  // Update team test users
+  if (teamOwner) {
+    await prisma.user.update({
+      where: { id: teamOwner.id },
+      data: { 
+        subscriptionStatus: 'active', // Pro user (can create teams)
+        emailVerified: true
+      }
+    })
+  }
+
+  if (teamMember) {
+    await prisma.user.update({
+      where: { id: teamMember.id },
+      data: { 
+        subscriptionStatus: 'inactive', // Free user (can join teams)
+        emailVerified: true
+      }
+    })
+  }
+
+  if (teamAdmin) {
+    await prisma.user.update({
+      where: { id: teamAdmin.id },
+      data: { 
+        subscriptionStatus: 'active', // Pro user
         emailVerified: true
       }
     })
@@ -136,6 +172,46 @@ async function main() {
     console.log('✅ Sample prompts created!')
   } else {
     console.log('⚠️  No demo user available, skipping sample prompts')
+  }
+
+  // Create test team for e2e testing
+  if (teamOwner && teamMember && teamAdmin) {
+    console.log('Creating test team...')
+    
+    const testTeam = await prisma.team.create({
+      data: {
+        name: 'Acme Corp',
+        slug: 'acme-corp',
+        subscriptionStatus: 'active'
+      }
+    })
+
+    // Add team members with different roles
+    await prisma.teamMember.createMany({
+      data: [
+        { teamId: testTeam.id, userId: teamOwner.id, role: 'ADMIN' },
+        { teamId: testTeam.id, userId: teamMember.id, role: 'MEMBER' },
+        { teamId: testTeam.id, userId: teamAdmin.id, role: 'ADMIN' }
+      ]
+    })
+
+    // Create a team prompt for testing
+    await prisma.prompt.create({
+      data: {
+        title: 'Team Marketing Template',
+        description: 'Shared marketing prompt for the team',
+        userId: teamOwner.id,
+        teamId: testTeam.id,
+        public: false,
+        taskContext: 'You are a marketing expert creating content for our team.',
+        toneContext: 'Use a professional but approachable tone that reflects our brand.',
+        immediateTask: 'Create marketing content for [CAMPAIGN_TYPE] targeting [TARGET_AUDIENCE].'
+      }
+    })
+
+    console.log('✅ Test team created!')
+  } else {
+    console.log('⚠️  Team users not available, skipping test team')
   }
 
   console.log('Database seeded successfully!')

@@ -4,7 +4,7 @@ import type { Route } from "./+types/home"
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Prompt Lab - Structure Your AI Prompts" },
+    { title: "Prompt Bucket - Structure Your AI Prompts" },
     { name: "description", content: "Create, organize, and manage AI prompts with our 10-section methodology. Build better prompts for better results." },
   ];
 }

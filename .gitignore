@@ -7,4 +7,5 @@
 
 /generated/prisma
 .env
-/cypress/screenshots
+cypress/screenshots
+cypress/videos

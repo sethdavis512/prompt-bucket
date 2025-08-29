@@ -33,7 +33,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-Prompt Lab is a React Router v7 application for managing and organizing AI prompts with authentication, categorization, AI scoring, and public sharing capabilities.
+Prompt Bucket is a React Router v7 application for managing and organizing AI prompts with authentication, categorization, AI scoring, and public sharing capabilities.
 
 ### Core Technology Stack
 
