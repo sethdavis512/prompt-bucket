@@ -22,40 +22,51 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
   const { teams, isProUser } = loaderData;
   
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
-          <p className="text-gray-600 mt-1">
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-5.523-4.477-10-10-10S7 6.477 7 12v2m10 0H7m0 0H2v-2a3 3 0 015.196-2.196M7 20v-2m0 0V9a2 2 0 012-2h6a2 2 0 012 2v11" />
+              </svg>
+              <h1 className="text-2xl font-bold text-gray-900">Teams</h1>
+            </div>
+            
+            {isProUser ? (
+              <Link
+                to="/teams/new"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create Team
+              </Link>
+            ) : (
+              <div className="text-right">
+                <Link
+                  to="/pricing"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Upgrade to Pro
+                </Link>
+                <p className="text-xs text-gray-500 mt-1">Team creation requires Pro</p>
+              </div>
+            )}
+          </div>
+          <p className="text-gray-600 mt-2">
             Collaborate with your team members on prompts, chains, and categories
           </p>
         </div>
-        
-        {isProUser ? (
-          <Link
-            to="/teams/new"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Create Team
-          </Link>
-        ) : (
-          <div className="text-right">
-            <Link
-              to="/pricing"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Upgrade to Pro
-            </Link>
-            <p className="text-xs text-gray-500 mt-1">Team creation requires Pro</p>
-          </div>
-        )}
       </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
       
       {teams.length === 0 ? (
         <div className="text-center py-12">
@@ -193,6 +204,7 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

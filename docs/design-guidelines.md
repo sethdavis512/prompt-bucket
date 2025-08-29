@@ -113,6 +113,68 @@ text-gray-400: Disabled text, placeholders
 
 ## Layout & Spacing
 
+### **Layout Architecture**
+
+#### **Main App Layout Structure**
+The application uses a fixed sidebar + main content layout pattern with these Tailwind utility classes:
+
+**Root Layout Container:**
+```html
+<div className="flex min-h-screen bg-gray-50">
+```
+
+**Fixed Top Navigation:**
+```html
+<nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
+  <div className="px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between h-16">
+```
+
+**Desktop Sidebar:**
+```html
+<div className="hidden md:flex md:w-64 md:flex-col pt-16">
+```
+
+#### **⚠️ CRITICAL LAYOUT FIXES**
+
+**❌ DO NOT USE** these problematic patterns:
+```html
+<!-- BROKEN - Causes width calculation issues -->
+<div className="w-0 flex-1 pt-16 h-screen">
+
+<!-- BROKEN - Missing proper structure -->
+<div className="pt-16 h-screen">
+```
+
+**✅ DO USE** these correct patterns:
+```html
+<!-- CORRECT - Proper flex layout -->
+<div className="flex flex-col flex-1 md:ml-0 pt-16 min-h-screen">
+  <main className="flex-1 relative overflow-y-auto focus:outline-none">
+    <div className="py-6">
+      <!-- Content goes here -->
+    </div>
+  </main>
+</div>
+```
+
+### **Mobile Navigation Patterns**
+
+**Mobile Menu Button:**
+```html
+<button className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+```
+
+**Mobile Navigation Overlay:**
+```html
+<div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40">
+```
+
+**Mobile Navigation Items:**
+```html
+<NavLink className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50">
+```
+
 ### **Container Widths**
 ```css
 max-w-xs:   320px (Cards, modals)
