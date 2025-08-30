@@ -16,7 +16,10 @@ import type { Route } from './+types/index';
 
 import TextField from '~/components/TextField';
 import { requireAuth } from '~/lib/session';
-import { getChainsByUserId, getChainCountByUserId } from '~/models/chain.server';
+import {
+    getChainsByUserId,
+    getChainCountByUserId
+} from '~/models/chain.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const { user, isProUser } = await requireAuth(request);
@@ -58,12 +61,12 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
         return (
             <div className="flex-1 flex flex-col min-h-0">
                 {/* Header */}
-                <div className="bg-white shadow-sm border-b border-gray-200">
+                <div className="bg-white shadow-sm border-b border-zinc-200">
                     <div className="px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
-                                <Link2 className="h-6 w-6 text-gray-400" />
-                                <h1 className="text-2xl font-bold text-gray-900">
+                                <Link2 className="h-6 w-6 text-zinc-400" />
+                                <h1 className="text-2xl font-bold text-zinc-900">
                                     Prompt Chains
                                 </h1>
                             </div>
@@ -74,27 +77,27 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                 {/* Pro upgrade content */}
                 <div className="flex-1 flex items-center justify-center p-6">
                     <div className="text-center max-w-md">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-primary-600 rounded-full flex items-center justify-center">
                             <Crown className="h-8 w-8 text-white" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                        <h2 className="text-2xl font-bold text-zinc-900 mb-4">
                             Unlock Prompt Chaining
                         </h2>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-zinc-600 mb-6">
                             Create powerful multi-step workflows by chaining
                             your prompts together. Get AI-powered evaluation and
                             feedback to optimize your chains.
                         </p>
                         <div className="space-y-3 mb-8">
-                            <div className="flex items-center text-sm text-gray-700">
+                            <div className="flex items-center text-sm text-zinc-700">
                                 <Star className="h-4 w-4 text-amber-500 mr-2" />
                                 Horizontal scrolling chain interface
                             </div>
-                            <div className="flex items-center text-sm text-gray-700">
+                            <div className="flex items-center text-sm text-zinc-700">
                                 <Star className="h-4 w-4 text-amber-500 mr-2" />
                                 AI-powered chain evaluation and scoring
                             </div>
-                            <div className="flex items-center text-sm text-gray-700">
+                            <div className="flex items-center text-sm text-zinc-700">
                                 <Star className="h-4 w-4 text-amber-500 mr-2" />
                                 Flow analysis and optimization suggestions
                             </div>
@@ -108,19 +111,19 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
     return (
         <div className="flex-1 flex flex-col min-h-0">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
+            <div className="bg-white shadow-sm border-b border-zinc-200">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <Link2 className="h-6 w-6 text-gray-400" />
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <Link2 className="h-6 w-6 text-zinc-400" />
+                            <h1 className="text-2xl font-bold text-zinc-900">
                                 Prompt Chains
                             </h1>
                         </div>
                         <Link
                             to="/chains/new"
                             data-cy="new-chain"
-                            className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                            className="bg-primary-600 text-white hover:bg-primary-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                         >
                             <Plus className="h-4 w-4" />
                             <span>New Chain</span>
@@ -128,7 +131,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                     </div>
 
                     {loaderData.chainCount > 0 && (
-                        <p className="text-gray-600 mt-2">
+                        <p className="text-zinc-600 mt-2">
                             {loaderData.chainCount} chain
                             {loaderData.chainCount !== 1 ? 's' : ''} created
                         </p>
@@ -141,7 +144,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                 {loaderData.chainCount > 0 && (
                     <div className="mb-6">
                         <div className="relative max-w-md">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 h-4 w-4 z-10" />
                             <TextField
                                 type="search"
                                 placeholder="Search chains..."
@@ -182,24 +185,24 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                             >
                                 <div className="p-6">
                                     <div className="flex items-start justify-between mb-3">
-                                        <h3 className="text-lg font-medium text-gray-900 truncate">
+                                        <h3 className="text-lg font-medium text-zinc-900 truncate">
                                             {chain.name}
                                         </h3>
-                                        <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                        <div className="flex items-center space-x-1 text-xs text-zinc-500">
                                             <Link2 className="h-3 w-3" />
                                             <span>{chain.prompts.length}</span>
                                         </div>
                                     </div>
 
                                     {chain.description && (
-                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                        <p className="text-sm text-zinc-600 mb-3 line-clamp-2">
                                             {chain.description}
                                         </p>
                                     )}
 
                                     {/* Chain preview */}
                                     <div className="mb-4">
-                                        <div className="flex items-center space-x-2 text-xs text-gray-500 mb-2">
+                                        <div className="flex items-center space-x-2 text-xs text-zinc-500 mb-2">
                                             <span>Chain Steps:</span>
                                         </div>
                                         <div className="space-y-1">
@@ -208,7 +211,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                                 .map((chainPrompt, index) => (
                                                     <div
                                                         key={chainPrompt.id}
-                                                        className="text-xs text-gray-600 truncate"
+                                                        className="text-xs text-zinc-600 truncate"
                                                     >
                                                         {index + 1}.{' '}
                                                         {
@@ -218,7 +221,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                                     </div>
                                                 ))}
                                             {chain.prompts.length > 3 && (
-                                                <div className="text-xs text-gray-400">
+                                                <div className="text-xs text-zinc-400">
                                                     ... and{' '}
                                                     {chain.prompts.length - 3}{' '}
                                                     more
@@ -232,14 +235,14 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                         <div className="mb-4">
                                             <div className="flex items-center space-x-2">
                                                 <Star className="h-4 w-4 text-amber-500" />
-                                                <span className="text-sm font-medium text-gray-700">
+                                                <span className="text-sm font-medium text-zinc-700">
                                                     Score: {chain.chainScore}/10
                                                 </span>
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-4">
                                         <div className="flex items-center space-x-1">
                                             <Calendar className="h-3 w-3" />
                                             <span>
@@ -261,7 +264,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                         <Link
                                             to={`/chains/${chain.id}`}
                                             data-cy="view-chain"
-                                            className="flex items-center space-x-1 text-indigo-600 hover:text-indigo-500 text-sm"
+                                            className="flex items-center space-x-1 text-primary-600 hover:text-primary-500 text-sm"
                                         >
                                             <Eye className="h-4 w-4" />
                                             <span>View</span>
@@ -269,7 +272,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                         <Link
                                             to={`/chains/${chain.id}/edit`}
                                             data-cy="edit-chain"
-                                            className="flex items-center space-x-1 text-gray-600 hover:text-gray-500 text-sm"
+                                            className="flex items-center space-x-1 text-zinc-600 hover:text-zinc-500 text-sm"
                                         >
                                             <Edit className="h-4 w-4" />
                                             <span>Edit</span>
@@ -281,13 +284,13 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                     </div>
                 ) : (
                     <div className="text-center py-12">
-                        <Link2 className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">
+                        <Link2 className="mx-auto h-12 w-12 text-zinc-400" />
+                        <h3 className="mt-2 text-sm font-medium text-zinc-900">
                             {loaderData.search
                                 ? 'No matching chains found'
                                 : 'No chains yet'}
                         </h3>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-zinc-500">
                             {loaderData.search
                                 ? 'Try adjusting your search criteria.'
                                 : 'Get started by creating your first prompt chain.'}
@@ -297,7 +300,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                                 <Link
                                     to="/chains/new"
                                     data-cy="create-first-chain"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
                                 >
                                     <Plus className="h-4 w-4 mr-2" />
                                     Create Your First Chain

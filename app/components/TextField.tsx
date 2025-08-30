@@ -64,25 +64,29 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
         };
 
         const baseInputClasses = `
-            block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 
-            placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 
-            disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200
+            block w-full rounded-md border-0 py-1.5 text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 
+            placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 
+            disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500 disabled:ring-zinc-200
             ${sizeClasses[size]}
             ${error ? 'ring-red-300 focus:ring-red-600' : ''}
             ${inputClassName}
-        `.trim().replace(/\s+/g, ' ');
+        `
+            .trim()
+            .replace(/\s+/g, ' ');
 
         return (
             <div className={className}>
                 {label && (
                     <label
                         htmlFor={id}
-                        className={`block text-sm font-medium leading-6 text-gray-900 mb-2 ${
+                        className={`block text-sm font-medium leading-6 text-zinc-900 mb-2 ${
                             labelClassName || ''
                         }`}
                     >
                         {label}
-                        {required && <span className="text-red-500 ml-1">*</span>}
+                        {required && (
+                            <span className="text-red-500 ml-1">*</span>
+                        )}
                     </label>
                 )}
                 <div>
@@ -114,7 +118,10 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
                     </p>
                 )}
                 {helpText && !error && (
-                    <p className="mt-2 text-sm text-gray-500" id={`${id}-description`}>
+                    <p
+                        className="mt-2 text-sm text-zinc-500"
+                        id={`${id}-description`}
+                    >
                         {helpText}
                     </p>
                 )}

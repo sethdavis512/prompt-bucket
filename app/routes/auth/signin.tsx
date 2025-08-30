@@ -9,35 +9,43 @@ export async function action({ request }: Route.ActionArgs) {
 
     try {
         // Make a request to our own auth API endpoint
-        const authResponse = await fetch(`${process.env.BETTER_AUTH_URL}/api/auth/sign-in/email`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        });
+        const authResponse = await fetch(
+            `${process.env.BETTER_AUTH_URL}/api/auth/sign-in/email`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            }
+        );
 
         if (authResponse.ok) {
             // Get the set-cookie headers from the response
-            const setCookieHeaders = authResponse.headers.getSetCookie?.() || authResponse.headers.get('set-cookie');
-            
+            const setCookieHeaders =
+                authResponse.headers.getSetCookie?.() ||
+                authResponse.headers.get('set-cookie');
+
             // Create a redirect response with the cookies
             const redirectResponse = redirect('/dashboard');
-            
+
             // Copy authentication cookies from BetterAuth response
             if (setCookieHeaders) {
                 if (Array.isArray(setCookieHeaders)) {
-                    setCookieHeaders.forEach(cookie => {
+                    setCookieHeaders.forEach((cookie) => {
                         redirectResponse.headers.append('Set-Cookie', cookie);
                     });
                 } else {
-                    redirectResponse.headers.set('Set-Cookie', setCookieHeaders);
+                    redirectResponse.headers.set(
+                        'Set-Cookie',
+                        setCookieHeaders
+                    );
                 }
             }
-            
+
             return redirectResponse;
         }
 
@@ -51,17 +59,17 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function SignIn({ actionData }: Route.ComponentProps) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-zinc-900">
                         Sign in to your account
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
+                    <p className="mt-2 text-center text-sm text-zinc-600">
                         Or{' '}
                         <Link
                             to="/auth/signup"
-                            className="font-medium text-indigo-600 hover:text-indigo-500"
+                            className="font-medium text-primary-600 hover:text-primary-500"
                         >
                             create a new account
                         </Link>
@@ -100,7 +108,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
                         <button
                             type="submit"
                             data-cy="signin-button"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                         >
                             Sign in
                         </button>
