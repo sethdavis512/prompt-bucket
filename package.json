@@ -4,16 +4,16 @@
     "type": "module",
     "scripts": {
         "build": "react-router build",
-        "dev": "react-router dev",
-        "start": "react-router-serve ./build/server/index.js",
-        "typecheck": "react-router typegen && tsc",
-        "db:seed": "tsx prisma/seed.ts",
-        "db:reset": "prisma migrate reset --force && npm run db:seed",
         "cypress:open": "cypress open",
         "cypress:run": "cypress run",
-        "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run",
+        "db:reset": "prisma migrate reset --force && npm run db:seed",
+        "db:seed": "tsx prisma/seed.ts",
+        "dev": "react-router dev",
+        "postinstall": "prisma generate",
+        "start": "react-router-serve ./build/server/index.js",
         "test:e2e:open": "start-server-and-test dev http://localhost:5173 cypress:open",
-        "setup": "prisma generate && prisma migrate deploy"
+        "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run",
+        "typecheck": "react-router typegen && tsc"
     },
     "prisma": {
         "seed": "tsx prisma/seed.ts"
