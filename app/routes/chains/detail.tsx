@@ -39,7 +39,6 @@ export async function loader({ request, params }: Route.LoaderArgs) {
         throw new Response('Chain not found', { status: 404 });
     }
 
-
     // Get all user prompts for editing
     const allPrompts = await getPromptsForSelectionByUserId(user.id);
 
@@ -114,17 +113,17 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
     return (
         <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
+            <div className="bg-white shadow-sm border-b border-zinc-200">
                 <div className="px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                            <Link2 className="h-6 w-6 text-indigo-600" />
+                            <Link2 className="h-6 w-6 text-primary-600" />
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-900">
+                                <h1 className="text-2xl font-bold text-zinc-900">
                                     {chain.name}
                                 </h1>
                                 {chain.description && (
-                                    <p className="text-gray-600 text-sm mt-1">
+                                    <p className="text-zinc-600 text-sm mt-1">
                                         {chain.description}
                                     </p>
                                 )}
@@ -135,7 +134,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                             <button
                                 onClick={handleEvaluateChain}
                                 disabled={isEvaluating}
-                                className="bg-purple-600 text-white hover:bg-purple-700 disabled:bg-gray-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                className="bg-purple-600 text-white hover:bg-purple-700 disabled:bg-zinc-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                             >
                                 {isEvaluating ? (
                                     <RefreshCw className="h-4 w-4 animate-spin" />
@@ -151,7 +150,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
 
                             <button
                                 onClick={handleEditChain}
-                                className="bg-gray-600 text-white hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                className="bg-zinc-600 text-white hover:bg-zinc-700 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                             >
                                 <Edit className="h-4 w-4" />
                                 <span>Edit</span>
@@ -160,7 +159,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                             <button
                                 onClick={handleDeleteChain}
                                 disabled={deleteFetcher.state !== 'idle'}
-                                className="bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                className="bg-red-600 text-white hover:bg-red-700 disabled:bg-zinc-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                             >
                                 <Trash2 className="h-4 w-4" />
                                 <span>Delete</span>
@@ -169,7 +168,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                     </div>
 
                     {/* Chain Stats */}
-                    <div className="flex items-center space-x-6 mt-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-6 mt-4 text-sm text-zinc-600">
                         <div className="flex items-center space-x-1">
                             <Link2 className="h-4 w-4" />
                             <span>{chain.prompts.length} steps</span>
@@ -211,18 +210,18 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                         <div
                                             className={`w-80 bg-white shadow rounded-lg overflow-hidden border-2 transition-colors ${
                                                 currentStep === index
-                                                    ? 'border-indigo-500'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-primary-500'
+                                                    : 'border-zinc-200 hover:border-zinc-300'
                                             }`}
                                         >
                                             {/* Column Header */}
-                                            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                            <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-2">
-                                                        <div className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-medium">
+                                                        <div className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-medium">
                                                             {index + 1}
                                                         </div>
-                                                        <h3 className="font-medium text-gray-900 truncate">
+                                                        <h3 className="font-medium text-zinc-900 truncate">
                                                             {
                                                                 chainPrompt
                                                                     .prompt
@@ -236,14 +235,14 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                                 index
                                                             )
                                                         }
-                                                        className="text-indigo-600 hover:text-indigo-700"
+                                                        className="text-primary-600 hover:text-primary-700"
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </button>
                                                 </div>
                                                 {chainPrompt.prompt
                                                     .description && (
-                                                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                                    <p className="text-xs text-zinc-600 mt-1 line-clamp-2">
                                                         {
                                                             chainPrompt.prompt
                                                                 .description
@@ -257,10 +256,10 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                 {chainPrompt.prompt
                                                     .taskContext && (
                                                     <div className="mb-3">
-                                                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                                                        <div className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">
                                                             Task Context
                                                         </div>
-                                                        <p className="text-gray-700 line-clamp-3">
+                                                        <p className="text-zinc-700 line-clamp-3">
                                                             {
                                                                 chainPrompt
                                                                     .prompt
@@ -273,10 +272,10 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                 {chainPrompt.prompt
                                                     .detailedTaskDescription && (
                                                     <div className="mb-3">
-                                                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                                                        <div className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">
                                                             Task Description
                                                         </div>
-                                                        <p className="text-gray-700 line-clamp-3">
+                                                        <p className="text-zinc-700 line-clamp-3">
                                                             {
                                                                 chainPrompt
                                                                     .prompt
@@ -289,10 +288,10 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                 {chainPrompt.prompt
                                                     .immediateTask && (
                                                     <div className="mb-3">
-                                                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                                                        <div className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">
                                                             Immediate Task
                                                         </div>
-                                                        <p className="text-gray-700 line-clamp-2">
+                                                        <p className="text-zinc-700 line-clamp-2">
                                                             {
                                                                 chainPrompt
                                                                     .prompt
@@ -308,7 +307,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                             `/prompts/${chainPrompt.prompt.id}`
                                                         )
                                                     }
-                                                    className="text-xs text-indigo-600 hover:text-indigo-700 mt-2"
+                                                    className="text-xs text-primary-600 hover:text-primary-700 mt-2"
                                                 >
                                                     View full prompt →
                                                 </button>
@@ -318,7 +317,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                         {/* Arrow between columns */}
                                         {index < chain.prompts.length - 1 && (
                                             <div className="flex items-center justify-center">
-                                                <ArrowRight className="h-6 w-6 text-gray-400" />
+                                                <ArrowRight className="h-6 w-6 text-zinc-400" />
                                             </div>
                                         )}
                                     </div>
@@ -329,12 +328,12 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
 
                     {/* Evaluation Panel */}
                     {(evaluationResult || isEvaluating) && (
-                        <div className="w-96 bg-white border-l border-gray-200 flex flex-col h-full">
-                            <div className="bg-purple-50 px-4 py-3 border-b border-gray-200">
+                        <div className="w-96 bg-white border-l border-zinc-200 flex flex-col h-full">
+                            <div className="bg-purple-50 px-4 py-3 border-b border-zinc-200">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
                                         <Zap className="h-5 w-5 text-purple-600" />
-                                        <h3 className="font-medium text-gray-900">
+                                        <h3 className="font-medium text-zinc-900">
                                             AI Chain Evaluation
                                         </h3>
                                     </div>
@@ -377,7 +376,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                     <div className="flex items-center justify-center py-8">
                                         <div className="text-center">
                                             <RefreshCw className="h-8 w-8 text-purple-600 animate-spin mx-auto mb-2" />
-                                            <p className="text-sm text-gray-600">
+                                            <p className="text-sm text-zinc-600">
                                                 Analyzing your chain flow...
                                             </p>
                                         </div>
@@ -415,9 +414,9 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                     return (
                                                         <div
                                                             key={index}
-                                                            className="border-b border-gray-100 pb-4 last:border-b-0"
+                                                            className="border-b border-zinc-100 pb-4 last:border-b-0"
                                                         >
-                                                            <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                                                            <h4 className="font-medium text-zinc-900 mb-2 flex items-center">
                                                                 {title.includes(
                                                                     'Flow Analysis'
                                                                 ) && (
@@ -433,7 +432,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                                 {title.includes(
                                                                     'Recommendations'
                                                                 ) && (
-                                                                    <span className="w-4 h-4 mr-2 text-blue-500">
+                                                                    <span className="w-4 h-4 mr-2 text-primary-500">
                                                                         💡
                                                                     </span>
                                                                 )}
@@ -446,7 +445,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                                 )}
                                                                 {title}
                                                             </h4>
-                                                            <div className="text-sm text-gray-700 space-y-2">
+                                                            <div className="text-sm text-zinc-700 space-y-2">
                                                                 {content
                                                                     .split('\n')
                                                                     .map(
@@ -468,7 +467,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                                                         }
                                                                                         className="flex items-start space-x-2"
                                                                                     >
-                                                                                        <span className="text-gray-400 mt-0.5">
+                                                                                        <span className="text-zinc-400 mt-0.5">
                                                                                             •
                                                                                         </span>
                                                                                         <span>
@@ -508,20 +507,20 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
             </div>
 
             {/* Mobile Navigation */}
-            <div className="md:hidden bg-white border-t border-gray-200 px-4 py-3">
+            <div className="md:hidden bg-white border-t border-zinc-200 px-4 py-3">
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() =>
                             setCurrentStep(Math.max(0, currentStep - 1))
                         }
                         disabled={currentStep === 0}
-                        className="flex items-center space-x-1 text-gray-600 disabled:text-gray-400"
+                        className="flex items-center space-x-1 text-zinc-600 disabled:text-zinc-400"
                     >
                         <ChevronLeft className="h-4 w-4" />
                         <span>Previous</span>
                     </button>
 
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-zinc-600">
                         Step {currentStep + 1} of {chain.prompts.length}
                     </span>
 
@@ -535,7 +534,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                             )
                         }
                         disabled={currentStep === chain.prompts.length - 1}
-                        className="flex items-center space-x-1 text-gray-600 disabled:text-gray-400"
+                        className="flex items-center space-x-1 text-zinc-600 disabled:text-zinc-400"
                     >
                         <span>Next</span>
                         <ChevronRight className="h-4 w-4" />

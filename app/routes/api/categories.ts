@@ -1,6 +1,7 @@
 import { data } from 'react-router';
 import { getCategoryByUserIdAndName, createCategory, getCategoryByIdForAPI, deleteCategory } from '~/models/category.server';
 import { auth } from '~/lib/auth';
+import { prisma } from '~/lib/prisma';
 import type { Route } from './+types/categories';
 
 export async function action({ request }: Route.ActionArgs) {
@@ -37,7 +38,7 @@ export async function action({ request }: Route.ActionArgs) {
     try {
         switch (intent) {
             case 'create': {
-                if (!data.name?.trim()) {
+                if (!_data.name?.trim()) {
                     return new Response(
                         JSON.stringify({ error: 'Category name is required' }),
                         {
@@ -48,12 +49,11 @@ export async function action({ request }: Route.ActionArgs) {
                 }
 
                 // Check if category already exists for this user
-                const existing = await prisma.category.findUnique({
+                const existing = await prisma.category.findFirst({
                     where: {
-                        name_userId: {
-                            name: data.name.trim(),
-                            userId: session.user.id
-                        }
+                        name: _data.name?.trim(),
+                        userId: session.user.id,
+                        teamId: null // Personal category
                     }
                 });
 

@@ -1,111 +1,146 @@
-import { Link, Form, redirect } from 'react-router';
+import { Form, useNavigate, Link } from 'react-router';
+import { useState } from 'react';
+import { authClient } from '~/lib/auth-client';
 import TextField from '~/components/TextField';
-import type { Route } from './+types/signin';
+import Button from '~/components/Button';
+import { ArrowLeft } from 'lucide-react';
 
-export async function action({ request }: Route.ActionArgs) {
-    const formData = await request.formData();
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+export default function SignIn() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    try {
-        // Make a request to our own auth API endpoint
-        const authResponse = await fetch(`${process.env.BETTER_AUTH_URL}/api/auth/sign-in/email`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+    const navigate = useNavigate();
+
+    const signIn = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        await authClient.signIn.email(
+            {
                 email,
                 password
-            })
-        });
-
-        if (authResponse.ok) {
-            // Get the set-cookie headers from the response
-            const setCookieHeaders = authResponse.headers.getSetCookie?.() || authResponse.headers.get('set-cookie');
-            
-            // Create a redirect response with the cookies
-            const redirectResponse = redirect('/dashboard');
-            
-            // Copy authentication cookies from BetterAuth response
-            if (setCookieHeaders) {
-                if (Array.isArray(setCookieHeaders)) {
-                    setCookieHeaders.forEach(cookie => {
-                        redirectResponse.headers.append('Set-Cookie', cookie);
-                    });
-                } else {
-                    redirectResponse.headers.set('Set-Cookie', setCookieHeaders);
+            },
+            {
+                onRequest: (ctx) => {
+                    setIsLoading(true);
+                },
+                onSuccess: (ctx) => {
+                    navigate('/dashboard');
+                },
+                onError: (ctx) => {
+                    setError(
+                        ctx.error.message || 'An error occurred during sign in'
+                    );
+                    setIsLoading(false);
                 }
             }
-            
-            return redirectResponse;
-        }
+        );
+    };
 
-        const errorData = await authResponse.json().catch(() => ({}));
-        return { error: errorData.message || 'Invalid email or password' };
-    } catch (error) {
-        console.error('Auth error:', error);
-        return { error: 'Invalid email or password' };
-    }
-}
-
-export default function SignIn({ actionData }: Route.ComponentProps) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-purple-50 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Sign in to your account
+                {/* Header */}
+                <div className="text-center">
+                    <Link
+                        to="/"
+                        className="inline-flex items-center justify-center mb-8 text-primary-600 hover:text-primary-700 transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to home
+                    </Link>
+
+                    <div className="flex justify-center mb-6">
+                        <span className="h-12 w-12 text-4xl">🪣</span>
+                    </div>
+
+                    <h2 className="text-3xl font-bold text-zinc-900">
+                        Welcome back
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
-                        Or{' '}
-                        <Link
-                            to="/auth/signup"
-                            className="font-medium text-indigo-600 hover:text-indigo-500"
-                        >
-                            create a new account
-                        </Link>
+                    <p className="mt-2 text-sm text-zinc-600">
+                        Sign in to your PromptBucket account
                     </p>
                 </div>
-                {actionData?.error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                        {actionData.error}
-                    </div>
-                )}
-                <Form method="post" className="mt-8 space-y-6">
-                    <TextField
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        placeholder="Email address"
-                        labelClassName="sr-only"
-                        label="Email address"
-                        data-cy="email-input"
-                    />
-                    <TextField
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        placeholder="Password"
-                        labelClassName="sr-only"
-                        label="Password"
-                        data-cy="password-input"
-                    />
 
-                    <div>
-                        <button
+                {/* Form */}
+                <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-zinc-200">
+                    <Form onSubmit={signIn} className="space-y-6">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                                <p className="text-sm text-red-600">{error}</p>
+                            </div>
+                        )}
+
+                        <TextField
+                            label="Email address"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            autoComplete="email"
+                            placeholder="Enter your email"
+                            disabled={isLoading}
+                        />
+
+                        <TextField
+                            label="Password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            autoComplete="current-password"
+                            placeholder="Enter your password"
+                            disabled={isLoading}
+                        />
+
+                        <Button
                             type="submit"
-                            data-cy="signin-button"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            variant="primary"
+                            size="lg"
+                            loading={isLoading}
+                            disabled={isLoading || !email || !password}
+                            className="w-full"
                         >
-                            Sign in
-                        </button>
+                            {isLoading ? 'Signing in...' : 'Sign in'}
+                        </Button>
+                    </Form>
+
+                    {/* Footer links */}
+                    <div className="mt-6 text-center">
+                        <p className="text-sm text-zinc-600">
+                            Don't have an account?{' '}
+                            <Link
+                                to="/auth/sign-up"
+                                className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                            >
+                                Sign up for free
+                            </Link>
+                        </p>
                     </div>
-                </Form>
+                </div>
+
+                {/* Additional footer */}
+                <div className="text-center">
+                    <p className="text-xs text-zinc-500">
+                        By signing in, you agree to our{' '}
+                        <a
+                            href="#"
+                            className="text-primary-600 hover:text-primary-500"
+                        >
+                            Terms of Service
+                        </a>{' '}
+                        and{' '}
+                        <a
+                            href="#"
+                            className="text-primary-600 hover:text-primary-500"
+                        >
+                            Privacy Policy
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
     );

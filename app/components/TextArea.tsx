@@ -54,7 +54,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         ref
     ) => {
         const baseTextAreaClasses = `
-            block p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white
+            block p-2.5 w-full text-sm text-zinc-900 bg-white rounded-lg border border-zinc-300 focus:ring-primary-500 focus:border-primary-500 focus:bg-white
             ${error ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50' : ''}
             ${!resize ? 'resize-none' : 'resize-y'}
             ${textAreaClassName}
@@ -67,7 +67,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 {label && (
                     <label
                         htmlFor={id}
-                        className={`block mb-2 text-sm font-medium text-gray-900 dark:text-white ${
+                        className={`block mb-2 text-sm font-medium text-zinc-900 dark:text-white ${
                             error ? 'text-red-700 dark:text-red-500' : ''
                         } ${labelClassName || ''}`}
                     >
@@ -119,7 +119,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 )}
                 {helpText && !error && (
                     <p
-                        className="mt-2 text-sm text-gray-500 dark:text-gray-400"
+                        className="mt-2 text-sm text-zinc-500 dark:text-zinc-400"
                         id={`${id}-description`}
                     >
                         {helpText}

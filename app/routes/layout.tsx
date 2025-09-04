@@ -8,7 +8,7 @@ import { getUserById } from '~/models/user.server';
 
 export async function loader({ request }: Route.LoaderArgs) {
     const session = await auth.api.getSession({ headers: request.headers });
-    
+
     if (!session) {
         // For public routes, return null user
         return { user: null };
@@ -49,16 +49,16 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-zinc-50">
             <nav className="bg-white shadow-sm border-b border-b-zinc-200">
                 <div className="px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <Link to="/" className="flex items-center">
-                                <span className="h-8 w-8 text-2xl text-indigo-600">
+                                <span className="h-8 w-8 text-2xl text-primary-600">
                                     🪣
                                 </span>
-                                <span className="text-xl font-bold text-gray-900">
+                                <span className="text-xl font-bold text-zinc-900">
                                     PromptBucket
                                 </span>
                             </Link>
@@ -67,19 +67,19 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
                         <div className="flex items-center space-x-4">
                             <Link
                                 to="/pricing"
-                                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                                className="text-zinc-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Pricing
                             </Link>
                             <Link
                                 to="/auth/signin"
-                                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                                className="text-zinc-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 to="/auth/signup"
-                                className="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium"
+                                className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Sign Up
                             </Link>

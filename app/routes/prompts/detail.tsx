@@ -36,16 +36,16 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
         {
             id: 'taskContext',
             title: 'Task Context',
-            description: 'Define the AI\'s role and expertise area'
+            description: "Define the AI's role and expertise area"
         },
         {
-            id: 'toneContext', 
+            id: 'toneContext',
             title: 'Tone Context',
             description: 'Specify the desired tone and style'
         },
         {
             id: 'backgroundData',
-            title: 'Background Data', 
+            title: 'Background Data',
             description: 'Provide relevant context and information'
         },
         {
@@ -87,9 +87,9 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
 
     const copyToClipboard = (text: string, section: string) => {
         navigator.clipboard.writeText(text);
-        setCopyStatus(prev => ({ ...prev, [section]: true }));
+        setCopyStatus((prev) => ({ ...prev, [section]: true }));
         setTimeout(() => {
-            setCopyStatus(prev => ({ ...prev, [section]: false }));
+            setCopyStatus((prev) => ({ ...prev, [section]: false }));
         }, 2000);
     };
 
@@ -103,32 +103,36 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                 });
             } catch (err) {
                 // Fallback to copying URL
-                copyToClipboard(`${window.location.origin}/share/${prompt.id}`, 'share');
+                copyToClipboard(
+                    `${window.location.origin}/share/${prompt.id}`,
+                    'share'
+                );
             }
         } else {
             // Copy share URL to clipboard
-            const shareUrl = isProUser && prompt.public
-                ? `${window.location.origin}/share/${prompt.id}`
-                : window.location.href;
+            const shareUrl =
+                isProUser && prompt.public
+                    ? `${window.location.origin}/share/${prompt.id}`
+                    : window.location.href;
             copyToClipboard(shareUrl, 'share');
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-zinc-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div className="bg-white border-b border-zinc-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-4">
                             <Link
                                 to="/prompts"
-                                className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+                                className="inline-flex items-center text-sm text-zinc-500 hover:text-zinc-700"
                             >
                                 <ArrowLeft className="w-4 h-4 mr-1" />
                                 Back to Prompts
                             </Link>
-                            <h1 className="text-lg font-medium text-gray-900 truncate max-w-md">
+                            <h1 className="text-lg font-medium text-zinc-900 truncate max-w-md">
                                 {prompt.title}
                             </h1>
                             {prompt.categories?.length > 0 && (
@@ -136,7 +140,7 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                     {prompt.categories.map((pc: any) => (
                                         <span
                                             key={pc.category.id}
-                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                                         >
                                             {pc.category.name}
                                         </span>
@@ -148,7 +152,7 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={handleShare}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                className="inline-flex items-center px-3 py-2 border border-zinc-300 shadow-sm text-sm leading-4 font-medium rounded-md text-zinc-700 bg-white hover:bg-zinc-50"
                             >
                                 <Share2 className="w-4 h-4 mr-1" />
                                 {copyStatus.share ? 'Copied!' : 'Share'}
@@ -174,25 +178,36 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                         <div className="bg-white shadow rounded-lg p-6">
                             <div className="space-y-4">
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900">{prompt.title}</h3>
+                                    <h3 className="text-lg font-medium text-zinc-900">
+                                        {prompt.title}
+                                    </h3>
                                     {prompt.description && (
-                                        <p className="mt-2 text-sm text-gray-600">{prompt.description}</p>
+                                        <p className="mt-2 text-sm text-zinc-600">
+                                            {prompt.description}
+                                        </p>
                                     )}
                                 </div>
 
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-4">
                                         <div className="flex items-center">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                prompt.public
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                                {prompt.public ? 'Public' : 'Private'}
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    prompt.public
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-zinc-100 text-zinc-800'
+                                                }`}
+                                            >
+                                                {prompt.public
+                                                    ? 'Public'
+                                                    : 'Private'}
                                             </span>
                                         </div>
-                                        <div className="text-xs text-gray-500">
-                                            Created {new Date(prompt.createdAt).toLocaleDateString()}
+                                        <div className="text-xs text-zinc-500">
+                                            Created{' '}
+                                            {new Date(
+                                                prompt.createdAt
+                                            ).toLocaleDateString()}
                                         </div>
                                     </div>
                                 </div>
@@ -202,18 +217,28 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                         {/* Prompt Sections */}
                         <div className="space-y-4">
                             {promptSections.map((section) => {
-                                const content = prompt[section.id as keyof typeof prompt] as string;
+                                const content = prompt[
+                                    section.id as keyof typeof prompt
+                                ] as string;
                                 if (!content) return null;
 
                                 return (
-                                    <div key={section.id} className="bg-white shadow rounded-lg p-6">
+                                    <div
+                                        key={section.id}
+                                        className="bg-white shadow rounded-lg p-6"
+                                    >
                                         <div className="flex items-center justify-between mb-4">
-                                            <h4 className="text-sm font-medium text-gray-900">
+                                            <h4 className="text-sm font-medium text-zinc-900">
                                                 {section.title}
                                             </h4>
                                             <button
-                                                onClick={() => copyToClipboard(content, section.id)}
-                                                className="inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                                                onClick={() =>
+                                                    copyToClipboard(
+                                                        content,
+                                                        section.id
+                                                    )
+                                                }
+                                                className="inline-flex items-center px-2 py-1 text-xs text-zinc-500 hover:text-zinc-700"
                                             >
                                                 {copyStatus[section.id] ? (
                                                     <>Copied!</>
@@ -226,7 +251,9 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                             </button>
                                         </div>
                                         <div className="prose prose-sm max-w-none">
-                                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{content}</p>
+                                            <p className="text-sm text-zinc-700 whitespace-pre-wrap">
+                                                {content}
+                                            </p>
                                         </div>
                                     </div>
                                 );
@@ -235,21 +262,24 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
 
                         {/* Team Collaboration Prompt (Free Users Only) */}
                         {!isProUser && (
-                            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-4">
+                            <div className="bg-gradient-to-r from-primary-50 to-primary-50 border border-primary-200 rounded-lg p-4">
                                 <div className="flex items-start space-x-3">
                                     <div className="flex-shrink-0">
-                                        <Users className="h-5 w-5 text-indigo-600" />
+                                        <Users className="h-5 w-5 text-primary-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-sm font-medium text-gray-900 mb-1">
-                                            Love this prompt? Share it with your team
+                                        <h4 className="text-sm font-medium text-zinc-900 mb-1">
+                                            Love this prompt? Share it with your
+                                            team
                                         </h4>
-                                        <p className="text-xs text-gray-600 mb-3">
-                                            Upgrade to Pro to create teams, share prompts, and collaborate on better AI outputs together.
+                                        <p className="text-xs text-zinc-600 mb-3">
+                                            Upgrade to Pro to create teams,
+                                            share prompts, and collaborate on
+                                            better AI outputs together.
                                         </p>
                                         <Link
                                             to="/pricing"
-                                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-indigo-600 bg-white border border-indigo-200 rounded-md hover:bg-indigo-50"
+                                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-primary-600 bg-white border border-primary-200 rounded-md hover:bg-primary-100"
                                         >
                                             Start Team Collaboration
                                         </Link>
@@ -274,7 +304,9 @@ export default function PromptDetail({ loaderData }: Route.ComponentProps) {
                                 prompt.thinkingSteps,
                                 prompt.outputFormatting,
                                 prompt.prefilledResponse
-                            ].filter(Boolean).join('\n\n')}
+                            ]
+                                .filter(Boolean)
+                                .join('\n\n')}
                             isProUser={isProUser}
                             onCopy={(text) => copyToClipboard(text, 'complete')}
                         />

@@ -93,7 +93,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-zinc-50">
             {/* Top Navigation */}
             <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-b-zinc-200 z-50">
                 <div className="px-4 sm:px-6 lg:px-8">
@@ -104,7 +104,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 onClick={() =>
                                     setIsMobileMenuOpen(!isMobileMenuOpen)
                                 }
-                                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 mr-2"
+                                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-zinc-700 hover:text-primary-600 hover:bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 mr-2"
                             >
                                 {isMobileMenuOpen ? (
                                     <X className="h-6 w-6" />
@@ -114,10 +114,10 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                             </button>
 
                             <Link to="/dashboard" className="flex items-center">
-                                <span className="h-8 w-8 text-2xl text-indigo-600">
+                                <span className="h-8 w-8 text-2xl text-primary-600">
                                     🪣
                                 </span>
-                                <span className="text-xl font-bold text-gray-900">
+                                <span className="text-xl font-bold text-zinc-900">
                                     PromptBucket
                                 </span>
                             </Link>
@@ -130,7 +130,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                         setIsDropdownOpen(!isDropdownOpen)
                                     }
                                     data-testid="user-dropdown"
-                                    className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
+                                    className="text-zinc-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
                                 >
                                     <User className="h-4 w-4" />
                                     <span>{user.name || user.email}</span>
@@ -145,7 +145,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                             onClick={() =>
                                                 setIsDropdownOpen(false)
                                             }
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
                                         >
                                             Profile Settings
                                         </Link>
@@ -156,7 +156,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                                 onClick={() =>
                                                     setIsDropdownOpen(false)
                                                 }
-                                                className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                className="flex items-center space-x-2 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100"
                                             >
                                                 <CreditCard className="h-4 w-4" />
                                                 <span>Manage Billing</span>
@@ -168,7 +168,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                         >
                                             <button
                                                 type="submit"
-                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                                                className="w-full text-left px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-100 flex items-center space-x-2"
                                             >
                                                 <LogOut className="h-4 w-4" />
                                                 <span>Sign Out</span>
@@ -184,7 +184,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
 
             {/* Mobile navigation menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40">
+                <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-zinc-200 z-40">
                     <div className="px-2 pt-2 pb-3 space-y-1">
                         {navigationItems.map((item) => {
                             const Icon = item.icon;
@@ -193,7 +193,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 return (
                                     <div
                                         key={item.name}
-                                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-400 cursor-not-allowed"
+                                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-zinc-400 cursor-not-allowed"
                                     >
                                         <Icon className="mr-3 h-5 w-5" />
                                         {item.name}
@@ -212,8 +212,8 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                     className={({ isActive }) =>
                                         `flex items-center px-3 py-2 rounded-md text-base font-medium ${
                                             isActive
-                                                ? 'bg-indigo-50 text-indigo-700'
-                                                : 'text-gray-700 hover:text-indigo-700 hover:bg-indigo-50'
+                                                ? 'bg-primary-100 text-primary-700'
+                                                : 'text-zinc-700 hover:text-primary-700 hover:bg-primary-100'
                                         }`
                                     }
                                 >
@@ -226,7 +226,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                         {/* Mobile Pro Upgrade Banner for Free Users */}
                         {!isProUser && (
                             <div className="mx-3 mt-4">
-                                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-3">
+                                <div className="bg-gradient-to-r from-purple-500 to-primary-600 rounded-lg p-3">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0">
                                             <Star className="h-5 w-5 text-white" />
@@ -246,7 +246,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                             onClick={() =>
                                                 setIsMobileMenuOpen(false)
                                             }
-                                            className="w-full bg-white text-purple-600 hover:bg-gray-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
+                                            className="w-full bg-white text-purple-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
                                         >
                                             Learn More
                                         </NavLink>
@@ -263,7 +263,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                 className="hidden md:flex md:w-64 md:flex-col pt-16"
                 data-testid="sidebar"
             >
-                <div className="flex flex-col flex-grow bg-white border-r border-gray-200 pt-5 pb-4 overflow-y-auto">
+                <div className="flex flex-col flex-grow bg-white border-r border-zinc-200 pt-5 pb-4 overflow-y-auto">
                     {/* Navigation */}
                     <nav className="mt-2 flex-1 px-2 space-y-1">
                         {navigationItems.map((item) => {
@@ -274,7 +274,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                     <div
                                         key={item.name}
                                         data-testid={`nav-${item.name.toLowerCase()}`}
-                                        className="group flex items-center px-2 py-2 text-sm font-medium text-gray-400 rounded-md cursor-not-allowed"
+                                        className="group flex items-center px-2 py-2 text-sm font-medium text-zinc-400 rounded-md cursor-not-allowed"
                                     >
                                         <Icon className="mr-3 h-5 w-5" />
                                         {item.name}
@@ -293,8 +293,8 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                     className={({ isActive }) =>
                                         `group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                                             isActive
-                                                ? 'bg-indigo-50 text-indigo-700'
-                                                : 'text-gray-700 hover:text-indigo-700 hover:bg-indigo-50'
+                                                ? 'bg-primary-100 text-primary-700'
+                                                : 'text-zinc-700 hover:text-primary-700 hover:bg-primary-100'
                                         }`
                                     }
                                 >
@@ -309,7 +309,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                     {!isProUser && (
                         <div className="flex-shrink-0 px-4 pb-4">
                             <div
-                                className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-3"
+                                className="bg-gradient-to-r from-lime-500 to-primary-600 rounded-lg p-3"
                                 data-testid="upgrade-banner"
                             >
                                 <div className="flex items-center">
@@ -328,7 +328,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 <div className="mt-3">
                                     <NavLink
                                         to="/pricing"
-                                        className="w-full bg-white text-purple-600 hover:bg-gray-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
+                                        className="w-full bg-white text-lime-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
                                     >
                                         Learn More
                                     </NavLink>
@@ -350,7 +350,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
             {isAdmin && (
                 <button
                     onClick={handleOpenAdminDrawer}
-                    className="fixed bottom-6 right-6 z-[50] bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-colors"
+                    className="fixed bottom-6 right-6 z-[50] bg-primary-600 hover:bg-primary-700 text-white p-3 rounded-full shadow-lg transition-colors"
                     title="Admin Tools"
                 >
                     <Settings className="w-5 h-5" />

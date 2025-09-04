@@ -107,14 +107,14 @@ export default function AdminToolsDrawer({
             {/* Drawer */}
             <div className="fixed top-0 right-0 z-[70] h-screen p-4 overflow-y-auto transition-transform bg-white w-80 shadow-lg">
                 <div className="flex items-center justify-between mb-6">
-                    <h5 className="text-base font-semibold text-gray-900 uppercase flex items-center">
+                    <h5 className="text-base font-semibold text-zinc-900 uppercase flex items-center">
                         <Settings className="w-4 h-4 mr-2" />
                         Admin Tools
                     </h5>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center"
+                        className="text-zinc-400 bg-transparent hover:bg-zinc-200 hover:text-zinc-900 rounded-lg text-sm p-1.5 inline-flex items-center"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -122,19 +122,19 @@ export default function AdminToolsDrawer({
 
                 <div className="space-y-4">
                     {/* User Info */}
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="bg-zinc-50 rounded-lg p-4">
                         <div className="flex items-center space-x-3 mb-3">
-                            <User className="w-5 h-5 text-gray-600" />
+                            <User className="w-5 h-5 text-zinc-600" />
                             <div>
-                                <h6 className="text-sm font-medium text-gray-900">
+                                <h6 className="text-sm font-medium text-zinc-900">
                                     {user?.name}
                                 </h6>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-zinc-500">
                                     {user?.email}
                                 </p>
                             </div>
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-zinc-500">
                             <p>ID: {user?.id}</p>
                             <p>
                                 Created:{' '}
@@ -144,13 +144,13 @@ export default function AdminToolsDrawer({
                     </div>
 
                     {/* Subscription Toggle */}
-                    <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="border border-zinc-200 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                                 <Crown
-                                    className={`w-4 h-4 ${isProUser ? 'text-yellow-500' : 'text-gray-400'}`}
+                                    className={`w-4 h-4 ${isProUser ? 'text-yellow-500' : 'text-zinc-400'}`}
                                 />
-                                <span className="text-sm font-medium text-gray-900">
+                                <span className="text-sm font-medium text-zinc-900">
                                     Pro Subscription
                                 </span>
                             </div>
@@ -162,19 +162,19 @@ export default function AdminToolsDrawer({
                                     disabled={updateFetcher.state !== 'idle'}
                                     className="sr-only peer"
                                 />
-                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-zinc-500 mt-2">
                             Current status:{' '}
                             <span
-                                className={`font-medium ${isProUser ? 'text-green-600' : 'text-gray-600'}`}
+                                className={`font-medium ${isProUser ? 'text-green-600' : 'text-zinc-600'}`}
                             >
                                 {isProUser ? 'Active Pro User' : 'Free User'}
                             </span>
                         </p>
                         {updateFetcher.state === 'submitting' && (
-                            <p className="text-xs text-blue-600 mt-1">
+                            <p className="text-xs text-primary-600 mt-1">
                                 Updating...
                             </p>
                         )}
@@ -191,10 +191,10 @@ export default function AdminToolsDrawer({
                     </div>
 
                     {/* User Management Form */}
-                    <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="border border-zinc-200 rounded-lg p-4">
                         <div className="flex items-center space-x-2 mb-4">
-                            <Users className="w-4 h-4 text-gray-600" />
-                            <h6 className="text-sm font-medium text-gray-900">
+                            <Users className="w-4 h-4 text-zinc-600" />
+                            <h6 className="text-sm font-medium text-zinc-900">
                                 Manage User Subscriptions
                             </h6>
                         </div>
@@ -207,7 +207,7 @@ export default function AdminToolsDrawer({
                             <div>
                                 <label
                                     htmlFor="user-select"
-                                    className="block text-xs font-medium text-gray-700 mb-1"
+                                    className="block text-xs font-medium text-zinc-700 mb-1"
                                 >
                                     Select User
                                 </label>
@@ -217,7 +217,7 @@ export default function AdminToolsDrawer({
                                     onChange={(e) =>
                                         setSelectedUserId(e.target.value)
                                     }
-                                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 py-1 text-xs border border-zinc-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                     required
                                 >
                                     <option value="">Choose a user...</option>
@@ -234,7 +234,7 @@ export default function AdminToolsDrawer({
                             <div>
                                 <label
                                     htmlFor="subscription-select"
-                                    className="block text-xs font-medium text-gray-700 mb-1"
+                                    className="block text-xs font-medium text-zinc-700 mb-1"
                                 >
                                     Subscription Status
                                 </label>
@@ -246,7 +246,7 @@ export default function AdminToolsDrawer({
                                             e.target.value
                                         )
                                     }
-                                    className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-2 py-1 text-xs border border-zinc-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                                 >
                                     <option value="free">Free</option>
                                     <option value="active">Pro</option>
@@ -260,7 +260,7 @@ export default function AdminToolsDrawer({
                                     !selectedUserId ||
                                     userManagementFetcher.state !== 'idle'
                                 }
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 px-3 rounded transition-colors"
+                                className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-zinc-300 disabled:cursor-not-allowed text-white text-xs font-medium py-2 px-3 rounded transition-colors"
                             >
                                 {userManagementFetcher.state === 'submitting'
                                     ? 'Updating...'
@@ -280,7 +280,7 @@ export default function AdminToolsDrawer({
                             </p>
                         )}
                         {usersFetcher.state === 'loading' && (
-                            <p className="text-xs text-blue-600 mt-2">
+                            <p className="text-xs text-primary-600 mt-2">
                                 Loading users...
                             </p>
                         )}

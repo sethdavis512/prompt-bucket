@@ -394,14 +394,14 @@ export default function NewPrompt({
     return (
         <div className="flex-1 flex flex-col min-h-0">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
+            <div className="bg-white shadow-sm border-b border-zinc-200">
                 <div className="p-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900">
+                            <h1 className="text-xl font-bold text-zinc-900">
                                 Create New Prompt
                             </h1>
-                            <p className="text-gray-600 mt-1">
+                            <p className="text-zinc-600 mt-1">
                                 Build a structured prompt using the 10-section
                                 methodology
                             </p>
@@ -453,8 +453,8 @@ export default function NewPrompt({
                                 value={totalScore || 0}
                             />
                             {/* Basic Info */}
-                            <div className="border-b border-gray-200 pb-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                            <div className="border-b border-zinc-200 pb-6">
+                                <h3 className="text-lg font-medium text-zinc-900 mb-4">
                                     Basic Information
                                 </h3>
 
@@ -508,7 +508,7 @@ export default function NewPrompt({
 
                                     {isProUser ? (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-zinc-700 mb-2">
                                                 Visibility
                                             </label>
                                             <div className="flex items-center space-x-4">
@@ -520,9 +520,9 @@ export default function NewPrompt({
                                                         onChange={() =>
                                                             setIsPublic(false)
                                                         }
-                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                        className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-zinc-300"
                                                     />
-                                                    <span className="ml-2 text-sm text-gray-700">
+                                                    <span className="ml-2 text-sm text-zinc-700">
                                                         Private
                                                     </span>
                                                 </label>
@@ -535,14 +535,14 @@ export default function NewPrompt({
                                                             setIsPublic(true)
                                                         }
                                                         data-cy="public-checkbox"
-                                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                                                        className="focus:ring-primary-500 h-4 w-4 text-primary-600 border-zinc-300"
                                                     />
-                                                    <span className="ml-2 text-sm text-gray-700">
+                                                    <span className="ml-2 text-sm text-zinc-700">
                                                         Public
                                                     </span>
                                                 </label>
                                             </div>
-                                            <p className="text-xs text-gray-500 mt-1">
+                                            <p className="text-xs text-zinc-500 mt-1">
                                                 Public prompts can be shared
                                                 with others via a link. Private
                                                 prompts are only visible to you.
@@ -550,10 +550,10 @@ export default function NewPrompt({
                                         </div>
                                     ) : (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <label className="block text-sm font-medium text-zinc-700 mb-2">
                                                 Visibility
                                             </label>
-                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                            <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
                                                 <div className="flex items-center">
                                                     <input
                                                         type="radio"
@@ -561,21 +561,21 @@ export default function NewPrompt({
                                                         value="false"
                                                         checked={true}
                                                         disabled
-                                                        className="h-4 w-4 text-gray-400 border-gray-300"
+                                                        className="h-4 w-4 text-zinc-400 border-zinc-300"
                                                     />
-                                                    <span className="ml-2 text-sm text-gray-700">
+                                                    <span className="ml-2 text-sm text-zinc-700">
                                                         Private
                                                     </span>
-                                                    <span className="ml-2 text-xs text-gray-500">
+                                                    <span className="ml-2 text-xs text-zinc-500">
                                                         (Free users)
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-gray-500 mt-2">
+                                                <p className="text-xs text-zinc-500 mt-2">
                                                     Public sharing is available
                                                     with Pro.
                                                     <a
                                                         href="/pricing"
-                                                        className="text-blue-600 hover:text-blue-500 ml-1"
+                                                        className="text-primary-600 hover:text-primary-500 ml-1"
                                                     >
                                                         Upgrade to share prompts
                                                         →
@@ -590,10 +590,10 @@ export default function NewPrompt({
                             {/* Prompt Sections */}
                             <div className="space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-medium text-gray-900">
+                                    <h3 className="text-lg font-medium text-zinc-900">
                                         Prompt Structure
                                     </h3>
-                                    <p className="text-sm text-gray-600 mt-1">
+                                    <p className="text-sm text-zinc-600 mt-1">
                                         Start by defining the AI's role in
                                         section 1 - this forms the foundation
                                         for your prompt. Complete additional
@@ -603,11 +603,11 @@ export default function NewPrompt({
                                 </div>
 
                                 {!isProUser && (
-                                    <div className="bg-gradient-to-r from-purple-100 to-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
+                                    <div className="bg-gradient-to-r from-purple-100 to-primary-100 border border-primary-300 rounded-lg p-4 mb-6">
                                         <div className="flex items-start space-x-3">
                                             <div className="flex-shrink-0">
                                                 <svg
-                                                    className="w-5 h-5 text-blue-600 mt-0.5"
+                                                    className="w-5 h-5 text-primary-600 mt-0.5"
                                                     fill="currentColor"
                                                     viewBox="0 0 20 20"
                                                 >
@@ -619,10 +619,10 @@ export default function NewPrompt({
                                                 </svg>
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                                <h4 className="text-sm font-medium text-zinc-900 mb-1">
                                                     Pro Features Available
                                                 </h4>
-                                                <div className="text-sm text-gray-600 space-y-1">
+                                                <div className="text-sm text-zinc-600 space-y-1">
                                                     <p>
                                                         <strong>
                                                             Auto-fill:
@@ -653,7 +653,7 @@ export default function NewPrompt({
                                                 <div className="mt-3">
                                                     <a
                                                         href="/pricing"
-                                                        className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                                                        className="text-sm font-medium text-primary-600 hover:text-primary-500"
                                                     >
                                                         Upgrade to Pro →
                                                     </a>
@@ -666,7 +666,7 @@ export default function NewPrompt({
                                 {promptSections.map((section) => (
                                     <div
                                         key={section.id}
-                                        className="border border-gray-200 rounded-lg p-4"
+                                        className="border border-zinc-200 rounded-lg p-4"
                                     >
                                         <div className="mb-3">
                                             <div className="flex items-start justify-between mb-2">
@@ -730,14 +730,14 @@ export default function NewPrompt({
                                                                 className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                                                                     generatingField ===
                                                                     section.id
-                                                                        ? 'bg-blue-100 text-blue-700 cursor-not-allowed'
-                                                                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                                        ? 'bg-primary-100 text-primary-700 cursor-not-allowed'
+                                                                        : 'bg-primary-600 text-white hover:bg-primary-700'
                                                                 }`}
                                                             >
                                                                 {generatingField ===
                                                                 section.id ? (
                                                                     <>
-                                                                        <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
+                                                                        <div className="w-3 h-3 border-2 border-primary-700 border-t-transparent rounded-full animate-spin mr-1.5"></div>
                                                                         Generating...
                                                                     </>
                                                                 ) : (
@@ -752,13 +752,13 @@ export default function NewPrompt({
                                                 )}
                                             </div>
 
-                                            <p className="text-xs text-gray-500 mb-2">
+                                            <p className="text-xs text-zinc-500 mb-2">
                                                 {section.description}
                                             </p>
 
                                             {suggestions[section.id] &&
                                                 isProUser && (
-                                                    <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                                                    <div className="mb-2 p-2 bg-primary-100 border border-primary-200 rounded text-xs text-primary-800">
                                                         💡{' '}
                                                         {
                                                             suggestions[
@@ -801,7 +801,7 @@ export default function NewPrompt({
 
                                         {/* Character count indicator */}
                                         <div className="mt-1 flex justify-between text-xs">
-                                            <span className="text-gray-500">
+                                            <span className="text-zinc-500">
                                                 Max {section.maxChars}{' '}
                                                 characters for optimal token
                                                 efficiency
@@ -819,7 +819,7 @@ export default function NewPrompt({
                                                             section.maxChars *
                                                                 0.75
                                                           ? 'text-yellow-600'
-                                                          : 'text-gray-600'
+                                                          : 'text-zinc-600'
                                                 }`}
                                             >
                                                 {promptValues[
@@ -830,8 +830,8 @@ export default function NewPrompt({
                                         </div>
                                         {isProUser &&
                                             scoringField === section.id && (
-                                                <div className="mt-2 flex items-center text-xs text-blue-600">
-                                                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                <div className="mt-2 flex items-center text-xs text-primary-600">
+                                                    <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mr-2"></div>
                                                     AI is analyzing this
                                                     field...
                                                 </div>
@@ -841,10 +841,10 @@ export default function NewPrompt({
                             </div>
 
                             {/* Submit */}
-                            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                            <div className="flex justify-end space-x-3 pt-6 border-t border-zinc-200">
                                 <button
                                     type="button"
-                                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                    className="bg-white py-2 px-4 border border-zinc-300 rounded-md shadow-sm text-sm font-medium text-zinc-700 hover:bg-zinc-50"
                                     onClick={() => window.history.back()}
                                 >
                                     Cancel
@@ -852,7 +852,7 @@ export default function NewPrompt({
                                 <button
                                     type="submit"
                                     data-cy="save-prompt"
-                                    className="bg-indigo-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700"
+                                    className="bg-primary-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-primary-700"
                                 >
                                     Create Prompt
                                 </button>
@@ -861,7 +861,7 @@ export default function NewPrompt({
                     </div>
 
                     {/* Live Preview Column */}
-                    <div className="sticky top-0 self-start">
+                    <div className="lg:sticky lg:top-8 lg:self-start">
                         <PromptPreview
                             content={generatePromptPreview()}
                             totalScore={totalScore}

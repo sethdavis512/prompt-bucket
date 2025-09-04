@@ -50,26 +50,25 @@ export default function CategoryManager({
     return (
         <div>
             <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-zinc-700">
                     Categories
                 </label>
                 {isProUser ? (
                     <button
                         type="button"
                         onClick={() => setIsCreating(true)}
-                        className="inline-flex items-center px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-500"
+                        className="inline-flex items-center px-2 py-1 text-xs font-medium text-primary-600 hover:text-primary-500"
                     >
                         <Plus className="w-3 h-3 mr-1" />
                         Add Category
                     </button>
                 ) : (
-                    <div className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed">
+                    <div className="inline-flex items-center px-2 py-1 text-xs font-medium text-zinc-400 cursor-not-allowed">
                         <Plus className="w-3 h-3 mr-1" />
                         Add Category
                     </div>
                 )}
             </div>
-
 
             {/* Categories list */}
             <div className="flex flex-wrap gap-2">
@@ -91,8 +90,8 @@ export default function CategoryManager({
                                             selectedCategories.includes(
                                                 category.id
                                             )
-                                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105'
-                                                : 'bg-white text-indigo-600 border-indigo-300 hover:bg-indigo-50 hover:border-indigo-400'
+                                                ? 'bg-primary-600 text-white border-primary-600 shadow-md transform scale-105'
+                                                : 'bg-white text-primary-600 border-primary-300 hover:bg-primary-100 hover:border-primary-400'
                                         }`}
                                     >
                                         {category.name}
@@ -116,7 +115,7 @@ export default function CategoryManager({
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-gray-500 italic">
+                            <p className="text-sm text-zinc-500 italic">
                                 No categories yet. Create your first category to
                                 organize prompts.
                             </p>
@@ -126,16 +125,16 @@ export default function CategoryManager({
                     <>
                         {/* Free user - show teaser categories */}
                         <div className="flex flex-wrap gap-2 opacity-50">
-                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed">
+                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-zinc-100 text-zinc-500 border-zinc-300 cursor-not-allowed">
                                 Marketing
                             </div>
-                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed">
+                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-zinc-100 text-zinc-500 border-zinc-300 cursor-not-allowed">
                                 Development
                             </div>
-                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed">
+                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-zinc-100 text-zinc-500 border-zinc-300 cursor-not-allowed">
                                 Content
                             </div>
-                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed">
+                            <div className="px-3 py-1 rounded-full text-sm font-medium border bg-zinc-100 text-zinc-500 border-zinc-300 cursor-not-allowed">
                                 + More
                             </div>
                         </div>
@@ -145,12 +144,12 @@ export default function CategoryManager({
 
             {/* Pro feature message for free users */}
             {!isProUser && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-zinc-500 mt-2">
                     <AlertCircle className="w-3 h-3 inline mr-1" />
                     Create custom categories to organize your prompts with Pro.{' '}
                     <a
                         href="/pricing"
-                        className="text-indigo-600 hover:text-indigo-500"
+                        className="text-primary-600 hover:text-primary-500"
                     >
                         Upgrade →
                     </a>
@@ -161,22 +160,27 @@ export default function CategoryManager({
             {isCreating && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-                        <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        <h3 className="text-lg font-medium text-zinc-900 mb-4">
                             Create Category
                         </h3>
                         <div className="space-y-4">
                             <input
                                 type="text"
                                 value={categoryName}
-                                onChange={(e) => setCategoryName(e.target.value)}
+                                onChange={(e) =>
+                                    setCategoryName(e.target.value)
+                                }
                                 placeholder="Category name..."
-                                className="w-full text-sm border border-gray-300 rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="w-full text-sm border border-zinc-300 rounded px-3 py-2 focus:ring-primary-500 focus:border-primary-500"
                                 onKeyDown={(e) => {
                                     if (e.key === 'Escape') {
                                         setIsCreating(false);
                                         setCategoryName('');
                                     }
-                                    if (e.key === 'Enter' && categoryName.trim()) {
+                                    if (
+                                        e.key === 'Enter' &&
+                                        categoryName.trim()
+                                    ) {
                                         handleCreateCategory();
                                     }
                                 }}
@@ -189,17 +193,22 @@ export default function CategoryManager({
                                         setIsCreating(false);
                                         setCategoryName('');
                                     }}
-                                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                                    className="px-3 py-2 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-md"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleCreateCategory}
-                                    disabled={createFetcher.state !== 'idle' || !categoryName.trim()}
-                                    className="px-3 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-md disabled:opacity-50"
+                                    disabled={
+                                        createFetcher.state !== 'idle' ||
+                                        !categoryName.trim()
+                                    }
+                                    className="px-3 py-2 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-md disabled:opacity-50"
                                 >
-                                    {createFetcher.state === 'submitting' ? 'Creating...' : 'Create'}
+                                    {createFetcher.state === 'submitting'
+                                        ? 'Creating...'
+                                        : 'Create'}
                                 </button>
                             </div>
                         </div>
@@ -211,10 +220,10 @@ export default function CategoryManager({
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        <h3 className="text-lg font-medium text-zinc-900 mb-2">
                             Delete Category
                         </h3>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-sm text-zinc-600 mb-4">
                             Are you sure you want to delete "
                             {
                                 categories.find((c) => c.id === deleteConfirm)
@@ -226,7 +235,7 @@ export default function CategoryManager({
                             <button
                                 type="button"
                                 onClick={() => setDeleteConfirm(null)}
-                                className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                                className="px-3 py-2 text-sm text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-md"
                             >
                                 Cancel
                             </button>

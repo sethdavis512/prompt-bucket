@@ -14,7 +14,8 @@
       "mcp__context7__get-library-docs",
       "WebFetch(domain:github.com)",
       "Bash(grep:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(gh repo edit:*)"
     ],
     "deny": [],
     "ask": []
