@@ -12,7 +12,8 @@
         "cypress:open": "cypress open",
         "cypress:run": "cypress run",
         "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run",
-        "test:e2e:open": "start-server-and-test dev http://localhost:5173 cypress:open"
+        "test:e2e:open": "start-server-and-test dev http://localhost:5173 cypress:open",
+        "setup": "prisma generate && prisma migrate deploy"
     },
     "prisma": {
         "seed": "tsx prisma/seed.ts"
