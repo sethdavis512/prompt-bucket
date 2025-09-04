@@ -9,7 +9,6 @@ import {
 } from '~/models/chain.server';
 import {
     getPromptsForSelectionByUserId,
-    getPromptsByIds,
     validatePromptsExist
 } from '~/models/prompt.server';
 import TextField from '~/components/TextField';

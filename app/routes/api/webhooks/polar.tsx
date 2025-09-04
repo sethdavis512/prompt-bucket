@@ -1,5 +1,10 @@
 import { Webhooks } from '@polar-sh/remix';
-import { updateUserSubscriptionByCustomerId, cancelUserSubscriptionByCustomerId, updateUserSubscriptionById, getAllUsers, updateUserByEmail, getAllUsersForDebugging } from '~/models/user.server';
+import {
+    updateUserSubscriptionByCustomerId,
+    cancelUserSubscriptionByCustomerId,
+    updateUserByEmail,
+    getAllUsersForDebugging
+} from '~/models/user.server';
 
 export const action = Webhooks({
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
@@ -24,10 +29,13 @@ export const action = Webhooks({
                     );
 
                     // Find user by customer ID and update subscription status
-                    const result = await updateUserSubscriptionByCustomerId(subscription.customerId, {
-                        subscriptionStatus: subscription.status,
-                        subscriptionId: subscription.id
-                    });
+                    const result = await updateUserSubscriptionByCustomerId(
+                        subscription.customerId,
+                        {
+                            subscriptionStatus: subscription.status,
+                            subscriptionId: subscription.id
+                        }
+                    );
                     console.log(`✅ Updated ${result.count} users`);
                     break;
                 }
@@ -36,7 +44,9 @@ export const action = Webhooks({
                     const subscription = payload.data;
 
                     // Update user subscription status to canceled
-                    await cancelUserSubscriptionByCustomerId(subscription.customerId);
+                    await cancelUserSubscriptionByCustomerId(
+                        subscription.customerId
+                    );
                     break;
                 }
 

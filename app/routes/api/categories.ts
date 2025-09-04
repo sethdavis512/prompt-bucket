@@ -1,5 +1,4 @@
 import { data } from 'react-router';
-import { getCategoryByUserIdAndName, createCategory, getCategoryByIdForAPI, deleteCategory } from '~/models/category.server';
 import { auth } from '~/lib/auth';
 import { prisma } from '~/lib/prisma';
 import type { Route } from './+types/categories';
