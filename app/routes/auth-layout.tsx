@@ -309,7 +309,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                     {!isProUser && (
                         <div className="flex-shrink-0 px-4 pb-4">
                             <div
-                                className="bg-gradient-to-r from-purple-500 to-primary-600 rounded-lg p-3"
+                                className="bg-gradient-to-r from-lime-500 to-primary-600 rounded-lg p-3"
                                 data-testid="upgrade-banner"
                             >
                                 <div className="flex items-center">
@@ -328,7 +328,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                 <div className="mt-3">
                                     <NavLink
                                         to="/pricing"
-                                        className="w-full bg-white text-purple-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
+                                        className="w-full bg-white text-lime-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
                                     >
                                         Learn More
                                     </NavLink>
