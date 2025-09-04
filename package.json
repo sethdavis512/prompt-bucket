@@ -9,7 +9,6 @@
         "db:reset": "prisma migrate reset --force && npm run db:seed",
         "db:seed": "tsx prisma/seed.ts",
         "dev": "react-router dev",
-        "postinstall": "prisma generate",
         "start": "react-router-serve ./build/server/index.js",
         "test:e2e:open": "start-server-and-test dev http://localhost:5173 cypress:open",
         "test:e2e": "start-server-and-test dev http://localhost:5173 cypress:run",
