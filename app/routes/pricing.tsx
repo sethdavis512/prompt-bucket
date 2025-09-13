@@ -291,7 +291,7 @@ export default function Pricing({ loaderData }: Route.ComponentProps) {
                                     Ready to collaborate with your team?
                                 </p>
                                 <Link
-                                    to={user ? '/teams' : '/auth/signup'}
+                                    to={user ? '/teams' : '/auth/sign-up'}
                                     className="inline-flex items-center px-6 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
                                 >
                                     <Users className="w-4 h-4 mr-2" />

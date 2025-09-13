@@ -77,7 +77,7 @@ export default function ChainsIndex({ loaderData }: Route.ComponentProps) {
                 {/* Pro upgrade content */}
                 <div className="flex-1 flex items-center justify-center p-6">
                     <div className="text-center max-w-md">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-primary-600 rounded-full flex items-center justify-center">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-lime-500 to-primary-600 rounded-full flex items-center justify-center">
                             <Crown className="h-8 w-8 text-white" />
                         </div>
                         <h2 className="text-2xl font-bold text-zinc-900 mb-4">

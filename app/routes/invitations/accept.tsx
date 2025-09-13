@@ -317,7 +317,7 @@ export default function AcceptInvitation({
 
                         {emailMismatch ? (
                             <Link
-                                to="/auth/signin"
+                                to="/auth/sign-in"
                                 className="flex-1 py-2 px-4 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
                             >
                                 Sign in as {invitation.email}

@@ -134,7 +134,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                             <button
                                 onClick={handleEvaluateChain}
                                 disabled={isEvaluating}
-                                className="bg-purple-600 text-white hover:bg-purple-700 disabled:bg-zinc-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                                className="bg-lime-600 text-white hover:bg-lime-700 disabled:bg-zinc-300 px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
                             >
                                 {isEvaluating ? (
                                     <RefreshCw className="h-4 w-4 animate-spin" />
@@ -329,10 +329,10 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                     {/* Evaluation Panel */}
                     {(evaluationResult || isEvaluating) && (
                         <div className="w-96 bg-white border-l border-zinc-200 flex flex-col h-full">
-                            <div className="bg-purple-50 px-4 py-3 border-b border-zinc-200">
+                            <div className="bg-lime-50 px-4 py-3 border-b border-zinc-200">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
-                                        <Zap className="h-5 w-5 text-purple-600" />
+                                        <Zap className="h-5 w-5 text-lime-600" />
                                         <h3 className="font-medium text-zinc-900">
                                             AI Chain Evaluation
                                         </h3>
@@ -375,7 +375,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                 {isEvaluating ? (
                                     <div className="flex items-center justify-center py-8">
                                         <div className="text-center">
-                                            <RefreshCw className="h-8 w-8 text-purple-600 animate-spin mx-auto mb-2" />
+                                            <RefreshCw className="h-8 w-8 text-lime-600 animate-spin mx-auto mb-2" />
                                             <p className="text-sm text-zinc-600">
                                                 Analyzing your chain flow...
                                             </p>
@@ -420,7 +420,7 @@ export default function ChainDetail({ loaderData }: Route.ComponentProps) {
                                                                 {title.includes(
                                                                     'Flow Analysis'
                                                                 ) && (
-                                                                    <Star className="h-4 w-4 mr-2 text-purple-600" />
+                                                                    <Star className="h-4 w-4 mr-2 text-lime-600" />
                                                                 )}
                                                                 {title.includes(
                                                                     'Issues'

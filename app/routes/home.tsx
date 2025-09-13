@@ -67,7 +67,7 @@ export default function Home({
     matches
 }: Route.ComponentProps) {
     return (
-        <div className="bg-gradient-to-br from-primary-50 via-white to-purple-50 min-h-screen">
+        <div className="bg-gradient-to-br from-primary-50 via-white to-lime-50 min-h-screen">
             {/* Hero Section */}
             <div className="relative px-6 lg:px-8">
                 <div className="mx-auto max-w-3xl pt-20 pb-32 sm:pt-48 sm:pb-40">
@@ -87,13 +87,13 @@ export default function Home({
                         </p>
                         <div className="mt-10 flex items-center justify-center gap-x-6">
                             <Link
-                                to="/auth/signup"
+                                to="/auth/sign-up"
                                 className="rounded-md bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                             >
                                 Get Started Free
                             </Link>
                             <Link
-                                to="/auth/signin"
+                                to="/auth/sign-in"
                                 className="text-base font-semibold leading-6 text-zinc-900 flex items-center"
                             >
                                 Sign In <ArrowRight className="ml-1 h-4 w-4" />
@@ -194,7 +194,7 @@ export default function Home({
                         </p>
                         <div className="mt-10 flex items-center justify-center gap-x-6">
                             <Link
-                                to="/auth/signup"
+                                to="/auth/sign-up"
                                 className="rounded-md bg-white px-6 py-3 text-base font-semibold text-primary-600 shadow-sm hover:bg-primary-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                             >
                                 Start Building Prompts

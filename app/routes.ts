@@ -13,8 +13,8 @@ export default [
         route('pricing', 'routes/pricing.tsx'),
         route('access-denied', 'routes/access-denied.tsx'),
         ...prefix(`auth`, [
-            route('sign-in', 'routes/auth/signin.tsx'),
-            route('sign-up', 'routes/auth/signup.tsx')
+            route('sign-in', 'routes/auth/sign-in.tsx'),
+            route('sign-up', 'routes/auth/sign-up.tsx')
         ]),
         route('share/:id', 'routes/share/prompt.tsx'),
         route('checkout', 'routes/checkout.tsx'),

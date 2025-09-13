@@ -19,7 +19,7 @@ export interface SessionData {
     isProUser: boolean;
     isAdmin: boolean;
     currentTeamId?: string; // Add team context
-    teamRole?: TeamRole;    // User's role in current team
+    teamRole?: TeamRole; // User's role in current team
 }
 
 export interface TeamSessionData extends SessionData {
@@ -36,7 +36,7 @@ export async function requireAuth(request: Request): Promise<SessionData> {
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session) {
-        throw redirect('/auth/signin');
+        throw redirect('/auth/sign-in');
     }
 
     const user = await prisma.user.findUnique({
@@ -53,7 +53,7 @@ export async function requireAuth(request: Request): Promise<SessionData> {
     });
 
     if (!user) {
-        throw redirect('/auth/signin');
+        throw redirect('/auth/sign-in');
     }
 
     const isProUser = user.subscriptionStatus === 'active';
@@ -66,21 +66,24 @@ export async function requireAuth(request: Request): Promise<SessionData> {
  * Enhanced auth helper for team routes that validates team access.
  * Use this in team-scoped routes that need both user and team context.
  */
-export async function requireTeamAuth(request: Request, teamSlug: string): Promise<TeamSessionData> {
+export async function requireTeamAuth(
+    request: Request,
+    teamSlug: string
+): Promise<TeamSessionData> {
     const { user, isProUser, isAdmin } = await requireAuth(request);
-    
+
     const team = await getTeamBySlug(teamSlug);
-    
+
     if (!team) {
         throw redirect('/access-denied');
     }
-    
+
     const teamMember = await getTeamMember(team.id, user.id);
-    
+
     if (!teamMember) {
         throw redirect('/access-denied');
     }
-    
+
     return {
         user,
         isProUser,
@@ -95,13 +98,16 @@ export async function requireTeamAuth(request: Request, teamSlug: string): Promi
  * Validates team admin access.
  * Use this for team management routes that require admin permissions.
  */
-export async function requireTeamAdmin(request: Request, teamSlug: string): Promise<TeamSessionData> {
+export async function requireTeamAdmin(
+    request: Request,
+    teamSlug: string
+): Promise<TeamSessionData> {
     const sessionData = await requireTeamAuth(request, teamSlug);
-    
+
     if (sessionData.teamRole !== 'ADMIN') {
         throw redirect('/access-denied');
     }
-    
+
     return sessionData;
 }
 
@@ -109,23 +115,26 @@ export async function requireTeamAdmin(request: Request, teamSlug: string): Prom
  * Gets user session with optional team context.
  * Use this when team context is optional but helpful.
  */
-export async function getSessionWithOptionalTeam(request: Request, teamSlug?: string): Promise<SessionData> {
+export async function getSessionWithOptionalTeam(
+    request: Request,
+    teamSlug?: string
+): Promise<SessionData> {
     const baseSession = await requireAuth(request);
-    
+
     if (!teamSlug) {
         return baseSession;
     }
-    
+
     const team = await getTeamBySlug(teamSlug);
     if (!team) {
         return baseSession;
     }
-    
+
     const teamMember = await getTeamMember(team.id, baseSession.user.id);
     if (!teamMember) {
         return baseSession;
     }
-    
+
     return {
         ...baseSession,
         currentTeamId: team.id,

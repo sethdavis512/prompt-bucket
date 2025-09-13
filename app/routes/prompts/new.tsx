@@ -392,9 +392,9 @@ export default function NewPrompt({
     };
 
     return (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="grid grid-cols-8">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-zinc-200">
+            <div className="col-span-full bg-white shadow-sm border-b border-zinc-200">
                 <div className="p-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -411,16 +411,16 @@ export default function NewPrompt({
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="col-span-full grid grid-cols-subgrid gap-6 p-6">
                 {actionData?.error && (
-                    <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    <div className="col-span-full mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                         {actionData.error}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="col-span-4">
                     {/* Form Column */}
-                    <div className="bg-white shadow rounded-lg">
+                    <div className="bg-white shadow rounded-lg col-span-2">
                         <Form method="post" className="space-y-6 p-6">
                             {/* Hidden field for user ID */}
                             <input
@@ -603,7 +603,7 @@ export default function NewPrompt({
                                 </div>
 
                                 {!isProUser && (
-                                    <div className="bg-gradient-to-r from-purple-100 to-primary-100 border border-primary-300 rounded-lg p-4 mb-6">
+                                    <div className="bg-gradient-to-r from-lime-100 to-primary-100 border border-primary-300 rounded-lg p-4 mb-6">
                                         <div className="flex items-start space-x-3">
                                             <div className="flex-shrink-0">
                                                 <svg
@@ -859,15 +859,16 @@ export default function NewPrompt({
                             </div>
                         </Form>
                     </div>
+                </div>
 
-                    {/* Live Preview Column */}
-                    <div className="lg:sticky lg:top-8 lg:self-start">
-                        <PromptPreview
-                            content={generatePromptPreview()}
-                            totalScore={totalScore}
-                            isProUser={isProUser}
-                        />
-                    </div>
+                {/* Live Preview Column */}
+                <div className="col-span-4 relative">
+                    <PromptPreview
+                        className="sticky top-0"
+                        content={generatePromptPreview()}
+                        totalScore={totalScore}
+                        isProUser={isProUser}
+                    />
                 </div>
             </div>
         </div>

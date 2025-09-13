@@ -279,8 +279,8 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
 
                         <div className="flex items-center space-x-3">
                             {isProUser && totalScore > 0 && (
-                                <div className="flex items-center px-3 py-2 bg-gradient-to-r from-purple-100 to-primary-100 border border-purple-200 rounded-md">
-                                    <span className="text-sm font-medium text-purple-700">
+                                <div className="flex items-center px-3 py-2 bg-gradient-to-r from-lime-100 to-primary-100 border border-lime-200 rounded-md">
+                                    <span className="text-sm font-medium text-lime-700">
                                         Total Score: {totalScore}/100
                                     </span>
                                 </div>
@@ -567,9 +567,10 @@ export default function EditPrompt({ loaderData }: Route.ComponentProps) {
                     </div>
 
                     {/* Preview */}
-                    <div className="lg:sticky lg:top-24 lg:h-fit">
+                    <div>
                         <PromptPreview
                             title="Live Prompt Preview"
+                            className="sticky top-24"
                             content={[
                                 editedPrompt.taskContext,
                                 editedPrompt.toneContext,

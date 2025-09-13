@@ -226,7 +226,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                         {/* Mobile Pro Upgrade Banner for Free Users */}
                         {!isProUser && (
                             <div className="mx-3 mt-4">
-                                <div className="bg-gradient-to-r from-purple-500 to-primary-600 rounded-lg p-3">
+                                <div className="bg-gradient-to-r from-lime-500 to-primary-600 rounded-lg p-3">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0">
                                             <Star className="h-5 w-5 text-white" />
@@ -235,7 +235,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                             <p className="text-sm font-medium text-white">
                                                 Upgrade to Pro
                                             </p>
-                                            <p className="text-xs text-purple-100">
+                                            <p className="text-xs text-lime-100">
                                                 Unlock teams & collaboration
                                             </p>
                                         </div>
@@ -246,7 +246,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                             onClick={() =>
                                                 setIsMobileMenuOpen(false)
                                             }
-                                            className="w-full bg-white text-purple-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
+                                            className="w-full bg-white text-lime-600 hover:bg-zinc-50 border border-transparent rounded-md py-2 px-3 inline-flex items-center justify-center text-sm font-semibold transition-colors"
                                         >
                                             Learn More
                                         </NavLink>
@@ -320,7 +320,7 @@ export default function AuthLayout({ loaderData }: Route.ComponentProps) {
                                         <p className="text-sm font-medium text-white">
                                             Upgrade to Pro
                                         </p>
-                                        <p className="text-xs text-purple-100">
+                                        <p className="text-xs text-lime-100">
                                             Unlock teams & collaboration
                                         </p>
                                     </div>

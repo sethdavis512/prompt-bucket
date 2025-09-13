@@ -7,11 +7,13 @@ This document establishes design standards for PromptLab to ensure consistency, 
 ## Design System Foundation
 
 ### **Brand Identity**
-- **Primary Brand**: 🪣 PromptBucket 
+
+- **Primary Brand**: 🪣 PromptBucket
 - **Tagline**: Professional prompt engineering platform
 - **Personality**: Clean, professional, collaborative, empowering
 
 ### **Core Values in Design**
+
 - **Clarity**: Information hierarchy should be immediately clear
 - **Efficiency**: Users should accomplish tasks with minimal friction  
 - **Professionalism**: Enterprise-ready appearance and interactions
@@ -20,6 +22,7 @@ This document establishes design standards for PromptLab to ensure consistency, 
 ## Color System
 
 ### **Primary Palette**
+
 ```css
 /* Indigo - Primary Brand Color */
 indigo-50:  #eef2ff
@@ -42,6 +45,7 @@ gray-900: #111827 (Headings, emphasis)
 ```
 
 ### **Semantic Colors**
+
 ```css
 /* Success */
 green-50:  #f0fdf4
@@ -66,6 +70,7 @@ blue-600: #2563eb
 ```
 
 ### **Team/Pro Features**
+
 ```css
 /* Pro Badge */
 purple-500: #a855f7
@@ -79,10 +84,12 @@ indigo-100: #e0e7ff (Team highlights)
 ## Typography
 
 ### **Font Stack**
+
 - **Primary**: System font stack for optimal performance
 - **Fallback**: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
 
 ### **Type Scale**
+
 ```css
 /* Headings */
 text-3xl: 30px  /* Page titles */
@@ -103,6 +110,7 @@ font-normal:    400 (Body text)
 ```
 
 ### **Text Colors**
+
 ```css
 text-gray-900: Page titles, primary content
 text-gray-700: Body text, nav items
@@ -116,14 +124,17 @@ text-gray-400: Disabled text, placeholders
 ### **Layout Architecture**
 
 #### **Main App Layout Structure**
+
 The application uses a fixed sidebar + main content layout pattern with these Tailwind utility classes:
 
 **Root Layout Container:**
+
 ```html
 <div className="flex min-h-screen bg-gray-50">
 ```
 
 **Fixed Top Navigation:**
+
 ```html
 <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-gray-200 z-50">
   <div className="px-4 sm:px-6 lg:px-8">
@@ -131,6 +142,7 @@ The application uses a fixed sidebar + main content layout pattern with these Ta
 ```
 
 **Desktop Sidebar:**
+
 ```html
 <div className="hidden md:flex md:w-64 md:flex-col pt-16">
 ```
@@ -138,6 +150,7 @@ The application uses a fixed sidebar + main content layout pattern with these Ta
 #### **⚠️ CRITICAL LAYOUT FIXES**
 
 **❌ DO NOT USE** these problematic patterns:
+
 ```html
 <!-- BROKEN - Causes width calculation issues -->
 <div className="w-0 flex-1 pt-16 h-screen">
@@ -147,6 +160,7 @@ The application uses a fixed sidebar + main content layout pattern with these Ta
 ```
 
 **✅ DO USE** these correct patterns:
+
 ```html
 <!-- CORRECT - Proper flex layout -->
 <div className="flex flex-col flex-1 md:ml-0 pt-16 min-h-screen">
@@ -161,21 +175,25 @@ The application uses a fixed sidebar + main content layout pattern with these Ta
 ### **Mobile Navigation Patterns**
 
 **Mobile Menu Button:**
+
 ```html
 <button className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
 ```
 
 **Mobile Navigation Overlay:**
+
 ```html
 <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40">
 ```
 
 **Mobile Navigation Items:**
+
 ```html
 <NavLink className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-700 hover:bg-indigo-50">
 ```
 
 ### **Container Widths**
+
 ```css
 max-w-xs:   320px (Cards, modals)
 max-w-sm:   384px (Forms)
@@ -187,6 +205,7 @@ max-w-6xl: 1152px (Dashboard grids)
 ```
 
 ### **Spacing System**
+
 ```css
 /* Micro spacing */
 space-1: 4px   (Icon gaps)
@@ -204,6 +223,7 @@ space-16: 64px (Page section gaps)
 ```
 
 ### **Grid Systems**
+
 ```css
 /* Dashboard Stats */
 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
@@ -236,6 +256,7 @@ size="lg"  // 24px padding, 16px text
 ```
 
 ### **Cards**
+
 ```css
 /* Standard Card */
 .card {
@@ -249,11 +270,12 @@ size="lg"  // 24px padding, 16px text
 
 /* Feature Card (Pro, Team) */
 .card-feature {
-  @apply bg-gradient-to-r from-purple-50 to-indigo-50 border border-indigo-200 rounded-lg p-6;
+  @apply bg-gradient-to-r from-lime-50 to-indigo-50 border border-indigo-200 rounded-lg p-6;
 }
 ```
 
 ### **Forms**
+
 ```css
 /* Form Container */
 .form-container {
@@ -288,6 +310,7 @@ size="lg"  // 24px padding, 16px text
 ```
 
 ### **Navigation**
+
 ```css
 /* Sidebar Navigation Item */
 .nav-item {
@@ -307,11 +330,12 @@ size="lg"  // 24px padding, 16px text
 ```
 
 ### **Badges & Status**
+
 ```css
 /* Pro Badge */
 .badge-pro {
   @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-         bg-purple-100 text-purple-800;
+         bg-lime-100 text-lime-800;
 }
 
 /* Team Role Badge */
@@ -337,6 +361,7 @@ size="lg"  // 24px padding, 16px text
 ## Team Feature Design Patterns
 
 ### **Team Context Indicators**
+
 ```css
 /* Team Header */
 .team-header {
@@ -355,6 +380,7 @@ size="lg"  // 24px padding, 16px text
 ```
 
 ### **Collaboration UI**
+
 ```css
 /* Team Member Avatar Group */
 .avatar-group {
@@ -373,6 +399,7 @@ size="lg"  // 24px padding, 16px text
 ```
 
 ### **Pro Feature Gating**
+
 ```css
 /* Feature Gate Overlay */
 .feature-gate {
@@ -382,7 +409,7 @@ size="lg"  // 24px padding, 16px text
 
 /* Upgrade Prompt */
 .upgrade-prompt {
-  @apply bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-4 rounded-lg;
+  @apply bg-gradient-to-r from-lime-500 to-indigo-600 text-white p-4 rounded-lg;
 }
 
 /* Pro Feature Hint */
@@ -394,6 +421,7 @@ size="lg"  // 24px padding, 16px text
 ## Responsive Design
 
 ### **Breakpoints**
+
 ```css
 sm:  640px  (Mobile landscape)
 md:  768px  (Tablet)  
@@ -403,6 +431,7 @@ xl:  1280px (Large desktop)
 ```
 
 ### **Mobile-First Patterns**
+
 - Stack cards vertically on mobile, grid on larger screens
 - Hide secondary actions in mobile, show in dropdowns
 - Collapse sidebar to bottom tabs on mobile
@@ -411,11 +440,13 @@ xl:  1280px (Large desktop)
 ## Accessibility Standards
 
 ### **Color Contrast**
+
 - **Normal text**: Minimum 4.5:1 contrast ratio
 - **Large text** (18px+): Minimum 3:1 contrast ratio
 - **Interactive elements**: Minimum 3:1 against adjacent colors
 
 ### **Focus States**
+
 ```css
 /* Standard Focus Ring */
 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
@@ -428,6 +459,7 @@ focus:ring-indigo-500 focus:ring-offset-2
 ```
 
 ### **Interactive Elements**
+
 - Minimum 44px touch target size
 - Clear hover states for all clickable elements
 - Loading states for async actions
@@ -436,6 +468,7 @@ focus:ring-indigo-500 focus:ring-offset-2
 ## Animation & Transitions
 
 ### **Standard Transitions**
+
 ```css
 /* Hover Effects */
 transition-colors duration-200
@@ -451,6 +484,7 @@ transform transition-transform duration-200
 ```
 
 ### **Micro-Interactions**
+
 - Button hover: Color change + subtle scale
 - Card hover: Shadow elevation increase
 - Form focus: Border color + ring appearance
@@ -459,12 +493,14 @@ transform transition-transform duration-200
 ## Content Guidelines
 
 ### **Microcopy Standards**
+
 - **Buttons**: Action-oriented ("Create Team", "Invite Members")
 - **Errors**: Helpful and actionable ("Team name must be at least 2 characters")
 - **Empty states**: Encouraging and clear next steps
 - **Feature gates**: Value-focused ("Upgrade to Pro for team collaboration")
 
 ### **Tone of Voice**
+
 - **Professional**: Business-appropriate language
 - **Helpful**: Guide users toward success
 - **Efficient**: Concise, scannable content  
@@ -473,18 +509,21 @@ transform transition-transform duration-200
 ## Implementation Notes
 
 ### **TailwindCSS Usage**
+
 - Use utility classes for consistency
 - Create component classes for reusable patterns
 - Leverage responsive prefixes (md:, lg:)
 - Use arbitrary values sparingly
 
 ### **Component Architecture**
+
 - Build reusable components for common patterns
 - Use TypeScript for prop validation
 - Include proper error boundaries
 - Support both light and future dark modes
 
 ### **Performance Considerations**
+
 - Minimize custom CSS
 - Use semantic HTML elements
 - Optimize for Core Web Vitals

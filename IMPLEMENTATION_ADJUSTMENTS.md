@@ -8,10 +8,12 @@ This document tracks the major adjustments made during the implementation of the
 
 **Original Plan**: Use Prisma dev database  
 **Adjustment**: Switched to local PostgreSQL database (`prompt_lab`)
+
 - **Reason**: User preference for local PostgreSQL over managed Prisma dev environment
 - **Impact**: Required manual database creation and connection string updates
 
 **Database Schema Evolution**:
+
 - **Original**: Custom auth schema design
 - **Adjustment 1**: Updated schema for BetterAuth compatibility with Prisma adapter
 - **Adjustment 2**: Used BetterAuth CLI to generate proper schema (`npx @better-auth/cli@latest generate --yes`)
@@ -21,16 +23,19 @@ This document tracks the major adjustments made during the implementation of the
 ### Authentication Architecture - Major Evolution
 
 **Phase 1: Client-Side Attempt**
+
 - **Original Plan**: Server-side authentication with BetterAuth using database adapter
 - **First Adjustment**: Client-side authentication with mock data
 - **Issue**: User rejected client-side patterns - "This code is horribly wrong. Go back to the rules and fix it"
 
 **Phase 2: Brooks Rules RR7 Compliance**
+
 - **Critical Discovery**: Must follow "Brooks Rules RR7" for React Router 7 patterns
 - **Key Insight**: No `useLoaderData` or `useActionData` hooks - "Those are old hat"
 - **Pattern**: Use `Route.ComponentProps` with loaders and actions for server-side data
 
 **Phase 3: Auth Layout Pattern (FINAL)**
+
 - **Major Breakthrough**: Implemented auth layout route to wrap protected routes
 - **Architecture**: Single authentication point with outlet context pattern
 - **Solution**: `layout("routes/auth-layout.tsx", [protected routes])` in routing config
@@ -38,6 +43,7 @@ This document tracks the major adjustments made during the implementation of the
 ### React Router 7 Pattern Evolution
 
 **Wrong Pattern (Initially Implemented)**:
+
 ```typescript
 export default function MyComponent() {
   const data = useLoaderData<typeof loader>() // WRONG
@@ -46,6 +52,7 @@ export default function MyComponent() {
 ```
 
 **Correct Pattern (Brooks Rules RR7)**:
+
 ```typescript
 export default function MyComponent({ loaderData }: Route.ComponentProps) {
   // Direct access to props from loader
@@ -58,11 +65,12 @@ export async function loader({ request }: Route.LoaderArgs) {
 ```
 
 **Auth Layout Pattern (FINAL)**:
+
 ```typescript
 // routes/auth-layout.tsx
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await auth.api.getSession({ headers: request.headers })
-  if (!session) throw redirect("/auth/signin")
+  if (!session) throw redirect("/auth/sign-in")
   
   // Load route-specific data based on pathname
   const url = new URL(request.url)
@@ -91,15 +99,18 @@ export default function Dashboard() {
 ### BetterAuth Integration - Trial and Error Process
 
 **Phase 1**: Manual schema design - **FAILED**
+
 - Custom Account/Session models caused 500 errors
 - Schema conflicts between custom design and BetterAuth expectations
 
 **Phase 2**: BetterAuth CLI generation - **SUCCESS**
+
 - Command: `npx @better-auth/cli@latest generate --yes`
 - Auto-generated proper schema with all required fields
 - Fixed database compatibility issues
 
 **Phase 3**: Server-side API integration - **SUCCESS**
+
 - Proper usage: `auth.api.signInEmail({ body: { email, password }, headers: request.headers })`
 - Correct session checking: `auth.api.getSession({ headers: request.headers })`
 - Follow BetterAuth server-side patterns exactly
@@ -107,17 +118,19 @@ export default function Dashboard() {
 ### Routing Architecture - Final Solution
 
 **Problem**: Navigation between protected routes failed
+
 - Routes existed but had authentication/data loading issues
 - User reported: "I'm not able to navigate anywhere once inside the dashboard"
 
 **Solution**: Auth Layout Wrapper Pattern
+
 ```typescript
 // routes.ts
 export default [
   // Public routes
   index("routes/home.tsx"),
-  route("/auth/signin", "routes/auth/signin.tsx"),
-  route("/auth/signup", "routes/auth/signup.tsx"),
+  route("/auth/sign-in", "routes/auth/sign-in.tsx"),
+  route("/auth/sign-up", "routes/auth/sign-up.tsx"),
   
   // Protected routes wrapped in auth layout
   layout("routes/auth-layout.tsx", [
@@ -133,6 +146,7 @@ export default [
 ```
 
 **Benefits**:
+
 - Single authentication point
 - No duplicate auth logic in each route
 - Centralized data loading based on route
@@ -141,6 +155,7 @@ export default [
 ### Form Handling - Server Actions
 
 **Final Pattern**: React Router `Form` with server actions
+
 ```typescript
 // Signin form
 export async function action({ request }: Route.ActionArgs) {
@@ -172,16 +187,19 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 ## Critical Pattern Violations Corrected
 
 ### 1. "Brooks Rules RR7" Compliance
+
 - **Violation**: Using `useLoaderData`/`useActionData` hooks
 - **Correction**: Use `Route.ComponentProps` pattern exclusively
 - **Impact**: Complete refactor of all route components
 
 ### 2. Authentication Patterns
+
 - **Violation**: Client-side authentication with useEffect
 - **Correction**: Server-side authentication in loaders with BetterAuth
 - **Impact**: Proper server-side rendering and security
 
 ### 3. Data Loading Strategy
+
 - **Violation**: Mock data and client-side fetching
 - **Correction**: Server-side data loading in auth layout based on route
 - **Impact**: Real database integration with proper authentication
@@ -189,16 +207,19 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 ## Key Technical Decisions - Final
 
 ### 1. BetterAuth Configuration
+
 - **Decision**: Use BetterAuth CLI to generate schema
 - **Configuration**: `prismaAdapter` with PostgreSQL provider
 - **Server API**: Use `auth.api.*` methods with proper body/headers structure
 
 ### 2. Environment Configuration
+
 - **Required**: `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL`
 - **Database**: Local PostgreSQL connection string
 - **Commands**: `psql -c "CREATE DATABASE prompt_lab;"`
 
 ### 3. Route Data Loading
+
 - **Pattern**: Auth layout handles all data loading
 - **Logic**: Route-specific data loading based on `url.pathname`
 - **Context**: Pass data through `useOutletContext` to child routes
@@ -206,16 +227,19 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 ## Development Workflow - Lessons
 
 ### 1. Authentication First
+
 - Get BetterAuth working properly before building features
 - Use BetterAuth CLI for schema generation
 - Test signin/signup flow before proceeding
 
 ### 2. Follow Framework Patterns
+
 - React Router 7 has specific patterns that must be followed
 - Don't mix React Router 6 patterns with v7
 - Use loaders/actions for server-side logic
 
 ### 3. Incremental Implementation
+
 - Build auth layout first
 - Add routes one by one
 - Test navigation between routes
@@ -223,6 +247,7 @@ export default function SignIn({ actionData }: Route.ComponentProps) {
 ## Next Steps for Better Initial Prompts
 
 ### 1. Auth Setup Instructions
+
 ```bash
 # Database setup
 psql -c "CREATE DATABASE prompt_lab;"
@@ -237,12 +262,14 @@ DATABASE_URL=postgresql://username:password@localhost:5432/prompt_lab
 ```
 
 ### 2. Required Pattern Examples
+
 - Auth layout with outlet context
 - Route.ComponentProps usage
 - BetterAuth server-side API calls
 - Form actions with server-side validation
 
 ### 3. File Structure Template
+
 ```
 app/
   routes/
@@ -261,13 +288,17 @@ app/
 ## Authentication Flow Fix - Session Cookie Handling
 
 ### Problem Discovery
+
 **Issue**: Authentication forms were failing with 500 errors and "Failed to reload" messages
+
 - User could see signin form but authentication wasn't working
 - Server was receiving auth requests but session cookies weren't being set properly
-- Error: `[vite] Failed to reload /app/routes/auth/signin.tsx`
+- Error: `[vite] Failed to reload /app/routes/auth/sign-in.tsx`
 
 ### Root Cause Analysis
+
 **Initial Implementation**: Using `auth.api.*` methods directly in server actions
+
 ```typescript
 // BROKEN - Direct API usage without proper cookie handling
 const response = await auth.api.signInEmail({
@@ -279,7 +310,9 @@ const response = await auth.api.signInEmail({
 **Problem**: While BetterAuth was processing authentication, the session cookies from the auth response weren't being properly captured and forwarded to the client.
 
 ### Solution Implementation
+
 **Fixed Approach**: Make HTTP requests to BetterAuth API endpoints and capture/forward cookies
+
 ```typescript
 // WORKING - Proper cookie handling pattern
 export async function action({ request }: Route.ActionArgs) {
@@ -330,12 +363,14 @@ export async function action({ request }: Route.ActionArgs) {
 ### Key Technical Insights
 
 **Cookie Handling Pattern**:
+
 1. **Fetch to BetterAuth endpoints**: `/api/auth/sign-in/email` and `/api/auth/sign-up/email`
 2. **Capture cookies**: Use `getSetCookie()` or `get('set-cookie')` from response headers
 3. **Forward cookies**: Attach to redirect response so browser receives session cookies
 4. **Session persistence**: Cookies enable auth layout to verify sessions on subsequent requests
 
 **BetterAuth API Endpoint Structure**:
+
 - Signin: `POST /api/auth/sign-in/email`
 - Signup: `POST /api/auth/sign-up/email`
 - Session check: `auth.api.getSession({ headers: request.headers })` (this works correctly)
@@ -343,6 +378,7 @@ export async function action({ request }: Route.ActionArgs) {
 ### Authentication Flow - Complete Picture
 
 **User Journey**:
+
 1. User submits signin/signup form
 2. Server action makes HTTP request to BetterAuth API
 3. BetterAuth returns session cookies in `Set-Cookie` headers
@@ -352,11 +388,13 @@ export async function action({ request }: Route.ActionArgs) {
 7. User successfully accesses protected routes
 
 **Files Updated**:
-- `/app/routes/auth/signin.tsx` - Fixed cookie handling in action
-- `/app/routes/auth/signup.tsx` - Fixed cookie handling in action
+
+- `/app/routes/auth/sign-in.tsx` - Fixed cookie handling in action
+- `/app/routes/auth/sign-up.tsx` - Fixed cookie handling in action
 - Removed unused `auth` imports since we're using direct HTTP requests
 
 ### Impact
+
 - ✅ **Authentication now works**: Users can sign in and stay authenticated
 - ✅ **Session persistence**: Cookies properly set and maintained
 - ✅ **Proper redirects**: Auth flow redirects to dashboard after success
@@ -367,13 +405,17 @@ This fix was critical for the entire application functionality, as authenticatio
 ## Prisma Client Singleton Pattern Fix
 
 ### Problem Discovery
+
 **Issue**: Improper PrismaClient instantiation throughout the application
+
 - Multiple `new PrismaClient()` instances created across route files
 - Potential connection leaks and performance issues
 - Violation of Prisma React Router 7 best practices
 
 ### Root Cause Analysis
+
 **Initial Implementation**: Direct PrismaClient instantiation in route files
+
 ```typescript
 // WRONG - Multiple client instances
 import { PrismaClient } from "@prisma/client"
@@ -386,13 +428,16 @@ export async function loader() {
 ```
 
 **Problem**: Creating multiple PrismaClient instances can lead to:
+
 - Connection pool exhaustion
 - Memory leaks in development with hot reloading
 - Performance degradation
 - Database connection limits being exceeded
 
 ### Solution Implementation
+
 **Fixed Approach**: Singleton pattern with global instance management
+
 ```typescript
 // ~/lib/prisma.ts - CORRECT singleton pattern
 import { PrismaClient } from '@prisma/client'
@@ -407,6 +452,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 ```
 
 **Usage in routes**:
+
 ```typescript
 // Route files - Import singleton instance
 import { prisma } from '~/lib/prisma'
@@ -420,12 +466,14 @@ export async function loader() {
 ### Key Technical Insights
 
 **Singleton Pattern Benefits**:
+
 1. **Single Connection Pool**: One PrismaClient = one connection pool
 2. **Development Hot Reload**: Global instance persists across reloads
 3. **Memory Efficiency**: No duplicate client instances
 4. **Production Optimization**: Clean single instance in production
 
 **Global Instance Management**:
+
 - Uses `globalThis` to store instance across module reloads
 - Only stores global reference in development (NODE_ENV !== 'production')
 - Production creates fresh instance each time (as intended)
@@ -433,6 +481,7 @@ export async function loader() {
 **Reference**: [Prisma React Router 7 Documentation](https://www.prisma.io/docs/guides/react-router-7)
 
 ### Files Updated
+
 - **Created**: `/app/lib/prisma.ts` - Singleton PrismaClient instance
 - **Updated**: `/app/lib/auth.ts` - Uses shared prisma instance
 - **Updated**: `/app/routes/auth-layout.tsx` - Import from singleton
@@ -441,6 +490,7 @@ export async function loader() {
 - **Updated**: `/app/routes/share/prompt.tsx` - Import from singleton
 
 ### Impact
+
 - ✅ **Single Connection Pool**: All database operations use one shared connection pool
 - ✅ **Development Performance**: No connection pool exhaustion during hot reloads
 - ✅ **Memory Efficiency**: Eliminated duplicate PrismaClient instances
@@ -452,19 +502,23 @@ This pattern is critical for scalable applications and prevents common database 
 ## Auth Layout Simplification - Separation of Concerns
 
 ### Problem Discovery
+
 **Issue**: Auth layout was handling too much responsibility
+
 - Centralized data loading for all routes in auth-layout.tsx
 - Complex pathname-based logic to determine what data to load
 - Mixing authentication concerns with business logic
 - Difficult to maintain and debug route-specific data loading
 
 ### Root Cause Analysis
+
 **Initial Implementation**: Monolithic auth layout handling all data loading
+
 ```typescript
 // PROBLEMATIC - Auth layout doing too much
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) throw redirect('/auth/signin');
+  if (!session) throw redirect('/auth/sign-in');
   
   const pathname = url.pathname;
   let routeData = {};
@@ -485,6 +539,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 ```
 
 **Problems**:
+
 - **Single Responsibility Violation**: Auth layout handling both auth and business data
 - **Tight Coupling**: Route data logic tied to auth layout
 - **Difficult Testing**: Hard to test individual route data loading
@@ -492,7 +547,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 - **Complex Maintenance**: One file handling all route logic
 
 ### Solution Implementation
+
 **Fixed Approach**: Separated auth concerns from business data loading
+
 ```typescript
 // CLEAN - Auth layout only handles authentication
 // ~/routes/auth-layout.tsx
@@ -500,7 +557,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   const session = await auth.api.getSession({ headers: request.headers });
   
   if (!session) {
-    throw redirect('/auth/signin');
+    throw redirect('/auth/sign-in');
   }
 
   // Only return user session data - let individual routes handle their own data
@@ -532,18 +589,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 ### Key Technical Insights
 
 **Separation of Concerns Benefits**:
+
 1. **Auth Layout**: Only handles authentication and user session
 2. **Individual Routes**: Handle their own data requirements
 3. **Clear Boundaries**: Auth vs business logic separation
 4. **Better Performance**: Only load data needed for specific route
 
 **Route Data Loading Pattern**:
+
 - Each route exports its own `loader` function
 - Routes access user session via `useOutletContext<{ user: any }>()`
 - Routes receive their data via `loaderData` prop
 - Clean, predictable data flow per route
 
 **Component Pattern Evolution**:
+
 ```typescript
 // BEFORE - Mixed outlet context
 export default function MyRoute() {
@@ -560,6 +620,7 @@ export default function MyRoute({ loaderData }: Route.ComponentProps) {
 ```
 
 ### Files Updated
+
 - **Simplified**: `/app/routes/auth-layout.tsx` - Only auth and user session
 - **Added loaders**: `/app/routes/dashboard.tsx` - Dashboard-specific data
 - **Added loaders**: `/app/routes/prompts/index.tsx` - Prompts list with search/filter
@@ -567,6 +628,7 @@ export default function MyRoute({ loaderData }: Route.ComponentProps) {
 - **Added loaders**: `/app/routes/prompts/detail.tsx` - Individual prompt data
 
 ### Impact
+
 - ✅ **Better Separation of Concerns**: Auth layout only handles authentication
 - ✅ **Improved Maintainability**: Each route manages its own data requirements  
 - ✅ **Better Performance**: No unnecessary data loading
@@ -581,16 +643,19 @@ This architectural improvement follows React Router 7 best practices and creates
 The final implementation uses a **separated auth and data pattern** where:
 
 ### 1. Authentication Layer
+
 - **Auth layout** (`routes/auth-layout.tsx`) only handles authentication and user session
 - Protects all routes with session verification and redirects to signin when needed
 - Provides user session data via outlet context: `useOutletContext<{ user: any }>()`
 
 ### 2. Data Loading Layer  
+
 - **Individual routes** handle their own data requirements with dedicated loaders
 - Each route exports `loader` function for server-side data fetching
 - Routes receive data via `loaderData` prop from `Route.ComponentProps`
 
 ### 3. Technical Patterns
+
 - **Server-side authentication** with BetterAuth following their exact patterns
 - **React Router 7** `Route.ComponentProps` pattern throughout
 - **Form submissions** use server actions with proper error handling
@@ -598,6 +663,7 @@ The final implementation uses a **separated auth and data pattern** where:
 - **Prisma singleton** pattern for efficient database connections
 
 ### 4. Architecture Benefits
+
 - ✅ **Clear separation of concerns**: Auth vs business logic
 - ✅ **Better performance**: Only load data needed per route
 - ✅ **Improved maintainability**: Route-specific data logic
@@ -609,14 +675,18 @@ This pattern eliminates code duplication, provides proper security, follows Reac
 ## Pro Feature Gating and Navigation Pattern Fixes
 
 ### Problem Discovery
+
 **Issue**: Inconsistent Pro feature gating and improper navigation patterns
+
 - Free users could set prompts to "Public" in detail edit view (Pro-only feature)
 - Multiple routes calculating `isProUser` independently causing inconsistency
 - Improper use of `window.location` for navigation instead of React Router 7 patterns
 - Missing server-side validation for Pro features
 
 ### Root Cause Analysis
+
 **Initial Implementation Issues**:
+
 1. **Inconsistent Feature Gating**: `detail.tsx` missing `isProUser` checks that existed in `new.tsx`
 2. **Duplicate Logic**: Each route calculating `isProUser = user?.subscriptionStatus === 'active'` separately
 3. **Navigation Anti-patterns**: Using `window.location.href` manipulation instead of React Router hooks
@@ -655,6 +725,7 @@ export default function MyRoute() {
 ### Fixed Pro Feature Gating Patterns
 
 **detail.tsx Visibility Section**: Added proper Pro gating matching `new.tsx` pattern
+
 ```typescript
 // BEFORE - No Pro gating (SECURITY ISSUE)
 <div>
@@ -681,6 +752,7 @@ export default function MyRoute() {
 ```
 
 **Server-Side Pro Validation**: Added action validation to prevent bypassing UI restrictions
+
 ```typescript
 // Enhanced detail.tsx action with Pro validation
 export async function action({ request, params }: Route.ActionArgs) {
@@ -711,6 +783,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 **Problem**: Multiple `window.location` usages violating React Router 7 patterns
 
 **Dashboard Search Functionality**:
+
 ```typescript
 // BEFORE - window.location anti-pattern
 onKeyDown={(e) => {
@@ -738,6 +811,7 @@ onKeyDown={(e) => {
 ```
 
 **Dashboard Category Filter**:
+
 ```typescript
 // BEFORE - window.location manipulation
 onChange={(e) => {
@@ -761,6 +835,7 @@ onChange={(e) => {
 ```
 
 **Detail Page URL Cleanup**:
+
 ```typescript
 // BEFORE - Manual history manipulation
 const url = new URL(window.location.href);
@@ -780,6 +855,7 @@ navigate(`/prompts/${prompt.id}`, { replace: true });
 ### Enhanced Security Patterns
 
 **Share Button Gating**: Enhanced to require both public status AND Pro subscription
+
 ```typescript
 // BEFORE - Only checked if prompt was public
 {prompt.public && (
@@ -793,6 +869,7 @@ navigate(`/prompts/${prompt.id}`, { replace: true });
 ```
 
 ### Files Updated
+
 - **Enhanced**: `/app/routes/auth-layout.tsx` - Centralized `isProUser` calculation
 - **Fixed**: `/app/routes/prompts/detail.tsx` - Pro feature gating, server validation, navigation
 - **Fixed**: `/app/routes/dashboard.tsx` - React Router navigation patterns
@@ -800,6 +877,7 @@ navigate(`/prompts/${prompt.id}`, { replace: true });
 - **Updated**: `/app/routes/profile.tsx` - Uses centralized `isProUser`
 
 ### Impact
+
 - ✅ **Consistent Pro Feature Gating**: All routes use centralized `isProUser` logic
 - ✅ **Enhanced Security**: Server-side validation prevents Pro feature bypass
 - ✅ **React Router 7 Compliance**: All navigation uses proper `useNavigate()` patterns
@@ -810,12 +888,14 @@ navigate(`/prompts/${prompt.id}`, { replace: true });
 ### Key Technical Lessons
 
 **Brooks Rules RR7 Navigation Patterns**:
+
 1. **Never use `window.location`** for navigation - use `useNavigate()` hook
 2. **URL parameter handling** with `URLSearchParams` for clean query building
 3. **State preservation** during navigation with proper parameter management
 4. **Replace vs push** - use `{ replace: true }` for URL cleanup operations
 
 **Pro Feature Security Pattern**:
+
 1. **UI Layer**: Conditional rendering based on `isProUser` with upgrade prompts
 2. **Server Layer**: Validate subscription status before allowing Pro features
 3. **Double Protection**: Force safe defaults for free users regardless of form input

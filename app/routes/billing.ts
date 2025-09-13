@@ -7,16 +7,16 @@ import type { Route } from './+types/billing';
 export async function loader({ request }: Route.LoaderArgs) {
     // Check authentication
     const session = await auth.api.getSession({ headers: request.headers });
-    
+
     if (!session) {
-        throw redirect('/auth/signin');
+        throw redirect('/auth/sign-in');
     }
 
     // Get user with subscription info
     const user = await getUserById(session.user.id);
 
     if (!user) {
-        throw redirect('/auth/signin');
+        throw redirect('/auth/sign-in');
     }
 
     // Check if user has an active subscription
